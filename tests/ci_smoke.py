@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import asyncio
-import importlib.util
+import importlib
 import os
 import socket
 import subprocess
@@ -27,11 +27,11 @@ def wait_for_port(host: str, port: int, timeout: float = 30.0) -> bool:
 
 
 def load_client_manager():
-    spec = importlib.util.spec_from_file_location("opcua_client", CLIENT_MODULE)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("Could not load opcua_client module")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    pkg_root = str((REPO_ROOT / "custom_components").resolve())
+    if pkg_root not in sys.path:
+        sys.path.insert(0, pkg_root)
+
+    module = importlib.import_module("opcua_machine.opcua_client")
     return module.OpcUaClientManager
 
 
