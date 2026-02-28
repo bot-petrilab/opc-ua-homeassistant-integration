@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv*
+*.log
+.DS_Store
+tests/ha_opcua_regression/out/

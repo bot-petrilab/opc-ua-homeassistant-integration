@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit OPC-UA-Server verbinden",
+        "description": "Erstelle eine Verbindung zu einem OPC-UA-Endpoint.",
+        "data": {
+          "title": "Name",
+          "endpoint": "Endpoint-URL",
+          "security_policy": "Security Policy",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "scan_interval": "Polling-Intervall (Sekunden)",
+          "validate_on_save": "Verbindung vor dem Speichern prüfen"
+        }
+      },
+      "zeroconf_confirm": {
+        "title": "OPC-UA-Server entdeckt",
+        "description": "{name} unter {endpoint} gefunden. Möchtest du ihn hinzufügen?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum OPC-UA-Endpoint fehlgeschlagen",
+      "invalid_endpoint": "Endpoint muss mit opc.tcp:// beginnen",
+      "no_servers_found": "Keine OPC-UA Server/Endpoints gefunden",
+      "unsupported_security_policy": "Der gewählte Endpoint nutzt eine noch nicht unterstützte Security Policy",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Dieser Endpoint ist bereits konfiguriert",
+      "cannot_connect": "Entdeckter Server ist nicht erreichbar",
+      "finished": "Konfiguration gespeichert"
+    }
+  },
+  "options": {
+    "error": {
+      "cannot_connect": "Verbindung zum OPC-UA-Endpoint fehlgeschlagen",
+      "no_servers_found": "Keine OPC-UA Server/Endpoints gefunden",
+      "unsupported_security_policy": "Der gewählte Endpoint nutzt eine noch nicht unterstützte Security Policy"
+    },
+    "step": {
+      "init": {
+        "title": "OPC-UA Node-Setup",
+        "menu_options": {
+          "add_sensor": "Sensor hinzufügen",
+          "add_binary_sensor": "Binary Sensor hinzufügen",
+          "add_switch": "Switch hinzufügen",
+          "add_light": "Light hinzufügen",
+          "add_stack_light_profile": "Stack-Light-Profil hinzufügen",
+          "discover_servers": "OPC-UA Server entdecken",
+          "auto_discovery": "Auto-Discovery (nativ + Companion)",
+          "browse_nodes": "OPC-UA Nodes browsen",
+          "remove_node": "Nodes entfernen",
+          "set_poll_interval": "Polling-Intervall setzen",
+          "done": "Speichern und beenden"
+        }
+      },
+      "add_sensor": {
+        "title": "Sensor-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node-ID",
+          "unit_of_measurement": "Einheit",
+          "device_class": "Device Class",
+          "state_class": "State Class",
+          "icon": "Icon"
+        }
+      },
+      "add_binary_sensor": {
+        "title": "Binary-Sensor-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node-ID",
+          "device_class": "Device Class",
+          "icon": "Icon",
+          "invert": "Logik invertieren"
+        }
+      },
+      "add_switch": {
+        "title": "Switch-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node-ID",
+          "icon": "Icon",
+          "invert": "Logik invertieren"
+        }
+      },
+      "add_light": {
+        "title": "Light-Node hinzufügen",
+        "description": "Nur die Felder konfigurieren, die du wirklich brauchst. Alle erweiterten Light-Features sind optional.",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "On/Off Node-ID",
+          "icon": "Icon",
+          "invert": "On/Off-Logik invertieren",
+          "brightness_node_id": "Helligkeit Node-ID",
+          "brightness_scale": "Helligkeit Max-Skala",
+          "color_temp_node_id": "Farbtemperatur Node-ID (Kelvin)",
+          "color_temp_min_kelvin": "Min. Farbtemperatur (K)",
+          "color_temp_max_kelvin": "Max. Farbtemperatur (K)",
+          "hs_hue_node_id": "HS Hue Node-ID",
+          "hs_hue_scale": "Hue Max-Skala",
+          "hs_saturation_node_id": "HS Sättigung Node-ID",
+          "hs_saturation_scale": "Sättigung Max-Skala",
+          "rgb_r_node_id": "RGB Rot Node-ID",
+          "rgb_g_node_id": "RGB Grün Node-ID",
+          "rgb_b_node_id": "RGB Blau Node-ID",
+          "rgb_scale": "RGB Max-Skala",
+          "rgbw_r_node_id": "RGBW Rot Node-ID",
+          "rgbw_g_node_id": "RGBW Grün Node-ID",
+          "rgbw_b_node_id": "RGBW Blau Node-ID",
+          "rgbw_w_node_id": "RGBW Weiß Node-ID",
+          "rgbww_r_node_id": "RGBWW Rot Node-ID",
+          "rgbww_g_node_id": "RGBWW Grün Node-ID",
+          "rgbww_b_node_id": "RGBWW Blau Node-ID",
+          "rgbww_cw_node_id": "RGBWW Kaltweiß Node-ID",
+          "rgbww_ww_node_id": "RGBWW Warmweiß Node-ID",
+          "white_node_id": "Weiß Node-ID",
+          "white_scale": "Weiß Max-Skala",
+          "xy_x_node_id": "XY X Node-ID",
+          "xy_y_node_id": "XY Y Node-ID",
+          "xy_scale": "XY-Skala",
+          "effect_node_id": "Effekt Node-ID",
+          "effect_list": "Effektliste (kommagetrennt)",
+          "transition_node_id": "Transition Node-ID",
+          "flash_node_id": "Flash Node-ID"
+        }
+      },
+      "add_stack_light_profile": {
+        "title": "Stack-Light-Profil hinzufügen",
+        "description": "Erstellt typische Stack-Light-Entitäten (R/G/Y und optional Buzzer).",
+        "data": {
+          "namespace": "Namespace-Index",
+          "base_path": "Basispfad",
+          "include_red": "Rote Lampe hinzufügen",
+          "include_yellow": "Gelbe Lampe hinzufügen",
+          "include_green": "Grüne Lampe hinzufügen",
+          "include_buzzer": "Buzzer-Switch hinzufügen",
+          "with_effect": "Effekt-Node an Lights anbinden",
+          "effect_node_id": "Effekt-Node-ID"
+        }
+      },
+      "discover_servers": {
+        "title": "OPC-UA Server entdecken",
+        "description": "Fragt einen Discovery-Endpoint ab und listet verfügbare Server-Endpoints.",
+        "data": {
+          "discovery_url": "Discovery-URL",
+          "include_network": "FindServersOnNetwork versuchen (benötigt LDS-ME)"
+        }
+      },
+      "discover_servers_select": {
+        "title": "Entdeckten Endpoint auswählen",
+        "data": {
+          "selected": "Entdeckte Endpoints"
+        }
+      },
+      "auto_discovery": {
+        "title": "Auto-Discovery",
+        "description": "Native OPC-UA-Erkennung mit optionalem Companion-Profil-Mapping.",
+        "data": {
+          "root_node_id": "Root-Node-ID",
+          "depth": "Tiefe",
+          "max_nodes": "Maximale Nodes",
+          "import_limit": "Import-Limit",
+          "companion_profiles": "Companion-Profil-Heuristiken aktivieren",
+          "include_readonly": "Read-only Variablen einbeziehen",
+          "include_standard_nodes": "OPC-UA Standard-Namespace-Nodes (i=...) einbeziehen",
+          "prefer_lights": "Für Stacklight-ähnliche Bool-Werte bevorzugt Lights anlegen"
+        }
+      },
+      "auto_discovery_review": {
+        "title": "Discovery-Ergebnis",
+        "description": "Gefunden: {total} Kandidaten (Sensor {sensors}, Binary {binary}, Switch {switches}, Light {lights}). Beispiel: {sample}",
+        "data": {
+          "apply": "Gefundene Entitäten jetzt importieren"
+        }
+      },
+      "browse_nodes": {
+        "title": "OPC-UA Nodes browsen",
+        "description": "Adressraum scannen und Nodes als Entitäten importieren.",
+        "data": {
+          "root_node_id": "Root-Node-ID",
+          "depth": "Tiefe",
+          "max_nodes": "Maximale Nodes"
+        }
+      },
+      "browse_pick_kind": {
+        "title": "Gebrowste Nodes importieren",
+        "menu_options": {
+          "browse_add_sensor": "Als Sensoren hinzufügen",
+          "browse_add_binary_sensor": "Als Binary Sensoren hinzufügen",
+          "browse_add_switch": "Als Switches hinzufügen",
+          "browse_add_light": "Als Lights hinzufügen",
+          "browse_nodes": "Erneut browsen"
+        }
+      },
+      "browse_add_sensor": {
+        "title": "Baumansicht: Sensoren hinzufügen",
+        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "data": {
+          "node_ids": "Zu importierende Variablen",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_binary_sensor": {
+        "title": "Baumansicht: Binary Sensoren hinzufügen",
+        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "data": {
+          "node_ids": "Zu importierende Variablen",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_switch": {
+        "title": "Baumansicht: Switches hinzufügen",
+        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "data": {
+          "node_ids": "Zu importierende Variablen",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_light": {
+        "title": "Baumansicht: Lights hinzufügen",
+        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "data": {
+          "node_ids": "Zu importierende Variablen",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "remove_node": {
+        "title": "Nodes entfernen",
+        "data": {
+          "remove": "Zu entfernende Nodes"
+        }
+      },
+      "set_poll_interval": {
+        "title": "Polling-Intervall setzen",
+        "data": {
+          "scan_interval": "Polling-Intervall (Sekunden)"
+        }
+      }
+    }
+  }
+}

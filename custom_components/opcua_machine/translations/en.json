@@ -1,0 +1,247 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to OPC UA server",
+        "description": "Create an OPC UA endpoint connection.",
+        "data": {
+          "title": "Name",
+          "endpoint": "Endpoint URL",
+          "security_policy": "Security policy",
+          "username": "Username",
+          "password": "Password",
+          "scan_interval": "Polling interval (seconds)",
+          "validate_on_save": "Validate connection before save"
+        }
+      },
+      "zeroconf_confirm": {
+        "title": "Discovered OPC UA server",
+        "description": "Found {name} at {endpoint}. Do you want to add it?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to OPC UA endpoint",
+      "invalid_endpoint": "Endpoint must start with opc.tcp://",
+      "no_servers_found": "No OPC UA servers/endpoints discovered",
+      "unsupported_security_policy": "Selected endpoint uses a security policy not supported by this integration yet",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This endpoint is already configured",
+      "cannot_connect": "Discovered server is not reachable",
+      "finished": "Configuration saved"
+    }
+  },
+  "options": {
+    "error": {
+      "cannot_connect": "Cannot connect to OPC UA endpoint",
+      "no_servers_found": "No OPC UA servers/endpoints discovered",
+      "unsupported_security_policy": "Selected endpoint uses a security policy not supported by this integration yet"
+    },
+    "step": {
+      "init": {
+        "title": "OPC UA node setup",
+        "menu_options": {
+          "add_sensor": "Add sensor",
+          "add_binary_sensor": "Add binary sensor",
+          "add_switch": "Add switch",
+          "add_light": "Add light",
+          "add_stack_light_profile": "Add stack light profile",
+          "discover_servers": "Discover OPC UA servers",
+          "auto_discovery": "Auto discovery (native + companion)",
+          "browse_nodes": "Browse OPC UA nodes",
+          "remove_node": "Remove nodes",
+          "set_poll_interval": "Set polling interval",
+          "done": "Save and finish"
+        }
+      },
+      "add_sensor": {
+        "title": "Add sensor node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "unit_of_measurement": "Unit",
+          "device_class": "Device class",
+          "state_class": "State class",
+          "icon": "Icon"
+        }
+      },
+      "add_binary_sensor": {
+        "title": "Add binary sensor node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "device_class": "Device class",
+          "icon": "Icon",
+          "invert": "Invert logic"
+        }
+      },
+      "add_switch": {
+        "title": "Add switch node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "invert": "Invert logic"
+        }
+      },
+      "add_light": {
+        "title": "Add light node",
+        "description": "Only configure fields you actually need. Every advanced light feature is optional.",
+        "data": {
+          "name": "Entity name",
+          "node_id": "On/Off node ID",
+          "icon": "Icon",
+          "invert": "Invert on/off logic",
+          "brightness_node_id": "Brightness node ID",
+          "brightness_scale": "Brightness max scale",
+          "color_temp_node_id": "Color temperature node ID (kelvin)",
+          "color_temp_min_kelvin": "Min color temperature (K)",
+          "color_temp_max_kelvin": "Max color temperature (K)",
+          "hs_hue_node_id": "HS Hue node ID",
+          "hs_hue_scale": "Hue max scale",
+          "hs_saturation_node_id": "HS Saturation node ID",
+          "hs_saturation_scale": "Saturation max scale",
+          "rgb_r_node_id": "RGB Red node ID",
+          "rgb_g_node_id": "RGB Green node ID",
+          "rgb_b_node_id": "RGB Blue node ID",
+          "rgb_scale": "RGB max scale",
+          "rgbw_r_node_id": "RGBW Red node ID",
+          "rgbw_g_node_id": "RGBW Green node ID",
+          "rgbw_b_node_id": "RGBW Blue node ID",
+          "rgbw_w_node_id": "RGBW White node ID",
+          "rgbww_r_node_id": "RGBWW Red node ID",
+          "rgbww_g_node_id": "RGBWW Green node ID",
+          "rgbww_b_node_id": "RGBWW Blue node ID",
+          "rgbww_cw_node_id": "RGBWW Cold White node ID",
+          "rgbww_ww_node_id": "RGBWW Warm White node ID",
+          "white_node_id": "White node ID",
+          "white_scale": "White max scale",
+          "xy_x_node_id": "XY X node ID",
+          "xy_y_node_id": "XY Y node ID",
+          "xy_scale": "XY scale",
+          "effect_node_id": "Effect node ID",
+          "effect_list": "Effect list (comma separated)",
+          "transition_node_id": "Transition node ID",
+          "flash_node_id": "Flash node ID"
+        }
+      },
+      "add_stack_light_profile": {
+        "title": "Add stack light profile",
+        "description": "Create common stack-light entities (R/Y/G and optional buzzer).",
+        "data": {
+          "namespace": "Namespace index",
+          "base_path": "Base path",
+          "include_red": "Include red light",
+          "include_yellow": "Include yellow light",
+          "include_green": "Include green light",
+          "include_buzzer": "Include buzzer switch",
+          "with_effect": "Attach effect node to lights",
+          "effect_node_id": "Effect node ID"
+        }
+      },
+      "discover_servers": {
+        "title": "Discover OPC UA servers",
+        "description": "Query a discovery endpoint and list available server endpoints.",
+        "data": {
+          "discovery_url": "Discovery URL",
+          "include_network": "Try FindServersOnNetwork (requires LDS-ME)"
+        }
+      },
+      "discover_servers_select": {
+        "title": "Select discovered endpoint",
+        "data": {
+          "selected": "Discovered endpoints"
+        }
+      },
+      "auto_discovery": {
+        "title": "Auto discovery",
+        "description": "Native OPC UA discovery with optional companion-style mapping.",
+        "data": {
+          "root_node_id": "Root node ID",
+          "depth": "Depth",
+          "max_nodes": "Maximum nodes",
+          "import_limit": "Import limit",
+          "companion_profiles": "Enable companion profile heuristics",
+          "include_readonly": "Include read-only variables",
+          "include_standard_nodes": "Include OPC UA standard namespace nodes (i=...)",
+          "prefer_lights": "Prefer light entities for stacklight-like booleans"
+        }
+      },
+      "auto_discovery_review": {
+        "title": "Discovery result",
+        "description": "Found {total} candidates (sensor {sensors}, binary {binary}, switch {switches}, light {lights}). Sample: {sample}",
+        "data": {
+          "apply": "Import discovered entities now"
+        }
+      },
+      "browse_nodes": {
+        "title": "Browse OPC UA nodes",
+        "description": "Scan the OPC UA tree and import nodes as entities.",
+        "data": {
+          "root_node_id": "Root node ID",
+          "depth": "Depth",
+          "max_nodes": "Maximum nodes"
+        }
+      },
+      "browse_pick_kind": {
+        "title": "Import browsed nodes",
+        "menu_options": {
+          "browse_add_sensor": "Add as sensors",
+          "browse_add_binary_sensor": "Add as binary sensors",
+          "browse_add_switch": "Add as switches",
+          "browse_add_light": "Add as lights",
+          "browse_nodes": "Browse again"
+        }
+      },
+      "browse_add_sensor": {
+        "title": "Browse tree: add sensors",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_binary_sensor": {
+        "title": "Browse tree: add binary sensors",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_switch": {
+        "title": "Browse tree: add switches",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_light": {
+        "title": "Browse tree: add lights",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "remove_node": {
+        "title": "Remove nodes",
+        "data": {
+          "remove": "Select nodes to remove"
+        }
+      },
+      "set_poll_interval": {
+        "title": "Set polling interval",
+        "data": {
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  }
+}
