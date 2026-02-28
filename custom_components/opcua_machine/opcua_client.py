@@ -7,6 +7,12 @@ from typing import Any
 
 from asyncua import Client, ua
 
+from .const import (
+    SECURITY_POLICY_BASIC256SHA256_SIGN,
+    SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+    SECURITY_POLICY_NONE,
+)
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -19,11 +25,19 @@ class OpcUaClientManager:
         security_policy: str,
         username: str | None,
         password: str | None,
+        client_cert_path: str | None = None,
+        client_key_path: str | None = None,
+        server_cert_path: str | None = None,
+        client_key_password: str | None = None,
     ) -> None:
         self.endpoint = endpoint
         self.security_policy = security_policy
         self.username = username
         self.password = password
+        self.client_cert_path = client_cert_path
+        self.client_key_path = client_key_path
+        self.server_cert_path = server_cert_path
+        self.client_key_password = client_key_password
 
         self._client: Client | None = None
         self._lock = asyncio.Lock()
@@ -33,13 +47,38 @@ class OpcUaClientManager:
             if self._client is not None:
                 return
 
-            if self.security_policy != "None":
-                raise NotImplementedError(
-                    "Only security_policy 'None' is supported in this MVP. "
-                    "Certificate-based policies can be added next."
+            client = Client(self.endpoint)
+
+            if self.security_policy == SECURITY_POLICY_NONE:
+                pass
+            elif self.security_policy in {
+                SECURITY_POLICY_BASIC256SHA256_SIGN,
+                SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+            }:
+                if not self.client_cert_path or not self.client_key_path:
+                    raise ValueError(
+                        "Security policy requires certificate + key paths "
+                        "(client_cert_path/client_key_path)."
+                    )
+
+                mode = (
+                    "Sign"
+                    if self.security_policy == SECURITY_POLICY_BASIC256SHA256_SIGN
+                    else "SignAndEncrypt"
                 )
 
-            client = Client(self.endpoint)
+                sec = (
+                    f"Basic256Sha256,{mode},{self.client_cert_path},{self.client_key_path}"
+                )
+                if self.server_cert_path:
+                    sec += f",{self.server_cert_path}"
+                if self.client_key_password:
+                    sec += f",{self.client_key_password}"
+
+                await client.set_security_string(sec)
+            else:
+                raise ValueError(f"Unsupported security policy: {self.security_policy}")
+
             if self.username:
                 client.set_user(self.username)
             if self.password:
@@ -374,6 +413,14 @@ class OpcUaClientManager:
                     continue
                 seen_endpoint_keys.add(key)
 
+                supported_now = (
+                    policy_short == "None"
+                    or (
+                        policy_short == "Basic256Sha256"
+                        and security_mode_name in {"Sign", "SignAndEncrypt"}
+                    )
+                )
+
                 discovered.append(
                     {
                         "source_discovery_url": src_url,
@@ -385,7 +432,7 @@ class OpcUaClientManager:
                         "transport_profile_uri": transport,
                         "application_uri": app_uri,
                         "application_name": app_name,
-                        "supported_now": policy_short == "None",
+                        "supported_now": supported_now,
                     }
                 )
             except Exception as err:

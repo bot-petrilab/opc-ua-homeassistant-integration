@@ -36,8 +36,11 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 
 ## Einschränkung
 
-- Security Policy aktuell nur `None`
-- Zertifikatsbasierte Security (Sign/Sign&Encrypt) kommt als nächster Schritt
+- Unterstützt jetzt:
+  - `None`
+  - `Basic256Sha256_Sign`
+  - `Basic256Sha256_SignAndEncrypt`
+- Für Basic256Sha256 müssen Zertifikat/Key-Pfade im Config-Flow gesetzt sein
 - Polling statt OPC-UA-Subscription
 
 ## Bedienung

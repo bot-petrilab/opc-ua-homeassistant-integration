@@ -20,6 +20,9 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import (
+    CONF_CLIENT_CERT_PATH,
+    CONF_CLIENT_KEY_PASSWORD,
+    CONF_CLIENT_KEY_PATH,
     CONF_ENDPOINT,
     CONF_LIGHT_BRIGHTNESS_NODE_ID,
     CONF_LIGHT_BRIGHTNESS_SCALE,
@@ -63,6 +66,7 @@ from .const import (
     CONF_NODES,
     CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
+    CONF_SERVER_CERT_PATH,
     CONF_VALIDATE_ON_SAVE,
     DEFAULT_BRIGHTNESS_SCALE,
     DEFAULT_COLOR_TEMP_MAX_KELVIN,
@@ -73,6 +77,9 @@ from .const import (
     DEFAULT_SCAN_INTERVAL_SECONDS,
     DEFAULT_SECURITY_POLICY,
     DEFAULT_TITLE,
+    SECURITY_POLICY_BASIC256SHA256_SIGN,
+    SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+    SECURITY_POLICY_NONE,
     DEFAULT_VALIDATE_ON_SAVE,
     DEFAULT_WHITE_SCALE,
     DEFAULT_XY_SCALE,
@@ -146,6 +153,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_SECURITY_POLICY: DEFAULT_SECURITY_POLICY,
                     CONF_USERNAME: None,
                     CONF_PASSWORD: None,
+                    CONF_CLIENT_CERT_PATH: None,
+                    CONF_CLIENT_KEY_PATH: None,
+                    CONF_SERVER_CERT_PATH: None,
+                    CONF_CLIENT_KEY_PASSWORD: None,
                     CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_SECONDS,
                     CONF_NODES: [],
                 },
@@ -167,6 +178,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
             security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
             username = user_input.get(CONF_USERNAME) or None
             password = user_input.get(CONF_PASSWORD) or None
+            client_cert_path = (user_input.get(CONF_CLIENT_CERT_PATH) or "").strip() or None
+            client_key_path = (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None
+            server_cert_path = (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None
+            client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
             validate_on_save = bool(user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE))
             scan_interval = int(user_input[CONF_SCAN_INTERVAL])
 
@@ -174,6 +189,13 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors[CONF_ENDPOINT] = "required"
             elif not endpoint.lower().startswith("opc.tcp://"):
                 errors[CONF_ENDPOINT] = "invalid_endpoint"
+
+            secure_policy = security_policy != SECURITY_POLICY_NONE
+            if secure_policy:
+                if not client_cert_path:
+                    errors[CONF_CLIENT_CERT_PATH] = "required"
+                if not client_key_path:
+                    errors[CONF_CLIENT_KEY_PATH] = "required"
 
             if not errors:
                 await self.async_set_unique_id(endpoint)
@@ -186,6 +208,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                             security_policy=security_policy,
                             username=username,
                             password=password,
+                            client_cert_path=client_cert_path,
+                            client_key_path=client_key_path,
+                            server_cert_path=server_cert_path,
+                            client_key_password=client_key_password,
                         )
                         await manager.ensure_connected()
                         await manager.disconnect()
@@ -202,6 +228,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_SECURITY_POLICY: security_policy,
                         CONF_USERNAME: username,
                         CONF_PASSWORD: password,
+                        CONF_CLIENT_CERT_PATH: client_cert_path,
+                        CONF_CLIENT_KEY_PATH: client_key_path,
+                        CONF_SERVER_CERT_PATH: server_cert_path,
+                        CONF_CLIENT_KEY_PASSWORD: client_key_password,
                         CONF_SCAN_INTERVAL: scan_interval,
                         CONF_NODES: [],
                     },
@@ -221,6 +251,18 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Optional(CONF_USERNAME): TextSelector(TextSelectorConfig(type="text")),
                 vol.Optional(CONF_PASSWORD): TextSelector(TextSelectorConfig(type="password")),
+                vol.Optional(CONF_CLIENT_CERT_PATH): TextSelector(
+                    TextSelectorConfig(type="text", autocomplete="off")
+                ),
+                vol.Optional(CONF_CLIENT_KEY_PATH): TextSelector(
+                    TextSelectorConfig(type="text", autocomplete="off")
+                ),
+                vol.Optional(CONF_SERVER_CERT_PATH): TextSelector(
+                    TextSelectorConfig(type="text", autocomplete="off")
+                ),
+                vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
+                    TextSelectorConfig(type="password")
+                ),
                 vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS): NumberSelector(
                     NumberSelectorConfig(min=1, max=60, step=1, mode="box")
                 ),
@@ -644,6 +686,10 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
                 security_policy=self._entry.data[CONF_SECURITY_POLICY],
                 username=self._entry.data.get(CONF_USERNAME),
                 password=self._entry.data.get(CONF_PASSWORD),
+                client_cert_path=self._entry.data.get(CONF_CLIENT_CERT_PATH),
+                client_key_path=self._entry.data.get(CONF_CLIENT_KEY_PATH),
+                server_cert_path=self._entry.data.get(CONF_SERVER_CERT_PATH),
+                client_key_password=self._entry.data.get(CONF_CLIENT_KEY_PASSWORD),
             )
             try:
                 browsed = await manager.browse_nodes(
@@ -883,9 +929,18 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
                 return await self.async_step_discover_servers_select()
 
             endpoint_url = str(chosen.get("endpoint_url", "")).strip()
-            policy = str(chosen.get("security_policy", "None")).strip() or "None"
+            policy_short = str(chosen.get("security_policy", "None")).strip() or "None"
+            mode_raw = str(chosen.get("security_mode", "None")).strip() or "None"
+            mode = mode_raw.rstrip("_")
 
-            if policy != "None":
+            policy_map = {
+                ("None", "None"): SECURITY_POLICY_NONE,
+                ("Basic256Sha256", "Sign"): SECURITY_POLICY_BASIC256SHA256_SIGN,
+                ("Basic256Sha256", "SignAndEncrypt"): SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+            }
+            mapped_policy = policy_map.get((policy_short, mode))
+
+            if mapped_policy is None:
                 return self.async_show_form(
                     step_id="discover_servers_select",
                     data_schema=vol.Schema({
@@ -902,7 +957,7 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
 
             current_data = dict(self._entry.data)
             current_data[CONF_ENDPOINT] = endpoint_url
-            current_data[CONF_SECURITY_POLICY] = policy
+            current_data[CONF_SECURITY_POLICY] = mapped_policy
             self.hass.config_entries.async_update_entry(self._entry, data=current_data)
             await self.hass.config_entries.async_reload(self._entry.entry_id)
             return await self.async_step_init()
@@ -933,6 +988,10 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
                 security_policy=self._entry.data[CONF_SECURITY_POLICY],
                 username=self._entry.data.get(CONF_USERNAME),
                 password=self._entry.data.get(CONF_PASSWORD),
+                client_cert_path=self._entry.data.get(CONF_CLIENT_CERT_PATH),
+                client_key_path=self._entry.data.get(CONF_CLIENT_KEY_PATH),
+                server_cert_path=self._entry.data.get(CONF_SERVER_CERT_PATH),
+                client_key_password=self._entry.data.get(CONF_CLIENT_KEY_PASSWORD),
             )
             try:
                 self._browse_cache = await manager.browse_nodes(

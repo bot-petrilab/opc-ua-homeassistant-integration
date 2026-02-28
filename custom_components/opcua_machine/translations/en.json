@@ -10,6 +10,10 @@
           "security_policy": "Security policy",
           "username": "Username",
           "password": "Password",
+          "client_cert_path": "Client certificate path",
+          "client_key_path": "Client private key path",
+          "server_cert_path": "Server certificate path (optional)",
+          "client_key_password": "Client key password (optional)",
           "scan_interval": "Polling interval (seconds)",
           "validate_on_save": "Validate connection before save"
         }

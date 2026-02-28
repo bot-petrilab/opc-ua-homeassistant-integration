@@ -10,6 +10,10 @@
           "security_policy": "Security Policy",
           "username": "Benutzername",
           "password": "Passwort",
+          "client_cert_path": "Pfad Client-Zertifikat",
+          "client_key_path": "Pfad Client-Private-Key",
+          "server_cert_path": "Pfad Server-Zertifikat (optional)",
+          "client_key_password": "Passwort Client-Key (optional)",
           "scan_interval": "Polling-Intervall (Sekunden)",
           "validate_on_save": "Verbindung vor dem Speichern prüfen"
         }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0
+- Added security policy support for OPC-UA client:
+  - `Basic256Sha256_Sign`
+  - `Basic256Sha256_SignAndEncrypt`
+- Added config-flow fields for certificate/key paths and key password
+- Discovery endpoint selection now maps Basic256Sha256 + mode to supported security policy values
+- Discovery support marker now includes Basic256Sha256 (Sign/SignAndEncrypt)
+
 ## 0.6.0
 - Integration display name renamed to **OPC-UA** (UI/flow title)
 - Prepared repository/CI packaging for reusable tests

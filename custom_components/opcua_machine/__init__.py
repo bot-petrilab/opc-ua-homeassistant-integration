@@ -9,10 +9,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import (
+    CONF_CLIENT_CERT_PATH,
+    CONF_CLIENT_KEY_PASSWORD,
+    CONF_CLIENT_KEY_PATH,
     CONF_ENDPOINT,
     CONF_NODES,
     CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
+    CONF_SERVER_CERT_PATH,
     DEFAULT_SCAN_INTERVAL_SECONDS,
     DOMAIN,
     PLATFORMS,
@@ -43,6 +47,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
     security_policy: str = entry.data[CONF_SECURITY_POLICY]
     username: str | None = entry.data.get(CONF_USERNAME)
     password: str | None = entry.data.get(CONF_PASSWORD)
+    client_cert_path: str | None = entry.data.get(CONF_CLIENT_CERT_PATH)
+    client_key_path: str | None = entry.data.get(CONF_CLIENT_KEY_PATH)
+    server_cert_path: str | None = entry.data.get(CONF_SERVER_CERT_PATH)
+    client_key_password: str | None = entry.data.get(CONF_CLIENT_KEY_PASSWORD)
 
     scan_interval: int = int(
         entry.options.get(CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS))
@@ -54,6 +62,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         security_policy=security_policy,
         username=username,
         password=password,
+        client_cert_path=client_cert_path,
+        client_key_path=client_key_path,
+        server_cert_path=server_cert_path,
+        client_key_password=client_key_password,
     )
 
     coordinator = OpcUaCoordinator(
