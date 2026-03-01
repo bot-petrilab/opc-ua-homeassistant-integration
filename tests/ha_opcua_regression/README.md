@@ -29,6 +29,12 @@ Optional additional platform matrix test:
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/platform_coverage_check.py
 ```
 
+Optional notification event bridge test:
+
+```bash
+/home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/notification_e2e_check.py
+```
+
 ## Env vars (optional)
 
 - `HA_URL` (default `http://localhost:8123`)
