@@ -14,12 +14,19 @@ Run after every integration change.
 - Stack light profile can be applied
 - Entities are created for endpoint
 - Light service toggle works (`on`/`off`)
+- Optional platform matrix test validates KNX-style platform coverage (`button`, `climate`, `cover`, `date`, `datetime`, `fan`, `notify`, `number`, `scene`, `select`, `text`, `time`, `weather`)
 
 ## Run
 
 ```bash
 cd /home/user/.openclaw/workspace
 tests/ha_opcua_regression/run.sh
+```
+
+Optional additional platform matrix test:
+
+```bash
+/home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/platform_coverage_check.py
 ```
 
 ## Env vars (optional)

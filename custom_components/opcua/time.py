@@ -48,6 +48,9 @@ async def async_setup_entry(
 class OpcUaTime(OpcUaBaseEntity, TimeEntity):
     """OPC-UA time entity."""
 
+    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+        super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_TIME)
+
     @property
     def native_value(self) -> time | None:
         return _as_time(self._raw_value())

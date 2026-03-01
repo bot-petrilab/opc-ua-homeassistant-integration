@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+- Fixed `date`, `datetime`, and `time` platform entity initialization (`entity_kind` argument).
+- Added dedicated regression test `platform_coverage_check.py` for KNX-style platform coverage.
+
 ## 1.0.0
 - Added broad platform coverage aligned with KNX platform scope:
   - `button`, `climate`, `cover`, `date`, `datetime`, `fan`, `notify`, `number`, `scene`, `select`, `text`, `time`, `weather`
