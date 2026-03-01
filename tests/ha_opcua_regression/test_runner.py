@@ -178,7 +178,7 @@ async def run() -> dict:
 
         # 3) Cleanup existing OPC entries
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if x.get("domain") == "opcua"]:
+        for e in [x for x in entries if x.get("domain") in {"opcua", "opcua_machine"}]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
