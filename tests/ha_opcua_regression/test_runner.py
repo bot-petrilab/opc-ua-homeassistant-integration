@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import quote
 
+from asyncua import Client
 from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import async_playwright
 
@@ -16,6 +17,7 @@ HA_URL = os.getenv("HA_URL", "http://localhost:8123")
 HA_USER = os.getenv("HA_USER", "admin")
 HA_PASS = os.getenv("HA_PASS", "Admin123")
 OPC_ENDPOINT = os.getenv("OPC_ENDPOINT", "opc.tcp://127.0.0.1:4840")
+ALARM_NODE_ID = "ns=2;s=Machine.Operation.Alarm"
 
 OUT_DIR = Path(os.getenv("OUT_DIR", "/home/user/.openclaw/workspace/tests/ha_opcua_regression/out"))
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -88,6 +90,15 @@ async def run() -> dict:
                 break
             raise TestFailure(f"API {method} {path} failed: {last_err}")
 
+        async def opc_write_bool(node_id: str, value: bool) -> None:
+            client = Client(OPC_ENDPOINT)
+            await client.connect()
+            try:
+                node = client.get_node(node_id)
+                await node.write_value(value)
+            finally:
+                await client.disconnect()
+
         async def start_options_flow(entry_id: str):
             return await call_api("POST", "config/config_entries/options/flow", {"handler": entry_id})
 
@@ -99,6 +110,42 @@ async def run() -> dict:
                 if f.get("name") == name:
                     return f
             return None
+
+        async def subscribe_event_capture(event_type: str) -> bool:
+            raw = await page.evaluate(
+                """async (args) => {
+                  const ha = document.querySelector('home-assistant');
+                  if (!ha?.hass?.connection) return JSON.stringify({ok:false, err:'no_connection'});
+                  try {
+                    if (window.__opcuaUnsub) {
+                      try { window.__opcuaUnsub(); } catch (_) {}
+                      window.__opcuaUnsub = null;
+                    }
+                    window.__opcuaEvents = [];
+                    const unsub = await ha.hass.connection.subscribeEvents(
+                      (ev) => { (window.__opcuaEvents ||= []).push(ev); },
+                      args.eventType,
+                    );
+                    window.__opcuaUnsub = unsub;
+                    return JSON.stringify({ok:true});
+                  } catch (err) {
+                    return JSON.stringify({ok:false, err:String(err)});
+                  }
+                }""",
+                {"eventType": event_type},
+            )
+            obj = json.loads(raw)
+            return bool(obj.get("ok"))
+
+        async def read_captured_events() -> list[dict]:
+            raw = await page.evaluate(
+                """() => JSON.stringify(window.__opcuaEvents || [])"""
+            )
+            try:
+                data = json.loads(raw)
+            except Exception:
+                return []
+            return data if isinstance(data, list) else []
 
         # 1) Login
         await page.goto(HA_URL)
@@ -145,6 +192,10 @@ async def run() -> dict:
             raise TestFailure(f"flow init missing flow_id: {init}")
         add_check("config_flow_init", init.get("step_id") == "user", f"step={init.get('step_id')}")
 
+        init_fields = {f.get("name") for f in (init.get("data_schema") or [])}
+        notify_fields = {"notify_enabled", "notify_service", "notify_title_prefix", "notify_keywords"}
+        add_check("config_flow_has_notification_fields", notify_fields.issubset(init_fields), str(sorted(init_fields)))
+
         submit = await call_api(
             "POST",
             f"config/config_entries/flow/{flow_id}",
@@ -154,6 +205,10 @@ async def run() -> dict:
                 "security_policy": "None",
                 "scan_interval": 2,
                 "validate_on_save": False,
+                "notify_enabled": True,
+                "notify_service": "persistent_notification.create",
+                "notify_title_prefix": "OPC-UA",
+                "notify_keywords": "alarm,warning,fault,error",
             },
         )
         submit_type = submit.get("type")
@@ -170,6 +225,8 @@ async def run() -> dict:
             raise TestFailure("No opcua_machine entry found after config flow")
         entry_id = target[0]["entry_id"]
         add_check("config_entry_created", True, entry_id)
+
+        add_check("config_flow_submit_with_notification_fields", submit_type in {"create_entry", "abort"}, f"type={submit_type} reason={submit_reason}")
 
         # 5) Options menu has expected features
         opt_init = await start_options_flow(entry_id)
@@ -190,6 +247,21 @@ async def run() -> dict:
             },
         )
         add_check("add_light_manual_node", add_light.get("step_id") == "init", f"step={add_light.get('step_id')}")
+
+        # 6b) add dedicated alarm binary_sensor for notification trigger
+        opt_alarm = await start_options_flow(entry_id)
+        fid_alarm = opt_alarm["flow_id"]
+        await opt_step(fid_alarm, {"next_step_id": "add_binary_sensor"})
+        add_alarm = await opt_step(
+            fid_alarm,
+            {
+                "name": "E2E Alarm Notify",
+                "node_id": ALARM_NODE_ID,
+                "device_class": "problem",
+                "invert": False,
+            },
+        )
+        add_check("add_alarm_binary_sensor", add_alarm.get("step_id") == "init", f"step={add_alarm.get('step_id')}")
 
         # 7) discover servers
         opt_disc = await start_options_flow(entry_id)
@@ -262,7 +334,32 @@ async def run() -> dict:
         domains = Counter([s.get("entity_id", "").split(".")[0] for s in endpoint_states if s.get("entity_id")])
         add_check("entity_domains_include_light_switch_sensor", all(d in domains for d in ["sensor", "light", "switch"]), str(dict(domains)))
 
-        # 11) functional light toggle
+        # 11) runtime notification event trigger (alarm false -> true)
+        subscribed = await subscribe_event_capture("opcua_machine_notification")
+        add_check("notification_event_subscription", subscribed)
+
+        try:
+            await opc_write_bool(ALARM_NODE_ID, False)
+            await page.wait_for_timeout(1800)
+            await opc_write_bool(ALARM_NODE_ID, True)
+            await page.wait_for_timeout(3200)
+
+            events = await read_captured_events()
+            matched_events = [
+                ev
+                for ev in events
+                if str((ev.get("data") or {}).get("node_id") or "") == ALARM_NODE_ID
+                and str((ev.get("data") or {}).get("endpoint") or "") == OPC_ENDPOINT
+            ]
+            add_check(
+                "notification_alarm_trigger",
+                len(matched_events) > 0,
+                f"captured={len(events)} matched={len(matched_events)}",
+            )
+        except Exception as err:
+            add_check("notification_alarm_trigger", False, f"trigger failed: {err}")
+
+        # 12) functional light toggle
         light_candidates = [
             s for s in endpoint_states
             if (s.get("attributes") or {}).get("node_id") == "ns=2;s=Machine.Control.StackLight.ManualTest"
