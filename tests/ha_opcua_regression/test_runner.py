@@ -231,7 +231,26 @@ async def run() -> dict:
         # 5) Options menu has expected features
         opt_init = await start_options_flow(entry_id)
         menu = set(opt_init.get("menu_options", []))
-        expected = {"discover_servers", "auto_discovery", "browse_nodes", "add_light", "add_stack_light_profile"}
+        expected = {
+            "discover_servers",
+            "auto_discovery",
+            "browse_nodes",
+            "add_light",
+            "add_stack_light_profile",
+            "add_button",
+            "add_climate",
+            "add_cover",
+            "add_date",
+            "add_datetime",
+            "add_fan",
+            "add_notify",
+            "add_number",
+            "add_scene",
+            "add_select",
+            "add_text",
+            "add_time",
+            "add_weather",
+        }
         add_check("options_menu_expected_items", expected.issubset(menu), str(sorted(menu)))
 
         # 6) add one dedicated light on a non-simulated manual node
