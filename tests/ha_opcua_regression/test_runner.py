@@ -17,7 +17,7 @@ HA_URL = os.getenv("HA_URL", "http://localhost:8123")
 HA_USER = os.getenv("HA_USER", "admin")
 HA_PASS = os.getenv("HA_PASS", "Admin123")
 OPC_ENDPOINT = os.getenv("OPC_ENDPOINT", "opc.tcp://127.0.0.1:4840")
-ALARM_NODE_ID = "ns=2;s=Machine.Operation.Alarm"
+NOTIFY_TRIGGER_NODE_ID = "ns=2;s=Machine.Control.StackLight.ManualTest"
 
 OUT_DIR = Path(os.getenv("OUT_DIR", "/home/user/.openclaw/workspace/tests/ha_opcua_regression/out"))
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -208,7 +208,7 @@ async def run() -> dict:
                 "notify_enabled": True,
                 "notify_service": "persistent_notification.create",
                 "notify_title_prefix": "OPC-UA",
-                "notify_keywords": "alarm,warning,fault,error",
+                "notify_keywords": "manualtest,alarm,warning,fault,error",
             },
         )
         submit_type = submit.get("type")
@@ -248,20 +248,20 @@ async def run() -> dict:
         )
         add_check("add_light_manual_node", add_light.get("step_id") == "init", f"step={add_light.get('step_id')}")
 
-        # 6b) add dedicated alarm binary_sensor for notification trigger
+        # 6b) add dedicated binary_sensor for deterministic notification trigger
         opt_alarm = await start_options_flow(entry_id)
         fid_alarm = opt_alarm["flow_id"]
         await opt_step(fid_alarm, {"next_step_id": "add_binary_sensor"})
         add_alarm = await opt_step(
             fid_alarm,
             {
-                "name": "E2E Alarm Notify",
-                "node_id": ALARM_NODE_ID,
+                "name": "E2E Notify Trigger",
+                "node_id": NOTIFY_TRIGGER_NODE_ID,
                 "device_class": "problem",
                 "invert": False,
             },
         )
-        add_check("add_alarm_binary_sensor", add_alarm.get("step_id") == "init", f"step={add_alarm.get('step_id')}")
+        add_check("add_notify_trigger_binary_sensor", add_alarm.get("step_id") == "init", f"step={add_alarm.get('step_id')}")
 
         # 7) discover servers
         opt_disc = await start_options_flow(entry_id)
@@ -335,29 +335,29 @@ async def run() -> dict:
         add_check("entity_domains_include_light_switch_sensor", all(d in domains for d in ["sensor", "light", "switch"]), str(dict(domains)))
 
         # 11) runtime notification event trigger (alarm false -> true)
-        subscribed = await subscribe_event_capture("opcua_machine_notification")
+        subscribed = await subscribe_event_capture("opcua_notification")
         add_check("notification_event_subscription", subscribed)
 
         try:
-            await opc_write_bool(ALARM_NODE_ID, False)
-            await page.wait_for_timeout(1800)
-            await opc_write_bool(ALARM_NODE_ID, True)
-            await page.wait_for_timeout(3200)
+            await opc_write_bool(NOTIFY_TRIGGER_NODE_ID, False)
+            await page.wait_for_timeout(4200)
+            await opc_write_bool(NOTIFY_TRIGGER_NODE_ID, True)
+            await page.wait_for_timeout(6200)
 
             events = await read_captured_events()
             matched_events = [
                 ev
                 for ev in events
-                if str((ev.get("data") or {}).get("node_id") or "") == ALARM_NODE_ID
+                if str((ev.get("data") or {}).get("node_id") or "") == NOTIFY_TRIGGER_NODE_ID
                 and str((ev.get("data") or {}).get("endpoint") or "") == OPC_ENDPOINT
             ]
             add_check(
-                "notification_alarm_trigger",
+                "notification_trigger_event",
                 len(matched_events) > 0,
                 f"captured={len(events)} matched={len(matched_events)}",
             )
         except Exception as err:
-            add_check("notification_alarm_trigger", False, f"trigger failed: {err}")
+            add_check("notification_trigger_event", False, f"trigger failed: {err}")
 
         # 12) functional light toggle
         light_candidates = [

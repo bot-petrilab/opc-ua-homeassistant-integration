@@ -20,7 +20,7 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 ✅ OPC-UA Browser im Options-Flow (Root/Depth/Max + Import als Entität)  
 ✅ Auto-Discovery (native OPC-UA + Companion-Heuristiken)  
 ✅ Stack-Light-Profil-Assistent (R/Y/G + optional Buzzer)  
-✅ Built-in notifications (`opcua_machine_notification` event + optional HA notify service call)  
+✅ Built-in notifications (`opcua_notification` event + optional HA notify service call)  
 ✅ Light-Entity mit optionalen Features (alle optional):
 - on/off
 - brightness

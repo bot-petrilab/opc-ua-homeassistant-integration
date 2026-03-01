@@ -7,7 +7,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import CONF_NODE_ID, CONF_NODE_KIND, CONF_NODE_NAME, DOMAIN
+from .const import CONF_NODE_ID, CONF_NODE_KIND, CONF_NODE_NAME, EVENT_NOTIFICATION
 from .opcua_client import OpcUaClientManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -129,7 +129,7 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "node_id": node_id,
             "value": value,
         }
-        self.hass.bus.async_fire(f"{DOMAIN}_notification", event_data)
+        self.hass.bus.async_fire(EVENT_NOTIFICATION, event_data)
 
         if not self.notify_enabled:
             return

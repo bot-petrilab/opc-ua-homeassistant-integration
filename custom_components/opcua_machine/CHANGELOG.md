@@ -1,12 +1,16 @@
 # Changelog
 
+## 0.8.2
+- Standardized runtime HA notification event to generic `opcua_notification`.
+- Updated regression tests and docs to use `opcua_notification`.
+
 ## 0.8.1
 - Fixed config-flow runtime import for notification defaults (prevents flow 500 errors when opening user step).
-- Extended regression test to cover notification configuration fields and runtime `opcua_machine_notification` event trigger.
+- Extended regression test to cover notification configuration fields and runtime `opcua_notification` event trigger.
 
 ## 0.8.0
 - Added built-in OPC-UA notification bridge:
-  - Fires Home Assistant event: `opcua_machine_notification`
+  - Fires Home Assistant event: `opcua_notification`
   - Can create notifications via configurable HA service (default `persistent_notification.create`)
   - Triggered on alarm/warning/fault-like node transitions based on keywords
 - Added notification config fields in config flow
