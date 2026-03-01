@@ -60,7 +60,20 @@
           "browse_nodes": "OPC-UA Nodes browsen",
           "remove_node": "Nodes entfernen",
           "set_poll_interval": "Polling-Intervall setzen",
-          "done": "Speichern und beenden"
+          "done": "Speichern und beenden",
+          "add_button": "Button hinzufügen",
+          "add_climate": "Klima hinzufügen",
+          "add_cover": "Cover hinzufügen",
+          "add_date": "Datum hinzufügen",
+          "add_datetime": "Datum/Uhrzeit hinzufügen",
+          "add_fan": "Lüfter hinzufügen",
+          "add_notify": "Notify hinzufügen",
+          "add_number": "Zahl hinzufügen",
+          "add_scene": "Szene hinzufügen",
+          "add_select": "Auswahl hinzufügen",
+          "add_text": "Text hinzufügen",
+          "add_time": "Uhrzeit hinzufügen",
+          "add_weather": "Wetter hinzufügen"
         }
       },
       "add_sensor": {
@@ -199,7 +212,20 @@
           "browse_add_binary_sensor": "Als Binary Sensoren hinzufügen",
           "browse_add_switch": "Als Switches hinzufügen",
           "browse_add_light": "Als Lights hinzufügen",
-          "browse_nodes": "Erneut browsen"
+          "browse_nodes": "Erneut browsen",
+          "browse_add_button": "Als Buttons importieren",
+          "browse_add_climate": "Als Klima importieren",
+          "browse_add_cover": "Als Cover importieren",
+          "browse_add_date": "Als Datum importieren",
+          "browse_add_datetime": "Als Datum/Uhrzeit importieren",
+          "browse_add_fan": "Als Lüfter importieren",
+          "browse_add_notify": "Als Notify-Entitäten importieren",
+          "browse_add_number": "Als Zahlen importieren",
+          "browse_add_scene": "Als Szenen importieren",
+          "browse_add_select": "Als Auswahl importieren",
+          "browse_add_text": "Als Texte importieren",
+          "browse_add_time": "Als Uhrzeiten importieren",
+          "browse_add_weather": "Als Wetter importieren"
         }
       },
       "browse_add_sensor": {
@@ -248,6 +274,254 @@
         "title": "Polling-Intervall setzen",
         "data": {
           "scan_interval": "Polling-Intervall (Sekunden)"
+        }
+      },
+      "add_button": {
+        "title": "Button-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "button_payload": "Button-Payload"
+        }
+      },
+      "add_climate": {
+        "title": "Klima-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "target_node_id": "Solltemperatur-Node ID",
+          "hvac_mode_node_id": "HVAC-Modus-Node ID",
+          "min_temp": "Minimale Temperatur",
+          "max_temp": "Maximale Temperatur",
+          "temp_step": "Temperaturschritt"
+        }
+      },
+      "add_cover": {
+        "title": "Cover-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "target_node_id": "Zielposition-Node ID",
+          "set_position_node_id": "Set-Position-Node ID",
+          "open_node_id": "Open-Node ID",
+          "close_node_id": "Close-Node ID",
+          "stop_node_id": "Stop-Node ID",
+          "invert_position": "Position 0↔100 invertieren"
+        }
+      },
+      "add_date": {
+        "title": "Datum-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon"
+        }
+      },
+      "add_datetime": {
+        "title": "Datum/Uhrzeit-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon"
+        }
+      },
+      "add_fan": {
+        "title": "Lüfter-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "speed_node_id": "Speed-Node ID (0..100)",
+          "invert": "Ein/Aus invertieren"
+        }
+      },
+      "add_notify": {
+        "title": "Notify-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "message_node_id": "Message-Node ID",
+          "title_node_id": "Title-Node ID"
+        }
+      },
+      "add_number": {
+        "title": "Zahlen-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "number_min": "Minimum",
+          "number_max": "Maximum",
+          "number_step": "Schritt",
+          "unit_of_measurement": "Einheit"
+        }
+      },
+      "add_scene": {
+        "title": "Szenen-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "scene_activate_value": "Aktivierungswert"
+        }
+      },
+      "add_select": {
+        "title": "Auswahl-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "select_options": "Optionen (kommagetrennt)"
+        }
+      },
+      "add_text": {
+        "title": "Text-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "text_max": "Maximale Textlänge"
+        }
+      },
+      "add_time": {
+        "title": "Uhrzeit-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon"
+        }
+      },
+      "add_weather": {
+        "title": "Wetter-Node hinzufügen",
+        "data": {
+          "name": "Entitätsname",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "humidity_node_id": "Feuchte-Node ID",
+          "pressure_node_id": "Druck-Node ID",
+          "wind_speed_node_id": "Windgeschwindigkeit-Node ID",
+          "condition_node_id": "Bedingungs-Node ID"
+        }
+      },
+      "browse_add_button": {
+        "title": "Baum: Buttons importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_climate": {
+        "title": "Baum: Klima importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_cover": {
+        "title": "Baum: Cover importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_date": {
+        "title": "Baum: Datum importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_datetime": {
+        "title": "Baum: Datum/Uhrzeit importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_fan": {
+        "title": "Baum: Lüfter importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_notify": {
+        "title": "Baum: Notify importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_number": {
+        "title": "Baum: Zahlen importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_scene": {
+        "title": "Baum: Szenen importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_select": {
+        "title": "Baum: Auswahl importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_text": {
+        "title": "Baum: Texte importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_time": {
+        "title": "Baum: Uhrzeiten importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "browse_add_weather": {
+        "title": "Baum: Wetter importieren",
+        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "data": {
+          "node_ids": "Variablen zum Import",
+          "open_branch": "Unterzweig öffnen",
+          "go_up": "Eine Ebene nach oben"
         }
       }
     }

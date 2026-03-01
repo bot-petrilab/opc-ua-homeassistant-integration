@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0
+- Added broad platform coverage aligned with KNX platform scope:
+  - `button`, `climate`, `cover`, `date`, `datetime`, `fan`, `notify`, `number`, `scene`, `select`, `text`, `time`, `weather`
+  - existing `sensor`, `binary_sensor`, `switch`, `light` retained
+- Extended options flow with manual add steps for all new entity types.
+- Extended browse-import flow with all new entity kinds.
+
 ## 0.9.0
 - BREAKING: Integration domain is now `opcua`.
 - BREAKING: Component path is now `custom_components/opcua`.

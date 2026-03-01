@@ -20,10 +20,21 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import (
+    CONF_BUTTON_PAYLOAD,
     CONF_CLIENT_CERT_PATH,
     CONF_CLIENT_KEY_PASSWORD,
     CONF_CLIENT_KEY_PATH,
+    CONF_CLIMATE_HVAC_MODE_NODE_ID,
+    CONF_CLIMATE_MAX_TEMP,
+    CONF_CLIMATE_MIN_TEMP,
+    CONF_CLIMATE_TEMP_STEP,
+    CONF_COVER_CLOSE_NODE_ID,
+    CONF_COVER_INVERT_POSITION,
+    CONF_COVER_OPEN_NODE_ID,
+    CONF_COVER_SET_POSITION_NODE_ID,
+    CONF_COVER_STOP_NODE_ID,
     CONF_ENDPOINT,
+    CONF_FAN_SPEED_NODE_ID,
     CONF_LIGHT_BRIGHTNESS_NODE_ID,
     CONF_LIGHT_BRIGHTNESS_SCALE,
     CONF_LIGHT_COLOR_TEMP_MAX_KELVIN,
@@ -62,17 +73,33 @@ from .const import (
     CONF_NODE_KIND,
     CONF_NODE_NAME,
     CONF_NODE_STATE_CLASS,
+    CONF_NODE_TARGET_NODE_ID,
     CONF_NODE_UNIT,
     CONF_NODES,
     CONF_NOTIFY_ENABLED,
     CONF_NOTIFY_KEYWORDS,
+    CONF_NOTIFY_MESSAGE_NODE_ID,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_TITLE_NODE_ID,
     CONF_NOTIFY_TITLE_PREFIX,
+    CONF_NUMBER_MAX,
+    CONF_NUMBER_MIN,
+    CONF_NUMBER_STEP,
     CONF_SCAN_INTERVAL,
+    CONF_SCENE_ACTIVATE_VALUE,
     CONF_SECURITY_POLICY,
+    CONF_SELECT_OPTIONS,
     CONF_SERVER_CERT_PATH,
+    CONF_TEXT_MAX,
     CONF_VALIDATE_ON_SAVE,
+    CONF_WEATHER_CONDITION_NODE_ID,
+    CONF_WEATHER_HUMIDITY_NODE_ID,
+    CONF_WEATHER_PRESSURE_NODE_ID,
+    CONF_WEATHER_WIND_SPEED_NODE_ID,
     DEFAULT_BRIGHTNESS_SCALE,
+    DEFAULT_CLIMATE_MAX_TEMP,
+    DEFAULT_CLIMATE_MIN_TEMP,
+    DEFAULT_CLIMATE_TEMP_STEP,
     DEFAULT_COLOR_TEMP_MAX_KELVIN,
     DEFAULT_COLOR_TEMP_MIN_KELVIN,
     DEFAULT_HS_HUE_SCALE,
@@ -81,29 +108,45 @@ from .const import (
     DEFAULT_NOTIFY_KEYWORDS,
     DEFAULT_NOTIFY_SERVICE,
     DEFAULT_NOTIFY_TITLE_PREFIX,
+    DEFAULT_NUMBER_MAX,
+    DEFAULT_NUMBER_MIN,
+    DEFAULT_NUMBER_STEP,
     DEFAULT_RGB_SCALE,
     DEFAULT_SCAN_INTERVAL_SECONDS,
     DEFAULT_SECURITY_POLICY,
     DEFAULT_TITLE,
-    SECURITY_POLICY_BASIC256SHA256_SIGN,
-    SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
-    SECURITY_POLICY_NONE,
     DEFAULT_VALIDATE_ON_SAVE,
     DEFAULT_WHITE_SCALE,
     DEFAULT_XY_SCALE,
     DOMAIN,
     NODE_KIND_BINARY_SENSOR,
+    NODE_KIND_BUTTON,
+    NODE_KIND_CLIMATE,
+    NODE_KIND_COVER,
+    NODE_KIND_DATE,
+    NODE_KIND_DATETIME,
+    NODE_KIND_FAN,
     NODE_KIND_LIGHT,
+    NODE_KIND_NOTIFY,
+    NODE_KIND_NUMBER,
+    NODE_KIND_SCENE,
+    NODE_KIND_SELECT,
     NODE_KIND_SENSOR,
     NODE_KIND_SWITCH,
+    NODE_KIND_TEXT,
+    NODE_KIND_TIME,
+    NODE_KIND_WEATHER,
     SECURITY_POLICIES,
+    SECURITY_POLICY_BASIC256SHA256_SIGN,
+    SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+    SECURITY_POLICY_NONE,
 )
 from .opcua_client import OpcUaClientManager
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
+class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for OPC-UA."""
 
     VERSION = 1
@@ -312,10 +355,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     def async_get_options_flow(config_entry):
-        return OpcUaMachineOptionsFlow(config_entry)
+        return OpcUaOptionsFlow(config_entry)
 
 
-class OpcUaMachineOptionsFlow(OptionsFlow):
+class OpcUaOptionsFlow(OptionsFlow):
     """Handle options flow for OPC-UA."""
 
     def __init__(self, config_entry) -> None:
@@ -345,6 +388,19 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
                 "add_binary_sensor",
                 "add_switch",
                 "add_light",
+                "add_button",
+                "add_climate",
+                "add_cover",
+                "add_date",
+                "add_datetime",
+                "add_fan",
+                "add_notify",
+                "add_number",
+                "add_scene",
+                "add_select",
+                "add_text",
+                "add_time",
+                "add_weather",
                 "add_stack_light_profile",
                 "discover_servers",
                 "auto_discovery",
@@ -705,6 +761,383 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
             }
 
         return None
+
+    @staticmethod
+    def _parse_scalar_value(raw: Any) -> Any:
+        if raw is None:
+            return None
+        s = str(raw).strip()
+        if s == "":
+            return None
+        lower = s.lower()
+        if lower in {"true", "on", "yes"}:
+            return True
+        if lower in {"false", "off", "no"}:
+            return False
+        try:
+            if "." in s:
+                return float(s)
+            return int(s)
+        except ValueError:
+            return s
+
+    async def async_step_add_button(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            payload = self._parse_scalar_value(user_input.get(CONF_BUTTON_PAYLOAD))
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_BUTTON,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_BUTTON_PAYLOAD: True if payload is None else payload,
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_BUTTON_PAYLOAD, default="true"): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:gesture-tap-button"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_button", data_schema=schema)
+
+    async def async_step_add_climate(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_CLIMATE,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID) or None,
+                    CONF_CLIMATE_HVAC_MODE_NODE_ID: user_input.get(CONF_CLIMATE_HVAC_MODE_NODE_ID) or None,
+                    CONF_CLIMATE_MIN_TEMP: float(user_input.get(CONF_CLIMATE_MIN_TEMP, DEFAULT_CLIMATE_MIN_TEMP)),
+                    CONF_CLIMATE_MAX_TEMP: float(user_input.get(CONF_CLIMATE_MAX_TEMP, DEFAULT_CLIMATE_MAX_TEMP)),
+                    CONF_CLIMATE_TEMP_STEP: float(user_input.get(CONF_CLIMATE_TEMP_STEP, DEFAULT_CLIMATE_TEMP_STEP)),
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Required(CONF_NODE_TARGET_NODE_ID): TextSelector(),
+                vol.Optional(CONF_CLIMATE_HVAC_MODE_NODE_ID): TextSelector(),
+                vol.Required(CONF_CLIMATE_MIN_TEMP, default=DEFAULT_CLIMATE_MIN_TEMP): NumberSelector(
+                    NumberSelectorConfig(min=-50, max=100, step=0.1, mode="box")
+                ),
+                vol.Required(CONF_CLIMATE_MAX_TEMP, default=DEFAULT_CLIMATE_MAX_TEMP): NumberSelector(
+                    NumberSelectorConfig(min=-50, max=100, step=0.1, mode="box")
+                ),
+                vol.Required(CONF_CLIMATE_TEMP_STEP, default=DEFAULT_CLIMATE_TEMP_STEP): NumberSelector(
+                    NumberSelectorConfig(min=0.1, max=5, step=0.1, mode="box")
+                ),
+                vol.Optional(CONF_NODE_ICON, default="mdi:thermostat"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_climate", data_schema=schema)
+
+    async def async_step_add_cover(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_COVER,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID) or None,
+                    CONF_COVER_SET_POSITION_NODE_ID: user_input.get(CONF_COVER_SET_POSITION_NODE_ID) or None,
+                    CONF_COVER_OPEN_NODE_ID: user_input.get(CONF_COVER_OPEN_NODE_ID) or None,
+                    CONF_COVER_CLOSE_NODE_ID: user_input.get(CONF_COVER_CLOSE_NODE_ID) or None,
+                    CONF_COVER_STOP_NODE_ID: user_input.get(CONF_COVER_STOP_NODE_ID) or None,
+                    CONF_COVER_INVERT_POSITION: bool(user_input.get(CONF_COVER_INVERT_POSITION, False)),
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_TARGET_NODE_ID): TextSelector(),
+                vol.Optional(CONF_COVER_SET_POSITION_NODE_ID): TextSelector(),
+                vol.Optional(CONF_COVER_OPEN_NODE_ID): TextSelector(),
+                vol.Optional(CONF_COVER_CLOSE_NODE_ID): TextSelector(),
+                vol.Optional(CONF_COVER_STOP_NODE_ID): TextSelector(),
+                vol.Required(CONF_COVER_INVERT_POSITION, default=False): BooleanSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:blinds"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_cover", data_schema=schema)
+
+    async def async_step_add_date(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_DATE,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:calendar"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_date", data_schema=schema)
+
+    async def async_step_add_datetime(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_DATETIME,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:calendar-clock"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_datetime", data_schema=schema)
+
+    async def async_step_add_fan(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_FAN,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_FAN_SPEED_NODE_ID: user_input.get(CONF_FAN_SPEED_NODE_ID) or None,
+                    CONF_NODE_INVERT: bool(user_input.get(CONF_NODE_INVERT, False)),
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_FAN_SPEED_NODE_ID): TextSelector(),
+                vol.Required(CONF_NODE_INVERT, default=False): BooleanSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:fan"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_fan", data_schema=schema)
+
+    async def async_step_add_notify(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_NOTIFY,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NOTIFY_MESSAGE_NODE_ID: user_input.get(CONF_NOTIFY_MESSAGE_NODE_ID) or None,
+                    CONF_NOTIFY_TITLE_NODE_ID: user_input.get(CONF_NOTIFY_TITLE_NODE_ID) or None,
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NOTIFY_MESSAGE_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NOTIFY_TITLE_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:message-alert"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_notify", data_schema=schema)
+
+    async def async_step_add_number(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_NUMBER,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NUMBER_MIN: float(user_input.get(CONF_NUMBER_MIN, DEFAULT_NUMBER_MIN)),
+                    CONF_NUMBER_MAX: float(user_input.get(CONF_NUMBER_MAX, DEFAULT_NUMBER_MAX)),
+                    CONF_NUMBER_STEP: float(user_input.get(CONF_NUMBER_STEP, DEFAULT_NUMBER_STEP)),
+                    CONF_NODE_UNIT: user_input.get(CONF_NODE_UNIT) or None,
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Required(CONF_NUMBER_MIN, default=DEFAULT_NUMBER_MIN): NumberSelector(
+                    NumberSelectorConfig(min=-100000, max=100000, step=0.1, mode="box")
+                ),
+                vol.Required(CONF_NUMBER_MAX, default=DEFAULT_NUMBER_MAX): NumberSelector(
+                    NumberSelectorConfig(min=-100000, max=100000, step=0.1, mode="box")
+                ),
+                vol.Required(CONF_NUMBER_STEP, default=DEFAULT_NUMBER_STEP): NumberSelector(
+                    NumberSelectorConfig(min=0.001, max=10000, step=0.001, mode="box")
+                ),
+                vol.Optional(CONF_NODE_UNIT): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:numeric"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_number", data_schema=schema)
+
+    async def async_step_add_scene(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            activate_value = self._parse_scalar_value(user_input.get(CONF_SCENE_ACTIVATE_VALUE))
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_SCENE,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_SCENE_ACTIVATE_VALUE: True if activate_value is None else activate_value,
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_SCENE_ACTIVATE_VALUE, default="true"): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:palette"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_scene", data_schema=schema)
+
+    async def async_step_add_select(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            options_raw = str(user_input.get(CONF_SELECT_OPTIONS) or "").strip()
+            options = [x.strip() for x in options_raw.split(",") if x.strip()]
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_SELECT,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_SELECT_OPTIONS: options,
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Required(CONF_SELECT_OPTIONS): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:form-select"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_select", data_schema=schema)
+
+    async def async_step_add_text(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_TEXT,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_TEXT_MAX: int(user_input.get(CONF_TEXT_MAX, 255)),
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Required(CONF_TEXT_MAX, default=255): NumberSelector(
+                    NumberSelectorConfig(min=1, max=2048, step=1, mode="box")
+                ),
+                vol.Optional(CONF_NODE_ICON, default="mdi:form-textbox"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_text", data_schema=schema)
+
+    async def async_step_add_time(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_TIME,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:clock-outline"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_time", data_schema=schema)
+
+    async def async_step_add_weather(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_WEATHER,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_WEATHER_HUMIDITY_NODE_ID: user_input.get(CONF_WEATHER_HUMIDITY_NODE_ID) or None,
+                    CONF_WEATHER_PRESSURE_NODE_ID: user_input.get(CONF_WEATHER_PRESSURE_NODE_ID) or None,
+                    CONF_WEATHER_WIND_SPEED_NODE_ID: user_input.get(CONF_WEATHER_WIND_SPEED_NODE_ID) or None,
+                    CONF_WEATHER_CONDITION_NODE_ID: user_input.get(CONF_WEATHER_CONDITION_NODE_ID) or None,
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_WEATHER_HUMIDITY_NODE_ID): TextSelector(),
+                vol.Optional(CONF_WEATHER_PRESSURE_NODE_ID): TextSelector(),
+                vol.Optional(CONF_WEATHER_WIND_SPEED_NODE_ID): TextSelector(),
+                vol.Optional(CONF_WEATHER_CONDITION_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:weather-partly-cloudy"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_weather", data_schema=schema)
 
     async def async_step_auto_discovery(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
@@ -1074,6 +1507,19 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
                 "browse_add_binary_sensor",
                 "browse_add_switch",
                 "browse_add_light",
+                "browse_add_button",
+                "browse_add_climate",
+                "browse_add_cover",
+                "browse_add_date",
+                "browse_add_datetime",
+                "browse_add_fan",
+                "browse_add_notify",
+                "browse_add_number",
+                "browse_add_scene",
+                "browse_add_select",
+                "browse_add_text",
+                "browse_add_time",
+                "browse_add_weather",
                 "browse_nodes",
             ],
         )
@@ -1146,6 +1592,32 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
                     cfg[CONF_NODE_ICON] = "mdi:toggle-switch"
                 elif kind == NODE_KIND_LIGHT:
                     cfg[CONF_NODE_ICON] = "mdi:lightbulb"
+                elif kind == NODE_KIND_BUTTON:
+                    cfg[CONF_NODE_ICON] = "mdi:gesture-tap-button"
+                elif kind == NODE_KIND_CLIMATE:
+                    cfg[CONF_NODE_ICON] = "mdi:thermostat"
+                elif kind == NODE_KIND_COVER:
+                    cfg[CONF_NODE_ICON] = "mdi:blinds"
+                elif kind == NODE_KIND_FAN:
+                    cfg[CONF_NODE_ICON] = "mdi:fan"
+                elif kind == NODE_KIND_NOTIFY:
+                    cfg[CONF_NODE_ICON] = "mdi:message-alert"
+                elif kind == NODE_KIND_NUMBER:
+                    cfg[CONF_NODE_ICON] = "mdi:numeric"
+                elif kind == NODE_KIND_SCENE:
+                    cfg[CONF_NODE_ICON] = "mdi:palette"
+                elif kind == NODE_KIND_SELECT:
+                    cfg[CONF_NODE_ICON] = "mdi:form-select"
+                elif kind == NODE_KIND_TEXT:
+                    cfg[CONF_NODE_ICON] = "mdi:form-textbox"
+                elif kind == NODE_KIND_DATE:
+                    cfg[CONF_NODE_ICON] = "mdi:calendar"
+                elif kind == NODE_KIND_DATETIME:
+                    cfg[CONF_NODE_ICON] = "mdi:calendar-clock"
+                elif kind == NODE_KIND_TIME:
+                    cfg[CONF_NODE_ICON] = "mdi:clock-outline"
+                elif kind == NODE_KIND_WEATHER:
+                    cfg[CONF_NODE_ICON] = "mdi:weather-partly-cloudy"
                 nodes_to_add.append(cfg)
 
             if nodes_to_add:
@@ -1237,6 +1709,71 @@ class OpcUaMachineOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         return await self._browse_add_nodes_by_kind("browse_add_light", NODE_KIND_LIGHT, user_input)
+
+    async def async_step_browse_add_button(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_button", NODE_KIND_BUTTON, user_input)
+
+    async def async_step_browse_add_climate(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_climate", NODE_KIND_CLIMATE, user_input)
+
+    async def async_step_browse_add_cover(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_cover", NODE_KIND_COVER, user_input)
+
+    async def async_step_browse_add_date(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_date", NODE_KIND_DATE, user_input)
+
+    async def async_step_browse_add_datetime(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_datetime", NODE_KIND_DATETIME, user_input)
+
+    async def async_step_browse_add_fan(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_fan", NODE_KIND_FAN, user_input)
+
+    async def async_step_browse_add_notify(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_notify", NODE_KIND_NOTIFY, user_input)
+
+    async def async_step_browse_add_number(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_number", NODE_KIND_NUMBER, user_input)
+
+    async def async_step_browse_add_scene(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_scene", NODE_KIND_SCENE, user_input)
+
+    async def async_step_browse_add_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_select", NODE_KIND_SELECT, user_input)
+
+    async def async_step_browse_add_text(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_text", NODE_KIND_TEXT, user_input)
+
+    async def async_step_browse_add_time(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_time", NODE_KIND_TIME, user_input)
+
+    async def async_step_browse_add_weather(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return await self._browse_add_nodes_by_kind("browse_add_weather", NODE_KIND_WEATHER, user_input)
 
     async def async_step_remove_node(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         nodes = self._options.get(CONF_NODES, [])

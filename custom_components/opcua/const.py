@@ -10,6 +10,19 @@ except Exception:  # pragma: no cover - fallback for standalone smoke/import tes
         BINARY_SENSOR = "binary_sensor"
         SWITCH = "switch"
         LIGHT = "light"
+        BUTTON = "button"
+        CLIMATE = "climate"
+        COVER = "cover"
+        DATE = "date"
+        DATETIME = "datetime"
+        FAN = "fan"
+        NOTIFY = "notify"
+        NUMBER = "number"
+        SCENE = "scene"
+        SELECT = "select"
+        TEXT = "text"
+        TIME = "time"
+        WEATHER = "weather"
 
 DOMAIN = "opcua"
 PLATFORMS: list[Platform] = [
@@ -17,6 +30,19 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.SWITCH,
     Platform.LIGHT,
+    Platform.BUTTON,
+    Platform.CLIMATE,
+    Platform.COVER,
+    Platform.DATE,
+    Platform.DATETIME,
+    Platform.FAN,
+    Platform.NOTIFY,
+    Platform.NUMBER,
+    Platform.SCENE,
+    Platform.SELECT,
+    Platform.TEXT,
+    Platform.TIME,
+    Platform.WEATHER,
 ]
 
 CONF_ENDPOINT = "endpoint"
@@ -32,7 +58,7 @@ CONF_CLIENT_KEY_PATH = "client_key_path"
 CONF_SERVER_CERT_PATH = "server_cert_path"
 CONF_CLIENT_KEY_PASSWORD = "client_key_password"
 
-# Notification settings
+# Notification bridge settings
 CONF_NOTIFY_ENABLED = "notify_enabled"
 CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_TITLE_PREFIX = "notify_title_prefix"
@@ -47,6 +73,52 @@ CONF_NODE_DEVICE_CLASS = "device_class"
 CONF_NODE_STATE_CLASS = "state_class"
 CONF_NODE_ICON = "icon"
 CONF_NODE_INVERT = "invert"
+
+# Generic optional node mapping for write-capable entities
+CONF_NODE_TARGET_NODE_ID = "target_node_id"
+
+# Button
+CONF_BUTTON_PAYLOAD = "button_payload"
+
+# Climate
+CONF_CLIMATE_HVAC_MODE_NODE_ID = "hvac_mode_node_id"
+CONF_CLIMATE_MIN_TEMP = "min_temp"
+CONF_CLIMATE_MAX_TEMP = "max_temp"
+CONF_CLIMATE_TEMP_STEP = "temp_step"
+
+# Cover
+CONF_COVER_SET_POSITION_NODE_ID = "set_position_node_id"
+CONF_COVER_OPEN_NODE_ID = "open_node_id"
+CONF_COVER_CLOSE_NODE_ID = "close_node_id"
+CONF_COVER_STOP_NODE_ID = "stop_node_id"
+CONF_COVER_INVERT_POSITION = "invert_position"
+
+# Fan
+CONF_FAN_SPEED_NODE_ID = "speed_node_id"
+
+# Number
+CONF_NUMBER_MIN = "number_min"
+CONF_NUMBER_MAX = "number_max"
+CONF_NUMBER_STEP = "number_step"
+
+# Scene
+CONF_SCENE_ACTIVATE_VALUE = "scene_activate_value"
+
+# Select
+CONF_SELECT_OPTIONS = "select_options"
+
+# Text
+CONF_TEXT_MAX = "text_max"
+
+# Notify entity
+CONF_NOTIFY_MESSAGE_NODE_ID = "message_node_id"
+CONF_NOTIFY_TITLE_NODE_ID = "title_node_id"
+
+# Weather
+CONF_WEATHER_HUMIDITY_NODE_ID = "humidity_node_id"
+CONF_WEATHER_PRESSURE_NODE_ID = "pressure_node_id"
+CONF_WEATHER_WIND_SPEED_NODE_ID = "wind_speed_node_id"
+CONF_WEATHER_CONDITION_NODE_ID = "condition_node_id"
 
 # Optional advanced light mapping
 CONF_LIGHT_BRIGHTNESS_NODE_ID = "brightness_node_id"
@@ -93,6 +165,19 @@ NODE_KIND_SENSOR = "sensor"
 NODE_KIND_BINARY_SENSOR = "binary_sensor"
 NODE_KIND_SWITCH = "switch"
 NODE_KIND_LIGHT = "light"
+NODE_KIND_BUTTON = "button"
+NODE_KIND_CLIMATE = "climate"
+NODE_KIND_COVER = "cover"
+NODE_KIND_DATE = "date"
+NODE_KIND_DATETIME = "datetime"
+NODE_KIND_FAN = "fan"
+NODE_KIND_NOTIFY = "notify"
+NODE_KIND_NUMBER = "number"
+NODE_KIND_SCENE = "scene"
+NODE_KIND_SELECT = "select"
+NODE_KIND_TEXT = "text"
+NODE_KIND_TIME = "time"
+NODE_KIND_WEATHER = "weather"
 
 DEFAULT_TITLE = "OPC-UA"
 DEFAULT_SCAN_INTERVAL_SECONDS = 2
@@ -128,6 +213,14 @@ DEFAULT_HS_SAT_SCALE = 100.0
 DEFAULT_XY_SCALE = 1.0
 DEFAULT_COLOR_TEMP_MIN_KELVIN = 2000
 DEFAULT_COLOR_TEMP_MAX_KELVIN = 6500
+
+DEFAULT_CLIMATE_MIN_TEMP = 7.0
+DEFAULT_CLIMATE_MAX_TEMP = 35.0
+DEFAULT_CLIMATE_TEMP_STEP = 0.5
+
+DEFAULT_NUMBER_MIN = 0.0
+DEFAULT_NUMBER_MAX = 100.0
+DEFAULT_NUMBER_STEP = 1.0
 
 SECURITY_POLICIES: tuple[str, ...] = (
     SECURITY_POLICY_NONE,

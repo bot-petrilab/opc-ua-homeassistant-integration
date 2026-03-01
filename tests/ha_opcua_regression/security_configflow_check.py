@@ -18,7 +18,7 @@ async def main():
       return obj['out']
 
     entries=await api('GET','config/config_entries/entry')
-    for e in [x for x in entries if x.get('domain') in {'opcua','opcua_machine'} and x.get('title') in ['SEC CFG TEST','SEC CFG TEST 2']]:
+    for e in [x for x in entries if str(x.get('domain', '')).startswith('opcua') and x.get('title') in ['SEC CFG TEST','SEC CFG TEST 2']]:
       try: await api('DELETE',f"config/config_entries/entry/{e['entry_id']}")
       except Exception: pass
 

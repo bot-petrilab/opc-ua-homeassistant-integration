@@ -7,8 +7,21 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 - Standard-Entitäten:
   - `sensor`
   - `binary_sensor`
-  - `switch` (BOOL schreiben/lesen)
-  - `light` (BOOL an/aus)
+  - `switch`
+  - `light`
+  - `button`
+  - `climate`
+  - `cover`
+  - `date`
+  - `datetime`
+  - `fan`
+  - `notify`
+  - `number`
+  - `scene`
+  - `select`
+  - `text`
+  - `time`
+  - `weather`
 
 ## Aktueller Stand
 
@@ -56,7 +69,8 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 Im Options-Menü:
 - **Auto discovery (native + companion)**
   - scannt den OPC-UA-Adressraum
-  - ordnet Variablen automatisch Entitätstypen zu (sensor/binary_sensor/switch/light)
+  - ordnet Variablen automatisch Kern-Entitätstypen zu (sensor/binary_sensor/switch/light)
+  - weitere Entitätstypen können manuell im Options-Flow ergänzt werden
   - nutzt optional Companion-/Industrie-Heuristiken (z. B. Alarme, Stacklight, PackML-ähnliche States)
   - Standard-Namespace (`i=...`) kann optional ausgeblendet werden (default: ausblenden)
 - **Browse OPC UA nodes**

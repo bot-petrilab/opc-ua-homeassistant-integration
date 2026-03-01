@@ -60,7 +60,20 @@
           "browse_nodes": "Browse OPC UA nodes",
           "remove_node": "Remove nodes",
           "set_poll_interval": "Set polling interval",
-          "done": "Save and finish"
+          "done": "Save and finish",
+          "add_button": "Add button",
+          "add_climate": "Add climate",
+          "add_cover": "Add cover",
+          "add_date": "Add date",
+          "add_datetime": "Add datetime",
+          "add_fan": "Add fan",
+          "add_notify": "Add notify",
+          "add_number": "Add number",
+          "add_scene": "Add scene",
+          "add_select": "Add select",
+          "add_text": "Add text",
+          "add_time": "Add time",
+          "add_weather": "Add weather"
         }
       },
       "add_sensor": {
@@ -199,7 +212,20 @@
           "browse_add_binary_sensor": "Add as binary sensors",
           "browse_add_switch": "Add as switches",
           "browse_add_light": "Add as lights",
-          "browse_nodes": "Browse again"
+          "browse_nodes": "Browse again",
+          "browse_add_button": "Add as buttons",
+          "browse_add_climate": "Add as climates",
+          "browse_add_cover": "Add as covers",
+          "browse_add_date": "Add as dates",
+          "browse_add_datetime": "Add as datetimes",
+          "browse_add_fan": "Add as fans",
+          "browse_add_notify": "Add as notify entities",
+          "browse_add_number": "Add as numbers",
+          "browse_add_scene": "Add as scenes",
+          "browse_add_select": "Add as selects",
+          "browse_add_text": "Add as texts",
+          "browse_add_time": "Add as times",
+          "browse_add_weather": "Add as weather entities"
         }
       },
       "browse_add_sensor": {
@@ -248,6 +274,254 @@
         "title": "Set polling interval",
         "data": {
           "scan_interval": "Polling interval (seconds)"
+        }
+      },
+      "add_button": {
+        "title": "Add button node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "button_payload": "Button payload"
+        }
+      },
+      "add_climate": {
+        "title": "Add climate node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "target_node_id": "Target temperature node ID",
+          "hvac_mode_node_id": "HVAC mode node ID",
+          "min_temp": "Minimum temperature",
+          "max_temp": "Maximum temperature",
+          "temp_step": "Temperature step"
+        }
+      },
+      "add_cover": {
+        "title": "Add cover node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "target_node_id": "Target position node ID",
+          "set_position_node_id": "Set position node ID",
+          "open_node_id": "Open node ID",
+          "close_node_id": "Close node ID",
+          "stop_node_id": "Stop node ID",
+          "invert_position": "Invert position 0↔100"
+        }
+      },
+      "add_date": {
+        "title": "Add date node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon"
+        }
+      },
+      "add_datetime": {
+        "title": "Add datetime node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon"
+        }
+      },
+      "add_fan": {
+        "title": "Add fan node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "speed_node_id": "Speed node ID (0..100)",
+          "invert": "Invert on/off logic"
+        }
+      },
+      "add_notify": {
+        "title": "Add notify node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "message_node_id": "Message node ID",
+          "title_node_id": "Title node ID"
+        }
+      },
+      "add_number": {
+        "title": "Add number node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "number_min": "Minimum",
+          "number_max": "Maximum",
+          "number_step": "Step",
+          "unit_of_measurement": "Unit"
+        }
+      },
+      "add_scene": {
+        "title": "Add scene node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "scene_activate_value": "Activation value"
+        }
+      },
+      "add_select": {
+        "title": "Add select node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "select_options": "Options (comma separated)"
+        }
+      },
+      "add_text": {
+        "title": "Add text node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "text_max": "Max text length"
+        }
+      },
+      "add_time": {
+        "title": "Add time node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon"
+        }
+      },
+      "add_weather": {
+        "title": "Add weather node",
+        "data": {
+          "name": "Entity name",
+          "node_id": "Node ID",
+          "icon": "Icon",
+          "humidity_node_id": "Humidity node ID",
+          "pressure_node_id": "Pressure node ID",
+          "wind_speed_node_id": "Wind speed node ID",
+          "condition_node_id": "Condition node ID"
+        }
+      },
+      "browse_add_button": {
+        "title": "Browse tree: add buttons",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_climate": {
+        "title": "Browse tree: add climates",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_cover": {
+        "title": "Browse tree: add covers",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_date": {
+        "title": "Browse tree: add dates",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_datetime": {
+        "title": "Browse tree: add datetimes",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_fan": {
+        "title": "Browse tree: add fans",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_notify": {
+        "title": "Browse tree: add notify entities",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_number": {
+        "title": "Browse tree: add numbers",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_scene": {
+        "title": "Browse tree: add scenes",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_select": {
+        "title": "Browse tree: add selects",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_text": {
+        "title": "Browse tree: add texts",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_time": {
+        "title": "Browse tree: add times",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
+        }
+      },
+      "browse_add_weather": {
+        "title": "Browse tree: add weather entities",
+        "description": "Current branch: {current}. Import candidates here: {count}",
+        "data": {
+          "node_ids": "Variables to import",
+          "open_branch": "Open sub-branch",
+          "go_up": "Go one level up"
         }
       }
     }

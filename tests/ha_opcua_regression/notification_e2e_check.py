@@ -62,7 +62,7 @@ async def main() -> None:
 
         # clean old test entries
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if x.get("domain") in {"opcua", "opcua_machine"} and x.get("title") == "OPC-UA Notify Test"]:
+        for e in [x for x in entries if str(x.get("domain", "")).startswith("opcua") and x.get("title") == "OPC-UA Notify Test"]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
