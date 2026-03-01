@@ -64,6 +64,10 @@ from .const import (
     CONF_NODE_STATE_CLASS,
     CONF_NODE_UNIT,
     CONF_NODES,
+    CONF_NOTIFY_ENABLED,
+    CONF_NOTIFY_KEYWORDS,
+    CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_TITLE_PREFIX,
     CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
     CONF_SERVER_CERT_PATH,
@@ -157,6 +161,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_CLIENT_KEY_PATH: None,
                     CONF_SERVER_CERT_PATH: None,
                     CONF_CLIENT_KEY_PASSWORD: None,
+                    CONF_NOTIFY_ENABLED: DEFAULT_NOTIFY_ENABLED,
+                    CONF_NOTIFY_SERVICE: DEFAULT_NOTIFY_SERVICE,
+                    CONF_NOTIFY_TITLE_PREFIX: DEFAULT_NOTIFY_TITLE_PREFIX,
+                    CONF_NOTIFY_KEYWORDS: list(DEFAULT_NOTIFY_KEYWORDS),
                     CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_SECONDS,
                     CONF_NODES: [],
                 },
@@ -182,6 +190,15 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
             client_key_path = (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None
             server_cert_path = (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None
             client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
+            notify_enabled = bool(user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED))
+            notify_service = str(user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE).strip()
+            notify_title_prefix = str(user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX).strip()
+            notify_keywords_raw = str(user_input.get(CONF_NOTIFY_KEYWORDS) or "").strip()
+            if notify_keywords_raw:
+                notify_keywords = [k.strip().lower() for k in notify_keywords_raw.split(",") if k.strip()]
+            else:
+                notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
+
             validate_on_save = bool(user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE))
             scan_interval = int(user_input[CONF_SCAN_INTERVAL])
 
@@ -232,6 +249,10 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_CLIENT_KEY_PATH: client_key_path,
                         CONF_SERVER_CERT_PATH: server_cert_path,
                         CONF_CLIENT_KEY_PASSWORD: client_key_password,
+                        CONF_NOTIFY_ENABLED: notify_enabled,
+                        CONF_NOTIFY_SERVICE: notify_service,
+                        CONF_NOTIFY_TITLE_PREFIX: notify_title_prefix,
+                        CONF_NOTIFY_KEYWORDS: notify_keywords,
                         CONF_SCAN_INTERVAL: scan_interval,
                         CONF_NODES: [],
                     },
@@ -263,6 +284,19 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
                     TextSelectorConfig(type="password")
                 ),
+                vol.Optional(CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED): BooleanSelector(),
+                vol.Optional(
+                    CONF_NOTIFY_SERVICE,
+                    default=DEFAULT_NOTIFY_SERVICE,
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_NOTIFY_TITLE_PREFIX,
+                    default=DEFAULT_NOTIFY_TITLE_PREFIX,
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_NOTIFY_KEYWORDS,
+                    default=",".join(DEFAULT_NOTIFY_KEYWORDS),
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
                 vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS): NumberSelector(
                     NumberSelectorConfig(min=1, max=60, step=1, mode="box")
                 ),

@@ -23,6 +23,12 @@ CONF_CLIENT_KEY_PATH = "client_key_path"
 CONF_SERVER_CERT_PATH = "server_cert_path"
 CONF_CLIENT_KEY_PASSWORD = "client_key_password"
 
+# Notification settings
+CONF_NOTIFY_ENABLED = "notify_enabled"
+CONF_NOTIFY_SERVICE = "notify_service"
+CONF_NOTIFY_TITLE_PREFIX = "notify_title_prefix"
+CONF_NOTIFY_KEYWORDS = "notify_keywords"
+
 CONF_NODES = "nodes"
 CONF_NODE_NAME = "name"
 CONF_NODE_ID = "node_id"
@@ -88,6 +94,20 @@ SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT = "Basic256Sha256_SignAndEncrypt"
 
 DEFAULT_SECURITY_POLICY = SECURITY_POLICY_NONE
 DEFAULT_VALIDATE_ON_SAVE = False
+
+DEFAULT_NOTIFY_ENABLED = True
+DEFAULT_NOTIFY_SERVICE = "persistent_notification.create"
+DEFAULT_NOTIFY_TITLE_PREFIX = "OPC-UA"
+DEFAULT_NOTIFY_KEYWORDS: tuple[str, ...] = (
+    "alarm",
+    "warning",
+    "warn",
+    "fault",
+    "error",
+    "trip",
+    "störung",
+    "stoerung",
+)
 
 DEFAULT_BRIGHTNESS_SCALE = 255.0
 DEFAULT_RGB_SCALE = 255.0

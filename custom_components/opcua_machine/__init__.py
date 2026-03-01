@@ -14,9 +14,17 @@ from .const import (
     CONF_CLIENT_KEY_PATH,
     CONF_ENDPOINT,
     CONF_NODES,
+    CONF_NOTIFY_ENABLED,
+    CONF_NOTIFY_KEYWORDS,
+    CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_TITLE_PREFIX,
     CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
     CONF_SERVER_CERT_PATH,
+    DEFAULT_NOTIFY_ENABLED,
+    DEFAULT_NOTIFY_KEYWORDS,
+    DEFAULT_NOTIFY_SERVICE,
+    DEFAULT_NOTIFY_TITLE_PREFIX,
     DEFAULT_SCAN_INTERVAL_SECONDS,
     DOMAIN,
     PLATFORMS,
@@ -57,6 +65,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
     )
     nodes: list[dict] = entry.options.get(CONF_NODES, entry.data.get(CONF_NODES, []))
 
+    notify_enabled = bool(entry.options.get(CONF_NOTIFY_ENABLED, entry.data.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)))
+    notify_service = str(entry.options.get(CONF_NOTIFY_SERVICE, entry.data.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE)))
+    notify_title_prefix = str(
+        entry.options.get(CONF_NOTIFY_TITLE_PREFIX, entry.data.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX))
+    )
+    notify_keywords = entry.options.get(CONF_NOTIFY_KEYWORDS, entry.data.get(CONF_NOTIFY_KEYWORDS, list(DEFAULT_NOTIFY_KEYWORDS)))
+    if not isinstance(notify_keywords, list):
+        notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
+
     manager = OpcUaClientManager(
         endpoint=endpoint,
         security_policy=security_policy,
@@ -73,6 +90,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         manager=manager,
         nodes=nodes,
         scan_interval_seconds=scan_interval,
+        entry_id=entry.entry_id,
+        endpoint=endpoint,
+        notify_enabled=notify_enabled,
+        notify_service=notify_service,
+        notify_title_prefix=notify_title_prefix,
+        notify_keywords=[str(k).lower() for k in notify_keywords if str(k).strip()],
     )
 
     try:

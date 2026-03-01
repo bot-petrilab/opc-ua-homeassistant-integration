@@ -14,6 +14,10 @@
           "client_key_path": "Pfad Client-Private-Key",
           "server_cert_path": "Pfad Server-Zertifikat (optional)",
           "client_key_password": "Passwort Client-Key (optional)",
+          "notify_enabled": "Eingebaute OPC-UA Benachrichtigungen aktivieren",
+          "notify_service": "Benachrichtigungsdienst (domain.service)",
+          "notify_title_prefix": "Titel-Präfix für Benachrichtigungen",
+          "notify_keywords": "Benachrichtigungs-Keywords (kommagetrennt)",
           "scan_interval": "Polling-Intervall (Sekunden)",
           "validate_on_save": "Verbindung vor dem Speichern prüfen"
         }

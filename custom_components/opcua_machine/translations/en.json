@@ -14,6 +14,10 @@
           "client_key_path": "Client private key path",
           "server_cert_path": "Server certificate path (optional)",
           "client_key_password": "Client key password (optional)",
+          "notify_enabled": "Enable built-in OPC-UA notifications",
+          "notify_service": "Notification service (domain.service)",
+          "notify_title_prefix": "Notification title prefix",
+          "notify_keywords": "Notification keywords (comma separated)",
           "scan_interval": "Polling interval (seconds)",
           "validate_on_save": "Validate connection before save"
         }

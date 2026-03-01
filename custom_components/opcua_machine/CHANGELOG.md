@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+- Added built-in OPC-UA notification bridge:
+  - Fires Home Assistant event: `opcua_machine_notification`
+  - Can create notifications via configurable HA service (default `persistent_notification.create`)
+  - Triggered on alarm/warning/fault-like node transitions based on keywords
+- Added notification config fields in config flow
+
 ## 0.7.0
 - Added security policy support for OPC-UA client:
   - `Basic256Sha256_Sign`
