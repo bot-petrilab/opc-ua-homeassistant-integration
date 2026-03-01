@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+- Fixed config-flow runtime import for notification defaults (prevents flow 500 errors when opening user step).
+- Extended regression test to cover notification configuration fields and runtime `opcua_machine_notification` event trigger.
+
 ## 0.8.0
 - Added built-in OPC-UA notification bridge:
   - Fires Home Assistant event: `opcua_machine_notification`
