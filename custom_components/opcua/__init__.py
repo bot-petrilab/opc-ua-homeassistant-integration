@@ -45,12 +45,12 @@ OpcUaConfigEntry = ConfigEntry[OpcUaRuntimeData]
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Set up OPC UA Machine from YAML (not used, config-entry only)."""
+    """Set up OPC-UA from YAML (not used, config-entry only)."""
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> bool:
-    """Set up OPC UA Machine from a config entry."""
+    """Set up OPC-UA from a config entry."""
     endpoint: str = entry.data[CONF_ENDPOINT]
     security_policy: str = entry.data[CONF_SECURITY_POLICY]
     username: str | None = entry.data.get(CONF_USERNAME)
@@ -109,19 +109,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
-    _LOGGER.info("OPC UA Machine loaded for endpoint %s", endpoint)
+    _LOGGER.info("OPC-UA loaded for endpoint %s", endpoint)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> bool:
-    """Unload OPC UA Machine config entry."""
+    """Unload OPC-UA config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     runtime = entry.runtime_data
     await runtime.manager.disconnect()
 
     if unload_ok:
-        _LOGGER.info("OPC UA Machine unloaded for endpoint %s", entry.data.get(CONF_ENDPOINT))
+        _LOGGER.info("OPC-UA unloaded for endpoint %s", entry.data.get(CONF_ENDPOINT))
 
     return unload_ok
 

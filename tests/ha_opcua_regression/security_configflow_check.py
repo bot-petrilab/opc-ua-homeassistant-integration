@@ -18,11 +18,11 @@ async def main():
       return obj['out']
 
     entries=await api('GET','config/config_entries/entry')
-    for e in [x for x in entries if x.get('domain')=='opcua_machine' and x.get('title') in ['SEC CFG TEST','SEC CFG TEST 2']]:
+    for e in [x for x in entries if x.get('domain')=='opcua' and x.get('title') in ['SEC CFG TEST','SEC CFG TEST 2']]:
       try: await api('DELETE',f"config/config_entries/entry/{e['entry_id']}")
       except Exception: pass
 
-    init=await api('POST','config/config_entries/flow',{'handler':'opcua_machine'})
+    init=await api('POST','config/config_entries/flow',{'handler':'opcua'})
     fid=init['flow_id']
     r1=await api('POST',f'config/config_entries/flow/{fid}',{
       'title':'SEC CFG TEST',
@@ -34,7 +34,7 @@ async def main():
 
     ok_missing = r1.get('type')=='form' and 'client_cert_path' in (r1.get('errors') or {}) and 'client_key_path' in (r1.get('errors') or {})
 
-    init2=await api('POST','config/config_entries/flow',{'handler':'opcua_machine'})
+    init2=await api('POST','config/config_entries/flow',{'handler':'opcua'})
     fid2=init2['flow_id']
     r2=await api('POST',f'config/config_entries/flow/{fid2}',{
       'title':'SEC CFG TEST 2',

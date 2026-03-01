@@ -170,7 +170,7 @@ async def run() -> dict:
         await search.fill("opc")
         await page.wait_for_timeout(1300)
         aria = await page.get_by_role("alertdialog").aria_snapshot()
-        has_brand = ("OPC-UA" in aria) or ("OPC UA Machine" in aria)
+        has_brand = ("OPC-UA" in aria) or ("OPC UA" in aria)
         add_check("ui_search_shows_opcua", has_brand, "brand dialog contains OPC-UA")
         await screenshot("02_add_dialog_search_opc")
         await page.keyboard.press("Escape")
@@ -178,7 +178,7 @@ async def run() -> dict:
 
         # 3) Cleanup existing OPC entries
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if x.get("domain") == "opcua_machine"]:
+        for e in [x for x in entries if x.get("domain") == "opcua"]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
@@ -186,7 +186,7 @@ async def run() -> dict:
         add_check("cleanup_old_entries", True)
 
         # 4) Create config entry
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua_machine"})
+        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
         flow_id = init.get("flow_id")
         if not flow_id:
             raise TestFailure(f"flow init missing flow_id: {init}")
@@ -218,11 +218,11 @@ async def run() -> dict:
         entries2 = await call_api("GET", "config/config_entries/entry")
         target = [
             x for x in entries2
-            if x.get("domain") == "opcua_machine"
+            if x.get("domain") == "opcua"
             and ((x.get("title") == "OPC UA Regression") or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT))
         ]
         if not target:
-            raise TestFailure("No opcua_machine entry found after config flow")
+            raise TestFailure("No opcua entry found after config flow")
         entry_id = target[0]["entry_id"]
         add_check("config_entry_created", True, entry_id)
 

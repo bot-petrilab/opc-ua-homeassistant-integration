@@ -1,7 +1,7 @@
 {
-  "domain": "opcua_machine",
+  "domain": "opcua",
   "name": "OPC-UA",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "config_flow": true,
   "documentation": "https://github.com/FreeOpcUa/opcua-asyncio",
   "requirements": ["asyncua>=1.1.6,<2.0.0"],

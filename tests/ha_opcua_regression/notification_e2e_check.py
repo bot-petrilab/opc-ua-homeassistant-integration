@@ -62,14 +62,14 @@ async def main() -> None:
 
         # clean old test entries
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if x.get("domain") == "opcua_machine" and x.get("title") == "OPC-UA Notify Test"]:
+        for e in [x for x in entries if x.get("domain") == "opcua" and x.get("title") == "OPC-UA Notify Test"]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
                 pass
 
         # create new entry with notify enabled
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua_machine"})
+        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
         flow_id = init["flow_id"]
         created = await call_api(
             "POST",
@@ -90,7 +90,7 @@ async def main() -> None:
             raise RuntimeError(f"Unexpected create result: {created}")
 
         entries2 = await call_api("GET", "config/config_entries/entry")
-        entry = next(x for x in entries2 if x.get("domain") == "opcua_machine" and x.get("title") == "OPC-UA Notify Test")
+        entry = next(x for x in entries2 if x.get("domain") == "opcua" and x.get("title") == "OPC-UA Notify Test")
         entry_id = entry["entry_id"]
 
         # add alarm binary sensor node

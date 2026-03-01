@@ -1,6 +1,6 @@
 # OPC-UA Custom Integration for Home Assistant
 
-Custom Home Assistant integration (domain: `opcua_machine`) with display name **OPC-UA**.
+Custom Home Assistant integration (domain: `opcua`) with display name **OPC-UA**.
 
 ## Features
 

@@ -104,7 +104,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for OPC UA Machine."""
+    """Handle a config flow for OPC-UA."""
 
     VERSION = 1
 
@@ -316,7 +316,7 @@ class OpcUaMachineConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class OpcUaMachineOptionsFlow(OptionsFlow):
-    """Handle options flow for OPC UA Machine."""
+    """Handle options flow for OPC-UA."""
 
     def __init__(self, config_entry) -> None:
         self._entry = config_entry

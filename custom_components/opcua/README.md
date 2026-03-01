@@ -1,4 +1,4 @@
-# OPC UA Machine (Custom Integration for Home Assistant)
+# OPC-UA (Custom Integration for Home Assistant)
 
 Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assistant-Pattern mit:
 
@@ -47,7 +47,7 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 ## Bedienung
 
 1. Home Assistant neu starten.
-2. Integration „**OPC UA Machine**“ hinzufügen.
+2. Integration „**OPC-UA**“ hinzufügen.
 3. Endpoint eintragen (z. B. `opc.tcp://192.168.0.50:4840`).
 4. In den Integrations-Optionen Nodes hinzufügen oder Auto-Discovery nutzen.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.0
+- BREAKING: Integration domain is now `opcua`.
+- BREAKING: Component path is now `custom_components/opcua`.
+- Removed protocol-specific legacy naming from runtime identifiers for a general-purpose OPC-UA integration.
+
 ## 0.8.2
 - Standardized runtime HA notification event to generic `opcua_notification`.
 - Updated regression tests and docs to use `opcua_notification`.

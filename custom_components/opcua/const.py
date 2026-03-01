@@ -1,8 +1,17 @@
 from __future__ import annotations
 
-from homeassistant.const import Platform
+try:
+    from homeassistant.const import Platform
+except Exception:  # pragma: no cover - fallback for standalone smoke/import tests
+    from enum import StrEnum
 
-DOMAIN = "opcua_machine"
+    class Platform(StrEnum):
+        SENSOR = "sensor"
+        BINARY_SENSOR = "binary_sensor"
+        SWITCH = "switch"
+        LIGHT = "light"
+
+DOMAIN = "opcua"
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,

@@ -45,7 +45,7 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         super().__init__(
             hass,
             _LOGGER,
-            name="opcua_machine",
+            name="opcua",
             update_interval=timedelta(seconds=scan_interval_seconds),
         )
 

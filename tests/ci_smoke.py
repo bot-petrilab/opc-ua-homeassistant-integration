@@ -2,17 +2,19 @@
 from __future__ import annotations
 
 import asyncio
-import importlib
+import importlib.util
 import os
 import socket
 import subprocess
 import sys
 import time
+import types
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SIM_SERVER = REPO_ROOT / "testbed" / "opcua-sim" / "server.py"
-CLIENT_MODULE = REPO_ROOT / "custom_components" / "opcua_machine" / "opcua_client.py"
+COMPONENT_DIR = REPO_ROOT / "custom_components" / "opcua"
+CLIENT_MODULE = COMPONENT_DIR / "opcua_client.py"
 
 
 def wait_for_port(host: str, port: int, timeout: float = 30.0) -> bool:
@@ -27,11 +29,25 @@ def wait_for_port(host: str, port: int, timeout: float = 30.0) -> bool:
 
 
 def load_client_manager():
-    pkg_root = str((REPO_ROOT / "custom_components").resolve())
-    if pkg_root not in sys.path:
-        sys.path.insert(0, pkg_root)
+    if not CLIENT_MODULE.exists():
+        raise FileNotFoundError(f"Missing client module: {CLIENT_MODULE}")
 
-    module = importlib.import_module("opcua_machine.opcua_client")
+    # Create a lightweight package stub so relative imports (e.g. .const) work
+    # without importing custom_components/opcua/__init__.py (Home Assistant dependency).
+    pkg_name = "opcua"
+    if pkg_name not in sys.modules:
+        pkg = types.ModuleType(pkg_name)
+        pkg.__path__ = [str(COMPONENT_DIR)]  # type: ignore[attr-defined]
+        sys.modules[pkg_name] = pkg
+
+    full_name = "opcua.opcua_client"
+    spec = importlib.util.spec_from_file_location(full_name, CLIENT_MODULE)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load spec for {CLIENT_MODULE}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[full_name] = module
+    spec.loader.exec_module(module)
     return module.OpcUaClientManager
 
 

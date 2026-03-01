@@ -28,10 +28,10 @@ jobs:
           python - <<'PY'
           import json
           paths = [
-            'custom_components/opcua_machine/manifest.json',
-            'custom_components/opcua_machine/strings.json',
-            'custom_components/opcua_machine/translations/en.json',
-            'custom_components/opcua_machine/translations/de.json',
+            'custom_components/opcua/manifest.json',
+            'custom_components/opcua/strings.json',
+            'custom_components/opcua/translations/en.json',
+            'custom_components/opcua/translations/de.json',
           ]
           for p in paths:
             with open(p, 'r', encoding='utf-8') as f:
@@ -42,7 +42,7 @@ jobs:
       - name: Compile Python files
         run: |
           python -m py_compile \
-            custom_components/opcua_machine/*.py \
+            custom_components/opcua/*.py \
             testbed/opcua-sim/server.py \
             tests/ci_smoke.py
 
