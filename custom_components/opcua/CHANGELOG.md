@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+- Refactored options/config flow navigation into logical grouped menus (quick setup, add entities, discovery, settings).
+- Added explicit back-navigation entries across grouped menus and browse import menus.
+- Updated regression flow automation to follow the new grouped menu structure.
+- Added deterministic config-entry lifecycle regression test (`config_entry_add_remove_check.py`) covering add + delete of integration entries.
+- Updated regression runner path handling to always execute tests from the repository-local tree.
+
 ## 1.0.1
 - Fixed `date`, `datetime`, and `time` platform entity initialization (`entity_kind` argument).
 - Added dedicated regression test `platform_coverage_check.py` for KNX-style platform coverage.

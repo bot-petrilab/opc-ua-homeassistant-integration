@@ -384,29 +384,88 @@ class OpcUaOptionsFlow(OptionsFlow):
         return self.async_show_menu(
             step_id="init",
             menu_options=[
+                "menu_quick_setup",
+                "menu_add_entities",
+                "menu_discovery_tools",
+                "menu_settings",
+                "done",
+            ],
+        )
+
+    async def async_step_menu_quick_setup(
+        self, user_input: Mapping[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="menu_quick_setup",
+            menu_options=[
+                "auto_discovery",
+                "browse_nodes",
+                "add_stack_light_profile",
+                "init",
+            ],
+        )
+
+    async def async_step_menu_add_entities(
+        self, user_input: Mapping[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="menu_add_entities",
+            menu_options=[
                 "add_sensor",
                 "add_binary_sensor",
                 "add_switch",
                 "add_light",
-                "add_button",
-                "add_climate",
-                "add_cover",
-                "add_date",
-                "add_datetime",
-                "add_fan",
-                "add_notify",
                 "add_number",
-                "add_scene",
                 "add_select",
                 "add_text",
+                "add_button",
+                "menu_add_entities_advanced",
+                "init",
+            ],
+        )
+
+    async def async_step_menu_add_entities_advanced(
+        self, user_input: Mapping[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="menu_add_entities_advanced",
+            menu_options=[
+                "add_climate",
+                "add_cover",
+                "add_fan",
+                "add_scene",
+                "add_date",
+                "add_datetime",
                 "add_time",
                 "add_weather",
-                "add_stack_light_profile",
+                "add_notify",
+                "menu_add_entities",
+                "init",
+            ],
+        )
+
+    async def async_step_menu_discovery_tools(
+        self, user_input: Mapping[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="menu_discovery_tools",
+            menu_options=[
                 "discover_servers",
                 "auto_discovery",
                 "browse_nodes",
+                "init",
+            ],
+        )
+
+    async def async_step_menu_settings(
+        self, user_input: Mapping[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="menu_settings",
+            menu_options=[
                 "remove_node",
                 "set_poll_interval",
+                "init",
             ],
         )
 
@@ -1503,24 +1562,50 @@ class OpcUaOptionsFlow(OptionsFlow):
         return self.async_show_menu(
             step_id="browse_pick_kind",
             menu_options=[
+                "browse_pick_kind_basic",
+                "browse_pick_kind_advanced",
+                "browse_nodes",
+                "menu_discovery_tools",
+                "init",
+            ],
+        )
+
+    async def async_step_browse_pick_kind_basic(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="browse_pick_kind_basic",
+            menu_options=[
                 "browse_add_sensor",
                 "browse_add_binary_sensor",
                 "browse_add_switch",
                 "browse_add_light",
-                "browse_add_button",
-                "browse_add_climate",
-                "browse_add_cover",
-                "browse_add_date",
-                "browse_add_datetime",
-                "browse_add_fan",
-                "browse_add_notify",
                 "browse_add_number",
-                "browse_add_scene",
                 "browse_add_select",
                 "browse_add_text",
+                "browse_add_button",
+                "browse_pick_kind",
+                "init",
+            ],
+        )
+
+    async def async_step_browse_pick_kind_advanced(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="browse_pick_kind_advanced",
+            menu_options=[
+                "browse_add_climate",
+                "browse_add_cover",
+                "browse_add_fan",
+                "browse_add_scene",
+                "browse_add_date",
+                "browse_add_datetime",
                 "browse_add_time",
                 "browse_add_weather",
-                "browse_nodes",
+                "browse_add_notify",
+                "browse_pick_kind",
+                "init",
             ],
         )
 
