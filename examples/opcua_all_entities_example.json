@@ -1,0 +1,191 @@
+{
+  "title": "OPC UA Full Example",
+  "data": {
+    "endpoint": "opc.tcp://127.0.0.1:4840",
+    "security_policy": "None",
+    "username": null,
+    "password": null,
+    "client_cert_path": null,
+    "client_key_path": null,
+    "server_cert_path": null,
+    "client_key_password": null,
+    "notify_enabled": true,
+    "notify_service": "persistent_notification.create",
+    "notify_title_prefix": "OPC-UA",
+    "notify_keywords": ["alarm", "warning", "fault", "error"],
+    "scan_interval": 2,
+    "nodes": []
+  },
+  "options": {
+    "scan_interval": 2,
+    "nodes": [
+      {
+        "kind": "sensor",
+        "name": "Temperature",
+        "node_id": "ns=2;s=Machine.Process.Temperature",
+        "unit_of_measurement": "°C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "icon": "mdi:thermometer"
+      },
+      {
+        "kind": "binary_sensor",
+        "name": "Alarm Active",
+        "node_id": "ns=2;s=Machine.Diagnostics.AlarmActive",
+        "device_class": "problem",
+        "icon": "mdi:alert-circle",
+        "invert": false
+      },
+      {
+        "kind": "switch",
+        "name": "Machine Enable",
+        "node_id": "ns=2;s=Machine.Control.Enable",
+        "icon": "mdi:toggle-switch",
+        "invert": false
+      },
+      {
+        "kind": "light",
+        "name": "Stack Light Full",
+        "node_id": "ns=2;s=Machine.Control.StackLight.ManualTest",
+        "icon": "mdi:lightbulb",
+        "invert": false,
+        "brightness_node_id": "ns=2;s=Machine.Control.Light.Brightness",
+        "brightness_scale": 255,
+        "color_temp_node_id": "ns=2;s=Machine.Control.Light.ColorTemp",
+        "color_temp_min_kelvin": 2000,
+        "color_temp_max_kelvin": 6500,
+        "hs_hue_node_id": "ns=2;s=Machine.Control.Light.Hue",
+        "hs_hue_scale": 360,
+        "hs_saturation_node_id": "ns=2;s=Machine.Control.Light.Saturation",
+        "hs_saturation_scale": 100,
+        "rgb_r_node_id": "ns=2;s=Machine.Control.Light.RGB.R",
+        "rgb_g_node_id": "ns=2;s=Machine.Control.Light.RGB.G",
+        "rgb_b_node_id": "ns=2;s=Machine.Control.Light.RGB.B",
+        "rgbw_r_node_id": "ns=2;s=Machine.Control.Light.RGBW.R",
+        "rgbw_g_node_id": "ns=2;s=Machine.Control.Light.RGBW.G",
+        "rgbw_b_node_id": "ns=2;s=Machine.Control.Light.RGBW.B",
+        "rgbw_w_node_id": "ns=2;s=Machine.Control.Light.RGBW.W",
+        "rgbww_r_node_id": "ns=2;s=Machine.Control.Light.RGBWW.R",
+        "rgbww_g_node_id": "ns=2;s=Machine.Control.Light.RGBWW.G",
+        "rgbww_b_node_id": "ns=2;s=Machine.Control.Light.RGBWW.B",
+        "rgbww_cw_node_id": "ns=2;s=Machine.Control.Light.RGBWW.CW",
+        "rgbww_ww_node_id": "ns=2;s=Machine.Control.Light.RGBWW.WW",
+        "rgb_scale": 255,
+        "white_node_id": "ns=2;s=Machine.Control.Light.White",
+        "white_scale": 255,
+        "xy_x_node_id": "ns=2;s=Machine.Control.Light.XY.X",
+        "xy_y_node_id": "ns=2;s=Machine.Control.Light.XY.Y",
+        "xy_scale": 1,
+        "effect_node_id": "ns=2;s=Machine.Control.StackLight.Effect",
+        "effect_list": ["off", "blink", "flash"],
+        "transition_node_id": "ns=2;s=Machine.Control.Light.Transition",
+        "flash_node_id": "ns=2;s=Machine.Control.Light.Flash"
+      },
+      {
+        "kind": "button",
+        "name": "Reset Fault",
+        "node_id": "ns=2;s=Machine.Control.ResetFault",
+        "button_payload": true,
+        "icon": "mdi:gesture-tap-button"
+      },
+      {
+        "kind": "climate",
+        "name": "Zone Climate",
+        "node_id": "ns=2;s=Machine.HVAC.CurrentTemperature",
+        "target_node_id": "ns=2;s=Machine.HVAC.TargetTemperature",
+        "hvac_mode_node_id": "ns=2;s=Machine.HVAC.Mode",
+        "min_temp": 7,
+        "max_temp": 35,
+        "temp_step": 0.5,
+        "icon": "mdi:thermostat"
+      },
+      {
+        "kind": "cover",
+        "name": "Safety Gate",
+        "node_id": "ns=2;s=Machine.Cover.Position",
+        "target_node_id": "ns=2;s=Machine.Cover.Target",
+        "set_position_node_id": "ns=2;s=Machine.Cover.SetPosition",
+        "open_node_id": "ns=2;s=Machine.Cover.Open",
+        "close_node_id": "ns=2;s=Machine.Cover.Close",
+        "stop_node_id": "ns=2;s=Machine.Cover.Stop",
+        "invert_position": false,
+        "icon": "mdi:blinds"
+      },
+      {
+        "kind": "date",
+        "name": "Maintenance Date",
+        "node_id": "ns=2;s=Machine.Maintenance.Date",
+        "icon": "mdi:calendar"
+      },
+      {
+        "kind": "datetime",
+        "name": "Last Service DateTime",
+        "node_id": "ns=2;s=Machine.Maintenance.LastServiceDateTime",
+        "icon": "mdi:calendar-clock"
+      },
+      {
+        "kind": "fan",
+        "name": "Cabinet Fan",
+        "node_id": "ns=2;s=Machine.Fan.On",
+        "speed_node_id": "ns=2;s=Machine.Fan.Speed",
+        "invert": false,
+        "icon": "mdi:fan"
+      },
+      {
+        "kind": "notify",
+        "name": "OPC Alarm Notify",
+        "node_id": "ns=2;s=Machine.Diagnostics.AlarmActive",
+        "message_node_id": "ns=2;s=Machine.Diagnostics.AlarmText",
+        "title_node_id": "ns=2;s=Machine.Diagnostics.AlarmTitle",
+        "icon": "mdi:message-alert"
+      },
+      {
+        "kind": "number",
+        "name": "Speed Setpoint",
+        "node_id": "ns=2;s=Machine.Control.SpeedSetpoint",
+        "number_min": 0,
+        "number_max": 100,
+        "number_step": 1,
+        "unit_of_measurement": "%",
+        "icon": "mdi:numeric"
+      },
+      {
+        "kind": "scene",
+        "name": "Production Mode",
+        "node_id": "ns=2;s=Machine.Control.Scene",
+        "scene_activate_value": "production",
+        "icon": "mdi:palette"
+      },
+      {
+        "kind": "select",
+        "name": "Operation Mode",
+        "node_id": "ns=2;s=Machine.Control.Mode",
+        "select_options": ["auto", "manual", "service"],
+        "icon": "mdi:form-select"
+      },
+      {
+        "kind": "text",
+        "name": "Operator Message",
+        "node_id": "ns=2;s=Machine.Control.OperatorMessage",
+        "text_max": 255,
+        "icon": "mdi:form-textbox"
+      },
+      {
+        "kind": "time",
+        "name": "Shift Start",
+        "node_id": "ns=2;s=Machine.Schedule.ShiftStart",
+        "icon": "mdi:clock-outline"
+      },
+      {
+        "kind": "weather",
+        "name": "Plant Weather",
+        "node_id": "ns=2;s=Machine.Weather.Temperature",
+        "humidity_node_id": "ns=2;s=Machine.Weather.Humidity",
+        "pressure_node_id": "ns=2;s=Machine.Weather.Pressure",
+        "wind_speed_node_id": "ns=2;s=Machine.Weather.WindSpeed",
+        "condition_node_id": "ns=2;s=Machine.Weather.Condition",
+        "icon": "mdi:weather-partly-cloudy"
+      }
+    ]
+  }
+}

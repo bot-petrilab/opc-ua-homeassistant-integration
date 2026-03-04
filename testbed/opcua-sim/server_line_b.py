@@ -29,195 +29,195 @@ def _best_ipv4() -> str:
 async def main() -> None:
     server = Server()
     await server.init()
-    server.set_endpoint("opc.tcp://0.0.0.0:4840")
+    server.set_endpoint("opc.tcp://0.0.0.0:4842")
     server.set_security_policy([ua.SecurityPolicyType.NoSecurity])
-    uri = "urn:machine-assistant:opcua-sim"
+    uri = "urn:machine-assistant:opcua-sim-lineb"
     idx = await server.register_namespace(uri)
 
     # Root
-    machine = await server.nodes.objects.add_object(f"ns={idx};s=Machine", "Machine")
+    machine = await server.nodes.objects.add_object(f"ns={idx};s=LineB", "LineB")
 
     # Keep top-level clean: only a few logical groups
-    operation = await machine.add_object(f"ns={idx};s=Machine.Operation", "Operation")
-    process = await machine.add_object(f"ns={idx};s=Machine.Process", "Process")
-    assets = await machine.add_object(f"ns={idx};s=Machine.Assets", "Assets")
-    control = await machine.add_object(f"ns={idx};s=Machine.Control", "Control")
-    diagnostics = await machine.add_object(f"ns={idx};s=Machine.Diagnostics", "Diagnostics")
+    operation = await machine.add_object(f"ns={idx};s=LineB.Operation", "Operation")
+    process = await machine.add_object(f"ns={idx};s=LineB.Process", "Process")
+    assets = await machine.add_object(f"ns={idx};s=LineB.Assets", "Assets")
+    control = await machine.add_object(f"ns={idx};s=LineB.Control", "Control")
+    diagnostics = await machine.add_object(f"ns={idx};s=LineB.Diagnostics", "Diagnostics")
 
     # Assets sub-groups
-    assets_energy = await assets.add_object(f"ns={idx};s=Machine.Assets.Energy", "Energy")
+    assets_energy = await assets.add_object(f"ns={idx};s=LineB.Assets.Energy", "Energy")
     assets_maintenance = await assets.add_object(
-        f"ns={idx};s=Machine.Assets.Maintenance", "Maintenance"
+        f"ns={idx};s=LineB.Assets.Maintenance", "Maintenance"
     )
-    assets_drive = await assets.add_object(f"ns={idx};s=Machine.Assets.Drive", "Drive")
-    assets_sensors = await assets.add_object(f"ns={idx};s=Machine.Assets.Sensors", "Sensors")
+    assets_drive = await assets.add_object(f"ns={idx};s=LineB.Assets.Drive", "Drive")
+    assets_sensors = await assets.add_object(f"ns={idx};s=LineB.Assets.Sensors", "Sensors")
 
     # Control sub-groups
-    commands = await control.add_object(f"ns={idx};s=Machine.Control.Commands", "Commands")
-    setpoints = await control.add_object(f"ns={idx};s=Machine.Control.Setpoints", "Setpoints")
-    stack_light = await control.add_object(f"ns={idx};s=Machine.Control.StackLight", "StackLight")
+    commands = await control.add_object(f"ns={idx};s=LineB.Control.Commands", "Commands")
+    setpoints = await control.add_object(f"ns={idx};s=LineB.Control.Setpoints", "Setpoints")
+    stack_light = await control.add_object(f"ns={idx};s=LineB.Control.StackLight", "StackLight")
 
     # Operation
     running = await _add_var(
-        operation, f"ns={idx};s=Machine.Operation.Running", "Running", False, writable=True
+        operation, f"ns={idx};s=LineB.Operation.Running", "Running", False, writable=True
     )
-    alarm = await _add_var(operation, f"ns={idx};s=Machine.Operation.Alarm", "Alarm", False, writable=True)
+    alarm = await _add_var(operation, f"ns={idx};s=LineB.Operation.Alarm", "Alarm", False, writable=True)
     warning_active = await _add_var(
-        operation, f"ns={idx};s=Machine.Operation.WarningActive", "WarningActive", False, writable=True
+        operation, f"ns={idx};s=LineB.Operation.WarningActive", "WarningActive", False, writable=True
     )
-    mode = await _add_var(operation, f"ns={idx};s=Machine.Operation.Mode", "Mode", "Idle", writable=True)
-    state_code = await _add_var(operation, f"ns={idx};s=Machine.Operation.StateCode", "StateCode", 100)
-    heartbeat = await _add_var(operation, f"ns={idx};s=Machine.Operation.Heartbeat", "Heartbeat", 0)
+    mode = await _add_var(operation, f"ns={idx};s=LineB.Operation.Mode", "Mode", "Idle", writable=True)
+    state_code = await _add_var(operation, f"ns={idx};s=LineB.Operation.StateCode", "StateCode", 100)
+    heartbeat = await _add_var(operation, f"ns={idx};s=LineB.Operation.Heartbeat", "Heartbeat", 0)
     last_start_utc = await _add_var(
         operation,
-        f"ns={idx};s=Machine.Operation.LastStartUtc",
+        f"ns={idx};s=LineB.Operation.LastStartUtc",
         "LastStartUtc",
         dt.datetime.utcnow(),
     )
 
     # Process
     temperature = await _add_var(
-        process, f"ns={idx};s=Machine.Process.Temperature", "Temperature", 35.0, writable=True
+        process, f"ns={idx};s=LineB.Process.Temperature", "Temperature", 35.0, writable=True
     )
-    rpm = await _add_var(process, f"ns={idx};s=Machine.Process.RPM", "RPM", 0, writable=True)
+    rpm = await _add_var(process, f"ns={idx};s=LineB.Process.RPM", "RPM", 0, writable=True)
     pressure_bar = await _add_var(
-        process, f"ns={idx};s=Machine.Process.PressureBar", "PressureBar", 5.5, writable=True
+        process, f"ns={idx};s=LineB.Process.PressureBar", "PressureBar", 5.5, writable=True
     )
     flow_l_min = await _add_var(
-        process, f"ns={idx};s=Machine.Process.FlowLMin", "FlowLMin", 120.0, writable=True
+        process, f"ns={idx};s=LineB.Process.FlowLMin", "FlowLMin", 120.0, writable=True
     )
-    humidity_pct = await _add_var(process, f"ns={idx};s=Machine.Process.HumidityPct", "HumidityPct", 40.0)
+    humidity_pct = await _add_var(process, f"ns={idx};s=LineB.Process.HumidityPct", "HumidityPct", 40.0)
     vibration_mm_s = await _add_var(
-        process, f"ns={idx};s=Machine.Process.VibrationMmS", "VibrationMmS", 1.8
+        process, f"ns={idx};s=LineB.Process.VibrationMmS", "VibrationMmS", 1.8
     )
 
     product_count = await _add_var(
-        process, f"ns={idx};s=Machine.Process.ProductCount", "ProductCount", 0, writable=True
+        process, f"ns={idx};s=LineB.Process.ProductCount", "ProductCount", 0, writable=True
     )
     reject_count = await _add_var(
-        process, f"ns={idx};s=Machine.Process.RejectCount", "RejectCount", 0, writable=True
+        process, f"ns={idx};s=LineB.Process.RejectCount", "RejectCount", 0, writable=True
     )
     recipe_name = await _add_var(
-        process, f"ns={idx};s=Machine.Process.RecipeName", "RecipeName", "Recipe-A", writable=True
+        process, f"ns={idx};s=LineB.Process.RecipeName", "RecipeName", "Recipe-A", writable=True
     )
     batch_id = await _add_var(
-        process, f"ns={idx};s=Machine.Process.BatchId", "BatchId", "BATCH-0001", writable=True
+        process, f"ns={idx};s=LineB.Process.BatchId", "BatchId", "BATCH-0001", writable=True
     )
 
-    oee = await _add_var(process, f"ns={idx};s=Machine.Process.OEE", "OEE", 78.0)
+    oee = await _add_var(process, f"ns={idx};s=LineB.Process.OEE", "OEE", 78.0)
     availability = await _add_var(
-        process, f"ns={idx};s=Machine.Process.Availability", "Availability", 88.0
+        process, f"ns={idx};s=LineB.Process.Availability", "Availability", 88.0
     )
     performance = await _add_var(
-        process, f"ns={idx};s=Machine.Process.Performance", "Performance", 82.0
+        process, f"ns={idx};s=LineB.Process.Performance", "Performance", 82.0
     )
     quality_rate = await _add_var(
-        process, f"ns={idx};s=Machine.Process.QualityRate", "QualityRate", 96.0
+        process, f"ns={idx};s=LineB.Process.QualityRate", "QualityRate", 96.0
     )
 
     # Assets/Energy
-    power_kw = await _add_var(assets_energy, f"ns={idx};s=Machine.Assets.Energy.PowerKW", "PowerKW", 8.5)
+    power_kw = await _add_var(assets_energy, f"ns={idx};s=LineB.Assets.Energy.PowerKW", "PowerKW", 8.5)
     energy_kwh = await _add_var(
-        assets_energy, f"ns={idx};s=Machine.Assets.Energy.EnergyKWh", "EnergyKWh", 0.0
+        assets_energy, f"ns={idx};s=LineB.Assets.Energy.EnergyKWh", "EnergyKWh", 0.0
     )
     voltage_v = await _add_var(
-        assets_energy, f"ns={idx};s=Machine.Assets.Energy.VoltageV", "VoltageV", 400.0
+        assets_energy, f"ns={idx};s=LineB.Assets.Energy.VoltageV", "VoltageV", 400.0
     )
     current_a = await _add_var(
-        assets_energy, f"ns={idx};s=Machine.Assets.Energy.CurrentA", "CurrentA", 12.0
+        assets_energy, f"ns={idx};s=LineB.Assets.Energy.CurrentA", "CurrentA", 12.0
     )
     pf = await _add_var(
-        assets_energy, f"ns={idx};s=Machine.Assets.Energy.PowerFactor", "PowerFactor", 0.92
+        assets_energy, f"ns={idx};s=LineB.Assets.Energy.PowerFactor", "PowerFactor", 0.92
     )
 
     # Assets/Maintenance
     runtime_hours = await _add_var(
         assets_maintenance,
-        f"ns={idx};s=Machine.Assets.Maintenance.RuntimeHours",
+        f"ns={idx};s=LineB.Assets.Maintenance.RuntimeHours",
         "RuntimeHours",
         0.0,
     )
     next_service_hours = await _add_var(
         assets_maintenance,
-        f"ns={idx};s=Machine.Assets.Maintenance.NextServiceHours",
+        f"ns={idx};s=LineB.Assets.Maintenance.NextServiceHours",
         "NextServiceHours",
         500,
     )
     grease_level_pct = await _add_var(
         assets_maintenance,
-        f"ns={idx};s=Machine.Assets.Maintenance.GreaseLevelPct",
+        f"ns={idx};s=LineB.Assets.Maintenance.GreaseLevelPct",
         "GreaseLevelPct",
         100.0,
     )
 
     # Assets/Drive
     axis_position = await _add_var(
-        assets_drive, f"ns={idx};s=Machine.Assets.Drive.AxisPosition", "AxisPosition", 0.0, writable=True
+        assets_drive, f"ns={idx};s=LineB.Assets.Drive.AxisPosition", "AxisPosition", 0.0, writable=True
     )
     axis_velocity = await _add_var(
-        assets_drive, f"ns={idx};s=Machine.Assets.Drive.AxisVelocity", "AxisVelocity", 0.0, writable=True
+        assets_drive, f"ns={idx};s=LineB.Assets.Drive.AxisVelocity", "AxisVelocity", 0.0, writable=True
     )
     axis_accel = await _add_var(
         assets_drive,
-        f"ns={idx};s=Machine.Assets.Drive.AxisAcceleration",
+        f"ns={idx};s=LineB.Assets.Drive.AxisAcceleration",
         "AxisAcceleration",
         0.0,
     )
-    torque_nm = await _add_var(assets_drive, f"ns={idx};s=Machine.Assets.Drive.TorqueNm", "TorqueNm", 15.0)
+    torque_nm = await _add_var(assets_drive, f"ns={idx};s=LineB.Assets.Drive.TorqueNm", "TorqueNm", 15.0)
 
     # Assets/Sensors
     proximity_1 = await _add_var(
-        assets_sensors, f"ns={idx};s=Machine.Assets.Sensors.Proximity1", "Proximity1", False
+        assets_sensors, f"ns={idx};s=LineB.Assets.Sensors.Proximity1", "Proximity1", False
     )
     proximity_2 = await _add_var(
-        assets_sensors, f"ns={idx};s=Machine.Assets.Sensors.Proximity2", "Proximity2", False
+        assets_sensors, f"ns={idx};s=LineB.Assets.Sensors.Proximity2", "Proximity2", False
     )
 
     # Diagnostics
     recent_temps = await _add_var(
         diagnostics,
-        f"ns={idx};s=Machine.Diagnostics.RecentTemperatures",
+        f"ns={idx};s=LineB.Diagnostics.RecentTemperatures",
         "RecentTemperatures",
         [35.0] * 10,
     )
     recent_errors = await _add_var(
         diagnostics,
-        f"ns={idx};s=Machine.Diagnostics.RecentErrorCodes",
+        f"ns={idx};s=LineB.Diagnostics.RecentErrorCodes",
         "RecentErrorCodes",
         [0, 0, 0, 0, 0],
     )
     spectrum = await _add_var(
         diagnostics,
-        f"ns={idx};s=Machine.Diagnostics.VibrationSpectrum",
+        f"ns={idx};s=LineB.Diagnostics.VibrationSpectrum",
         "VibrationSpectrum",
         [0.0] * 16,
     )
     system_message = await _add_var(
         diagnostics,
-        f"ns={idx};s=Machine.Diagnostics.SystemMessage",
+        f"ns={idx};s=LineB.Diagnostics.SystemMessage",
         "SystemMessage",
         "System OK",
     )
     last_reject_reason = await _add_var(
         diagnostics,
-        f"ns={idx};s=Machine.Diagnostics.LastRejectReason",
+        f"ns={idx};s=LineB.Diagnostics.LastRejectReason",
         "LastRejectReason",
         "None",
     )
 
     # Control/Commands
     cmd_start = await _add_var(
-        commands, f"ns={idx};s=Machine.Control.Commands.Start", "Start", False, writable=True
+        commands, f"ns={idx};s=LineB.Control.Commands.Start", "Start", False, writable=True
     )
     cmd_stop = await _add_var(
-        commands, f"ns={idx};s=Machine.Control.Commands.Stop", "Stop", False, writable=True
+        commands, f"ns={idx};s=LineB.Control.Commands.Stop", "Stop", False, writable=True
     )
     cmd_reset = await _add_var(
-        commands, f"ns={idx};s=Machine.Control.Commands.Reset", "Reset", False, writable=True
+        commands, f"ns={idx};s=LineB.Control.Commands.Reset", "Reset", False, writable=True
     )
     cmd_ack = await _add_var(
         commands,
-        f"ns={idx};s=Machine.Control.Commands.Acknowledge",
+        f"ns={idx};s=LineB.Control.Commands.Acknowledge",
         "Acknowledge",
         False,
         writable=True,
@@ -226,21 +226,21 @@ async def main() -> None:
     # Control/Setpoints
     speed_sp = await _add_var(
         setpoints,
-        f"ns={idx};s=Machine.Control.Setpoints.SpeedSetpoint",
+        f"ns={idx};s=LineB.Control.Setpoints.SpeedSetpoint",
         "SpeedSetpoint",
         1800,
         writable=True,
     )
     temp_sp = await _add_var(
         setpoints,
-        f"ns={idx};s=Machine.Control.Setpoints.TemperatureSetpoint",
+        f"ns={idx};s=LineB.Control.Setpoints.TemperatureSetpoint",
         "TemperatureSetpoint",
         70.0,
         writable=True,
     )
     pressure_sp = await _add_var(
         setpoints,
-        f"ns={idx};s=Machine.Control.Setpoints.PressureSetpoint",
+        f"ns={idx};s=LineB.Control.Setpoints.PressureSetpoint",
         "PressureSetpoint",
         6.0,
         writable=True,
@@ -249,63 +249,63 @@ async def main() -> None:
     # Control/StackLight
     stack_light_green = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Green",
+        f"ns={idx};s=LineB.Control.StackLight.Green",
         "Green",
         False,
         writable=True,
     )
     stack_light_yellow = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Yellow",
+        f"ns={idx};s=LineB.Control.StackLight.Yellow",
         "Yellow",
         False,
         writable=True,
     )
     stack_light_red = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Red",
+        f"ns={idx};s=LineB.Control.StackLight.Red",
         "Red",
         False,
         writable=True,
     )
     stack_light_blue = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Blue",
+        f"ns={idx};s=LineB.Control.StackLight.Blue",
         "Blue",
         False,
         writable=True,
     )
     stack_light_white = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.White",
+        f"ns={idx};s=LineB.Control.StackLight.White",
         "White",
         False,
         writable=True,
     )
     stack_light_effect = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Effect",
+        f"ns={idx};s=LineB.Control.StackLight.Effect",
         "Effect",
         "off",
         writable=True,
     )
     stack_light_brightness = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Brightness",
+        f"ns={idx};s=LineB.Control.StackLight.Brightness",
         "Brightness",
         80,
         writable=True,
     )
     stack_light_manual_test = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.ManualTest",
+        f"ns={idx};s=LineB.Control.StackLight.ManualTest",
         "ManualTest",
         False,
         writable=True,
     )
     buzzer = await _add_var(
         stack_light,
-        f"ns={idx};s=Machine.Control.StackLight.Buzzer",
+        f"ns={idx};s=LineB.Control.StackLight.Buzzer",
         "Buzzer",
         False,
         writable=True,
@@ -328,15 +328,15 @@ async def main() -> None:
     try:
         host_ip = _best_ipv4()
         service_type = "_opcua-tcp._tcp.local."
-        service_name = f"Machine OPC UA Simulator {host_ip}.{service_type}"
+        service_name = f"Line B OPC UA Simulator {host_ip}.{service_type}"
         service_info = ServiceInfo(
             type_=service_type,
             name=service_name,
             addresses=[socket.inet_aton(host_ip)],
-            port=4840,
+            port=4842,
             properties={
                 b"path": b"/",
-                b"endpoint": f"opc.tcp://{host_ip}:4840".encode(),
+                b"endpoint": f"opc.tcp://{host_ip}:4842".encode(),
                 b"sim_version": SIM_VERSION.encode(),
             },
             server=f"opcua-sim-{host_ip.replace('.', '-')}.local.",
@@ -349,10 +349,10 @@ async def main() -> None:
 
     try:
         async with server:
-            print("OPC UA simulator running at opc.tcp://0.0.0.0:4840")
+            print("OPC UA simulator running at opc.tcp://0.0.0.0:4842")
             print(f"Simulator version: {SIM_VERSION}")
             print(f"Namespace URI: {uri} (ns={idx})")
-            print("Top-level under Machine: Operation, Process, Assets, Control, Diagnostics")
+            print("Top-level under LineB: Operation, Process, Assets, Control, Diagnostics")
 
             while True:
                 counter += 1

@@ -167,7 +167,8 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
         await self.async_set_unique_id(endpoint)
         self._abort_if_unique_id_configured()
 
-        # Validate endpoint quickly so we only prompt on real candidates.
+        # Probe discovered endpoint, but do not hard-abort discovery on probe errors.
+        # Some servers are visible via mDNS yet may reject immediate client probes.
         try:
             manager = OpcUaClientManager(
                 endpoint=endpoint,
@@ -178,8 +179,9 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             await manager.ensure_connected()
             await manager.disconnect()
         except Exception as err:
-            _LOGGER.debug("Zeroconf-discovered OPC-UA endpoint not reachable (%s): %s", endpoint, err)
-            return self.async_abort(reason="cannot_connect")
+            _LOGGER.debug(
+                "Zeroconf-discovered OPC-UA endpoint probe failed (%s): %s", endpoint, err
+            )
 
         self._discovered_endpoint = endpoint
         self._discovered_name = name

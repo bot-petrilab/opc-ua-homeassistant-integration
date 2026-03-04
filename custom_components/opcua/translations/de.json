@@ -73,7 +73,11 @@
           "add_select": "Auswahl hinzufügen",
           "add_text": "Text hinzufügen",
           "add_time": "Uhrzeit hinzufügen",
-          "add_weather": "Wetter hinzufügen"
+          "add_weather": "Wetter hinzufügen",
+          "menu_quick_setup": "Quick setup",
+          "menu_add_entities": "Add entities",
+          "menu_discovery_tools": "Discovery & browse",
+          "menu_settings": "Manage existing setup"
         }
       },
       "add_sensor": {
@@ -225,7 +229,11 @@
           "browse_add_select": "Als Auswahl importieren",
           "browse_add_text": "Als Texte importieren",
           "browse_add_time": "Als Uhrzeiten importieren",
-          "browse_add_weather": "Als Wetter importieren"
+          "browse_add_weather": "Als Wetter importieren",
+          "browse_pick_kind_basic": "Import as basic entities",
+          "browse_pick_kind_advanced": "Import as advanced entities",
+          "menu_discovery_tools": "← Back to discovery menu",
+          "init": "← Back to main menu"
         }
       },
       "browse_add_sensor": {
@@ -522,6 +530,94 @@
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
           "go_up": "Eine Ebene nach oben"
+        }
+      },
+      "menu_quick_setup": {
+        "title": "Quick setup",
+        "menu_options": {
+          "auto_discovery": "Auto discovery (native + companion)",
+          "browse_nodes": "Browse OPC UA nodes",
+          "add_stack_light_profile": "Add stack light profile",
+          "init": "← Back to main menu"
+        }
+      },
+      "menu_add_entities": {
+        "title": "Add entities (basic)",
+        "menu_options": {
+          "add_sensor": "Add sensor",
+          "add_binary_sensor": "Add binary sensor",
+          "add_switch": "Add switch",
+          "add_light": "Add light",
+          "add_number": "Add number",
+          "add_select": "Add select",
+          "add_text": "Add text",
+          "add_button": "Add button",
+          "menu_add_entities_advanced": "More entity types",
+          "init": "← Back to main menu"
+        }
+      },
+      "menu_add_entities_advanced": {
+        "title": "Add entities (advanced)",
+        "menu_options": {
+          "add_climate": "Add climate",
+          "add_cover": "Add cover",
+          "add_fan": "Add fan",
+          "add_scene": "Add scene",
+          "add_date": "Add date",
+          "add_datetime": "Add datetime",
+          "add_time": "Add time",
+          "add_weather": "Add weather",
+          "add_notify": "Add notify",
+          "menu_add_entities": "← Back to basic entities",
+          "init": "← Back to main menu"
+        }
+      },
+      "menu_discovery_tools": {
+        "title": "Discovery & browse",
+        "menu_options": {
+          "discover_servers": "Discover OPC UA servers",
+          "auto_discovery": "Auto discovery (native + companion)",
+          "browse_nodes": "Browse OPC UA nodes",
+          "init": "← Back to main menu"
+        }
+      },
+      "menu_settings": {
+        "title": "Manage existing setup",
+        "menu_options": {
+          "remove_node": "Remove nodes",
+          "set_poll_interval": "Set polling interval",
+          "init": "← Back to main menu"
+        }
+      },
+      "browse_pick_kind_basic": {
+        "title": "Import browsed nodes (basic)",
+        "menu_options": {
+          "browse_add_sensor": "Add as sensors",
+          "browse_add_binary_sensor": "Add as binary sensors",
+          "browse_add_switch": "Add as switches",
+          "browse_add_light": "Add as lights",
+          "browse_add_number": "Add as numbers",
+          "browse_add_select": "Add as selects",
+          "browse_add_text": "Add as texts",
+          "browse_add_button": "Add as buttons",
+          "browse_pick_kind": "← Back",
+          "init": "← Back to main menu"
+        }
+      },
+      "browse_pick_kind_advanced": {
+        "title": "Import browsed nodes (advanced)",
+        "menu_options": {
+          "browse_add_climate": "Add as climates",
+          "browse_add_cover": "Add as covers",
+          "browse_add_fan": "Add as fans",
+          "browse_add_scene": "Add as scenes",
+          "browse_add_date": "Add as dates",
+          "browse_add_datetime": "Add as datetimes",
+          "browse_add_time": "Add as times",
+          "browse_add_weather": "Add as weather entities",
+          "browse_add_notify": "Add as notify entities",
+          "browse_pick_kind": "← Back",
+          "init": "← Back to main menu"
         }
       }
     }

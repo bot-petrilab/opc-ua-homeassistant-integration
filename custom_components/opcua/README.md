@@ -64,6 +64,35 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 3. Endpoint eintragen (z. B. `opc.tcp://192.168.0.50:4840`).
 4. In den Integrations-Optionen Nodes hinzufügen oder Auto-Discovery nutzen.
 
+## Vollständiges Beispiel (alle Entity-Typen + Varianten)
+
+Ein vollständiges Beispiel mit **allen unterstützten Entity-Typen** und einer **Light-Konfiguration mit allen optionalen Varianten** liegt hier:
+
+- `examples/opcua_all_entities_example.json`
+
+Enthalten sind:
+- sensor
+- binary_sensor
+- switch
+- light (on/off, brightness, color_temp, hs, rgb, rgbw, rgbww, xy, white, effect, transition, flash)
+- button
+- climate
+- cover
+- date
+- datetime
+- fan
+- notify
+- number
+- scene
+- select
+- text
+- time
+- weather
+
+Hinweis:
+- Das JSON ist als **Referenz-/Vorlagen-Datei** gedacht (Node-IDs auf deine Maschine anpassen).
+- Einfachster Weg: Integration per UI anlegen und die Werte/Node-IDs aus dem Beispiel übernehmen.
+
 ## Auto-Discovery + Companion-Mapping
 
 Im Options-Menü:
