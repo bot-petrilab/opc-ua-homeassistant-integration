@@ -4,7 +4,7 @@
   "version": "1.0.2",
   "config_flow": true,
   "documentation": "https://github.com/FreeOpcUa/opcua-asyncio",
-  "requirements": ["asyncua>=1.1.6,<2.0.0"],
+  "requirements": ["asyncua @ git+https://github.com/FreeOpcUa/opcua-asyncio.git@c08c1bfd7f58b3a21e66d3c94333386b7bca0585"],
   "codeowners": ["@local"],
   "integration_type": "hub",
   "zeroconf": [

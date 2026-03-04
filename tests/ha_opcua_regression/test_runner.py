@@ -166,11 +166,26 @@ async def run() -> dict:
         await page.wait_for_function("() => !!document.querySelector('home-assistant')?.hass?.user")
         await page.locator("ha-fab").click()
         await page.wait_for_timeout(800)
-        search = page.get_by_role("textbox", name="Search for a brand name")
-        await search.fill("opc")
-        await page.wait_for_timeout(1300)
-        aria = await page.get_by_role("alertdialog").aria_snapshot()
-        has_brand = ("OPC-UA" in aria) or ("OPC UA" in aria)
+
+        # HA 2026.3 changed/translated add-integration dialog labels.
+        # Try a few robust selectors and keep this check non-fatal.
+        has_brand = False
+        try:
+            search = page.get_by_role("textbox", name="Search for a brand name")
+            await search.fill("opc")
+            await page.wait_for_timeout(1000)
+            aria = await page.get_by_role("alertdialog").aria_snapshot()
+            has_brand = ("OPC-UA" in aria) or ("OPC UA" in aria)
+        except Exception:
+            try:
+                search = page.locator("ha-dialog input").first
+                await search.fill("opc")
+                await page.wait_for_timeout(1000)
+                body = await page.locator("ha-dialog").inner_text()
+                has_brand = ("OPC-UA" in body) or ("OPC UA" in body)
+            except Exception:
+                has_brand = False
+
         add_check("ui_search_shows_opcua", has_brand, "brand dialog contains OPC-UA")
         await screenshot("02_add_dialog_search_opc")
         await page.keyboard.press("Escape")
