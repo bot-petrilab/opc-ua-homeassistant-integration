@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+- Removed `Save and finish` from options flow (KNX-like behavior with immediate persistence per action).
+- Simplified options menu hierarchy so completion is implicit and navigation-focused.
+
 ## 1.0.2
 - Refactored options/config flow navigation into logical grouped menus (quick setup, add entities, discovery, settings).
 - Added explicit back-navigation entries across grouped menus and browse import menus.
