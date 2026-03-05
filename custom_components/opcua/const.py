@@ -52,6 +52,11 @@ CONF_PASSWORD = "password"
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_VALIDATE_ON_SAVE = "validate_on_save"
 
+CONF_POLL_PROFILE = "poll_profile"
+CONF_POLL_FAST_INTERVAL = "poll_fast_interval"
+CONF_POLL_NORMAL_INTERVAL = "poll_normal_interval"
+CONF_POLL_SLOW_INTERVAL = "poll_slow_interval"
+
 # Security settings (for non-None policies)
 CONF_CLIENT_CERT_PATH = "client_cert_path"
 CONF_CLIENT_KEY_PATH = "client_key_path"
@@ -181,6 +186,11 @@ NODE_KIND_WEATHER = "weather"
 
 DEFAULT_TITLE = "OPC-UA"
 DEFAULT_SCAN_INTERVAL_SECONDS = 2
+DEFAULT_POLL_FAST_INTERVAL_SECONDS = 1
+DEFAULT_POLL_NORMAL_INTERVAL_SECONDS = 5
+DEFAULT_POLL_SLOW_INTERVAL_SECONDS = 30
+DEFAULT_POLL_PROFILE = "normal"
+POLL_PROFILES: tuple[str, ...] = ("fast", "normal", "slow")
 
 EVENT_NOTIFICATION = "opcua_notification"
 

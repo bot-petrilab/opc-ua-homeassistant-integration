@@ -18,6 +18,9 @@ from .const import (
     CONF_NOTIFY_KEYWORDS,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TITLE_PREFIX,
+    CONF_POLL_FAST_INTERVAL,
+    CONF_POLL_NORMAL_INTERVAL,
+    CONF_POLL_SLOW_INTERVAL,
     CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
     CONF_SERVER_CERT_PATH,
@@ -25,6 +28,9 @@ from .const import (
     DEFAULT_NOTIFY_KEYWORDS,
     DEFAULT_NOTIFY_SERVICE,
     DEFAULT_NOTIFY_TITLE_PREFIX,
+    DEFAULT_POLL_FAST_INTERVAL_SECONDS,
+    DEFAULT_POLL_NORMAL_INTERVAL_SECONDS,
+    DEFAULT_POLL_SLOW_INTERVAL_SECONDS,
     DEFAULT_SCAN_INTERVAL_SECONDS,
     DOMAIN,
     PLATFORMS,
@@ -65,6 +71,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
     )
     nodes: list[dict] = entry.options.get(CONF_NODES, entry.data.get(CONF_NODES, []))
 
+    poll_intervals = {
+        "fast": int(entry.options.get(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)),
+        "normal": int(entry.options.get(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)),
+        "slow": int(entry.options.get(CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS)),
+    }
+
     notify_enabled = bool(entry.options.get(CONF_NOTIFY_ENABLED, entry.data.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)))
     notify_service = str(entry.options.get(CONF_NOTIFY_SERVICE, entry.data.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE)))
     notify_title_prefix = str(
@@ -90,6 +102,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         manager=manager,
         nodes=nodes,
         scan_interval_seconds=scan_interval,
+        poll_intervals=poll_intervals,
         entry_id=entry.entry_id,
         endpoint=endpoint,
         notify_enabled=notify_enabled,

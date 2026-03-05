@@ -7,7 +7,14 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import CONF_NODE_ID, CONF_NODE_KIND, CONF_NODE_NAME, EVENT_NOTIFICATION
+from .const import (
+    CONF_NODE_ID,
+    CONF_NODE_KIND,
+    CONF_NODE_NAME,
+    CONF_POLL_PROFILE,
+    DEFAULT_POLL_PROFILE,
+    EVENT_NOTIFICATION,
+)
 from .opcua_client import OpcUaClientManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,6 +29,7 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         manager: OpcUaClientManager,
         nodes: list[dict[str, Any]],
         scan_interval_seconds: int,
+        poll_intervals: dict[str, int] | None,
         entry_id: str,
         endpoint: str,
         notify_enabled: bool,
@@ -41,17 +49,42 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         self._last_values: dict[str, Any] = {}
         self._notification_primed = False
+        self._node_last_polled: dict[str, float] = {}
+
+        merged_intervals = {"fast": 1, "normal": max(1, int(scan_interval_seconds)), "slow": 30}
+        if poll_intervals:
+            for k, v in poll_intervals.items():
+                if k in merged_intervals:
+                    merged_intervals[k] = max(1, int(v))
+        self.poll_intervals = merged_intervals
+
+        min_interval = min(self.poll_intervals.values()) if self.poll_intervals else max(1, int(scan_interval_seconds))
 
         super().__init__(
             hass,
             _LOGGER,
             name="opcua",
-            update_interval=timedelta(seconds=scan_interval_seconds),
+            update_interval=timedelta(seconds=min_interval),
         )
 
     async def _async_update_data(self) -> dict[str, Any]:
-        node_ids: set[str] = set()
+        now = self.hass.loop.time()
+
+        due_nodes: list[dict[str, Any]] = []
         for node in self.nodes:
+            main_node_id = str(node.get(CONF_NODE_ID, ""))
+            if not main_node_id:
+                continue
+
+            profile = str(node.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE) or DEFAULT_POLL_PROFILE).lower()
+            interval = int(self.poll_intervals.get(profile, self.poll_intervals.get("normal", 5)))
+
+            last = self._node_last_polled.get(main_node_id)
+            if last is None or (now - last) >= interval:
+                due_nodes.append(node)
+
+        node_ids: set[str] = set()
+        for node in due_nodes:
             for key, value in node.items():
                 if not isinstance(value, str):
                     continue
@@ -59,12 +92,21 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     node_ids.add(value)
 
         if not node_ids:
-            return {}
+            return dict(self._last_values)
 
         data = await self.manager.read_nodes(sorted(node_ids))
-        await self._process_notifications(data)
-        self._last_values = dict(data)
-        return data
+
+        for node in due_nodes:
+            main_node_id = str(node.get(CONF_NODE_ID, ""))
+            if main_node_id:
+                self._node_last_polled[main_node_id] = now
+
+        combined = dict(self._last_values)
+        combined.update(data)
+
+        await self._process_notifications(combined)
+        self._last_values = dict(combined)
+        return combined
 
     def nodes_by_kind(self, kind: str) -> list[dict[str, Any]]:
         return [node for node in self.nodes if node.get(CONF_NODE_KIND) == kind]

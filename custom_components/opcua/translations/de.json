@@ -254,10 +254,25 @@
           "remove": "Zu entfernende Nodes"
         }
       },
-      "set_poll_interval": {
-        "title": "Polling-Intervall setzen",
+      "set_node_poll_profile": {
+        "title": "Node-Geschwindigkeitsgruppe setzen",
         "data": {
-          "scan_interval": "Polling-Intervall (Sekunden)"
+          "node_index": "Node",
+          "poll_profile": "Geschwindigkeitsgruppe"
+        }
+      },
+      "set_poll_groups": {
+        "title": "Gruppen-Intervalle setzen",
+        "data": {
+          "poll_fast_interval": "Fast-Intervall (Sekunden)",
+          "poll_normal_interval": "Normal-Intervall (Sekunden)",
+          "poll_slow_interval": "Slow-Intervall (Sekunden)"
+        }
+      },
+      "set_poll_interval": {
+        "title": "Basis-Polling-Intervall setzen",
+        "data": {
+          "scan_interval": "Basis-Intervall (Sekunden)"
         }
       },
       "add_button": {
@@ -550,8 +565,10 @@
       "menu_settings": {
         "title": "Manage existing setup",
         "menu_options": {
-          "remove_node": "Remove nodes",
-          "set_poll_interval": "Set polling interval",
+          "remove_node": "Nodes entfernen",
+          "set_node_poll_profile": "Node-Geschwindigkeitsgruppe setzen",
+          "set_poll_groups": "Gruppen-Intervalle setzen",
+          "set_poll_interval": "Basis-Polling-Intervall setzen",
           "init": "← Back to main menu"
         }
       },

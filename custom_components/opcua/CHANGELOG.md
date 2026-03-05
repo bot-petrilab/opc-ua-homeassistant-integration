@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.18
+- Implemented poll-speed groups (`fast`, `normal`, `slow`) with individually configurable intervals in options flow.
+- Added per-node poll-profile assignment in options flow.
+- Coordinator now polls nodes based on assigned group intervals (due-node scheduling) instead of one global fixed cadence.
+- Added regression checks to verify poll-group persistence and per-node profile storage.
+
 ## 1.0.17
 - Added cleanup of orphaned entity-registry entries when options nodes are persisted.
 - Removing nodes in options flow now also removes stale entities from HA registry, avoiding "not provided by integration" leftovers.
