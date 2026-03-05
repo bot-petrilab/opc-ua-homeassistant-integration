@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4
+- Removed leftover `done` / `Save and finish` translation entries from `en` and `de` locale files so the option no longer appears in UI labels.
+
 ## 1.0.3
 - Removed `Save and finish` from options flow (KNX-like behavior with immediate persistence per action).
 - Simplified options menu hierarchy so completion is implicit and navigation-focused.

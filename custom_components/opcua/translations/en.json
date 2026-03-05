@@ -53,8 +53,7 @@
           "menu_quick_setup": "Quick setup",
           "menu_add_entities": "Add entities",
           "menu_discovery_tools": "Discovery & browse",
-          "menu_settings": "Manage existing setup",
-          "done": "Save and finish"
+          "menu_settings": "Manage existing setup"
         }
       },
       "menu_quick_setup": {

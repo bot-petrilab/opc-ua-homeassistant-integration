@@ -60,7 +60,6 @@
           "browse_nodes": "OPC-UA Nodes browsen",
           "remove_node": "Nodes entfernen",
           "set_poll_interval": "Polling-Intervall setzen",
-          "done": "Speichern und beenden",
           "add_button": "Button hinzufügen",
           "add_climate": "Klima hinzufügen",
           "add_cover": "Cover hinzufügen",
