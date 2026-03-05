@@ -158,8 +158,8 @@ class OpcUaClientManager:
     async def browse_nodes(
         self,
         root_node_id: str = "i=85",
-        depth: int = 2,
-        max_nodes: int = 300,
+        depth: int | None = None,
+        max_nodes: int | None = None,
     ) -> list[dict[str, Any]]:
         """Browse OPC-UA address space and return candidate nodes + metadata.
 
@@ -178,7 +178,7 @@ class OpcUaClientManager:
         queue: deque[tuple[str, int, str]] = deque()
         queue.append((root_node_id, 0, root_node_id))
 
-        while queue and len(result) < max_nodes:
+        while queue and (max_nodes is None or len(result) < max_nodes):
             current_node_id, level, current_path = queue.popleft()
             if current_node_id in visited:
                 continue
@@ -274,10 +274,10 @@ class OpcUaClientManager:
 
                     result.append(item)
 
-                    if level + 1 < depth and child_node_id not in visited:
+                    if (depth is None or level + 1 < depth) and child_node_id not in visited:
                         queue.append((child_node_id, level + 1, child_path))
 
-                    if len(result) >= max_nodes:
+                    if max_nodes is not None and len(result) >= max_nodes:
                         break
                 except Exception as err:
                     _LOGGER.debug("Browse child parse failed under %s: %s", current_node_id, err)

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.9
+- Removed internal scan limits for options-flow discovery/browse from selected root nodes:
+  - auto-discovery now runs without `depth`, `max_nodes`, and `import_limit` limits
+  - browse now runs without `depth` and `max_nodes` limits
+- Updated EN/DE descriptions to clearly state full-subtree scanning behavior.
+
 ## 1.0.8
 - Increased internal auto-discovery defaults to work from `i=85` on deeper hierarchies across simulators: `depth=4`, `max_nodes=2000`, `import_limit=500`.
 - Increased internal browse defaults to `depth=4`, `max_nodes=2000`.

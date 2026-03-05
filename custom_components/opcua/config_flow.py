@@ -1203,10 +1203,10 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             root_node_id = str(user_input.get("root_node_id", "i=85")).strip() or "i=85"
-            # Internal defaults tuned for common OPC-UA hierarchies when scanning from i=85.
-            depth = 4
-            max_nodes = 2000
-            import_limit = 500
+            # No hard limits for discovery scan; traverse from root until tree is exhausted.
+            depth = None
+            max_nodes = None
+            import_limit = None
             companion_profiles = bool(user_input.get("companion_profiles", True))
             include_readonly = bool(user_input.get("include_readonly", True))
             include_standard_nodes = bool(user_input.get("include_standard_nodes", False))
@@ -1261,7 +1261,7 @@ class OpcUaOptionsFlow(OptionsFlow):
                     seen.add(node_id)
                     deduped.append(cfg)
 
-                self._discovery_cache = deduped[:import_limit]
+                self._discovery_cache = deduped if import_limit is None else deduped[:import_limit]
                 return await self.async_step_auto_discovery_review()
 
         schema = vol.Schema(
@@ -1502,9 +1502,9 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             root_node_id = str(user_input.get("root_node_id", "i=85")).strip() or "i=85"
-            # Internal defaults tuned for useful subtree browse coverage.
-            depth = 4
-            max_nodes = 2000
+            # No hard limits for browse scan; traverse from root until tree is exhausted.
+            depth = None
+            max_nodes = None
 
             manager = OpcUaClientManager(
                 endpoint=self._entry.data[CONF_ENDPOINT],
