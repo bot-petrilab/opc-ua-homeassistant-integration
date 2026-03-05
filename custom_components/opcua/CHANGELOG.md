@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.8
+- Increased internal auto-discovery defaults to work from `i=85` on deeper hierarchies across simulators: `depth=4`, `max_nodes=2000`, `import_limit=500`.
+- Increased internal browse defaults to `depth=4`, `max_nodes=2000`.
+- Updated EN/DE descriptions to show the new automatic defaults.
+
 ## 1.0.7
 - Removed `depth`, `max_nodes`, and `import_limit` inputs from the options UI for `auto_discovery` and `browse_nodes`.
 - Discovery/browse now always use built-in defaults (auto_discovery: depth=2, max_nodes=400, import_limit=200; browse: depth=2, max_nodes=200).

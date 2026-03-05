@@ -1203,9 +1203,10 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             root_node_id = str(user_input.get("root_node_id", "i=85")).strip() or "i=85"
-            depth = 2
-            max_nodes = 400
-            import_limit = 200
+            # Internal defaults tuned for common OPC-UA hierarchies when scanning from i=85.
+            depth = 4
+            max_nodes = 2000
+            import_limit = 500
             companion_profiles = bool(user_input.get("companion_profiles", True))
             include_readonly = bool(user_input.get("include_readonly", True))
             include_standard_nodes = bool(user_input.get("include_standard_nodes", False))
@@ -1501,8 +1502,9 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             root_node_id = str(user_input.get("root_node_id", "i=85")).strip() or "i=85"
-            depth = 2
-            max_nodes = 200
+            # Internal defaults tuned for useful subtree browse coverage.
+            depth = 4
+            max_nodes = 2000
 
             manager = OpcUaClientManager(
                 endpoint=self._entry.data[CONF_ENDPOINT],

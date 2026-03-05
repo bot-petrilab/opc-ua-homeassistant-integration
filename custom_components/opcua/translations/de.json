@@ -180,7 +180,7 @@
       },
       "auto_discovery": {
         "title": "Auto-Discovery",
-        "description": "Scannt ab einer Root-Node und mappt Variablen automatisch auf Entitäten. Erweiterte Limits laufen automatisch (Tiefe=2, Max-Nodes=400, Import-Limit=200) und müssen nicht mehr eingegeben werden.",
+        "description": "Scannt ab einer Root-Node und mappt Variablen automatisch auf Entitäten. Erweiterte Limits laufen automatisch (Tiefe=4, Max-Nodes=2000, Import-Limit=500) und müssen nicht mehr eingegeben werden.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)",
           "companion_profiles": "Companion-Profil-Heuristiken aktivieren",
@@ -198,7 +198,7 @@
       },
       "browse_nodes": {
         "title": "OPC-UA Nodes browsen",
-        "description": "Durchsucht einen Teilbaum und lässt dich danach den Importtyp wählen. Scan-Limits laufen automatisch (Tiefe=2, Max-Nodes=200) und müssen nicht mehr eingegeben werden.",
+        "description": "Durchsucht einen Teilbaum und lässt dich danach den Importtyp wählen. Scan-Limits laufen automatisch (Tiefe=4, Max-Nodes=2000) und müssen nicht mehr eingegeben werden.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)"
         }
