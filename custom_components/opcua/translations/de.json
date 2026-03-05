@@ -54,7 +54,6 @@
           "add_binary_sensor": "Binary Sensor hinzufügen",
           "add_switch": "Switch hinzufügen",
           "add_light": "Light hinzufügen",
-          "add_stack_light_profile": "Stack-Light-Profil hinzufügen",
           "discover_servers": "OPC-UA Server entdecken",
           "auto_discovery": "Auto-Discovery (nativ + Companion)",
           "browse_nodes": "OPC-UA Nodes browsen",
@@ -73,7 +72,6 @@
           "add_text": "Text hinzufügen",
           "add_time": "Uhrzeit hinzufügen",
           "add_weather": "Wetter hinzufügen",
-          "menu_quick_setup": "Quick setup",
           "menu_add_entities": "Add entities",
           "menu_discovery_tools": "Discovery & browse",
           "menu_settings": "Manage existing setup"
@@ -148,20 +146,6 @@
           "effect_list": "Effektliste (kommagetrennt)",
           "transition_node_id": "Transition Node-ID",
           "flash_node_id": "Flash Node-ID"
-        }
-      },
-      "add_stack_light_profile": {
-        "title": "Stack-Light-Profil hinzufügen",
-        "description": "Erstellt typische Stack-Light-Entitäten (R/G/Y und optional Buzzer).",
-        "data": {
-          "namespace": "Namespace-Index",
-          "base_path": "Basispfad",
-          "include_red": "Rote Lampe hinzufügen",
-          "include_yellow": "Gelbe Lampe hinzufügen",
-          "include_green": "Grüne Lampe hinzufügen",
-          "include_buzzer": "Buzzer-Switch hinzufügen",
-          "with_effect": "Effekt-Node an Lights anbinden",
-          "effect_node_id": "Effekt-Node-ID"
         }
       },
       "discover_servers": {
@@ -524,15 +508,6 @@
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
           "go_up": "Eine Ebene nach oben"
-        }
-      },
-      "menu_quick_setup": {
-        "title": "Quick setup",
-        "menu_options": {
-          "auto_discovery": "Auto discovery (native + companion)",
-          "browse_nodes": "Browse OPC UA nodes",
-          "add_stack_light_profile": "Add stack light profile",
-          "init": "← Back to main menu"
         }
       },
       "menu_add_entities": {

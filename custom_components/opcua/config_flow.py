@@ -388,23 +388,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         return self.async_show_menu(
             step_id="init",
             menu_options=[
-                "menu_quick_setup",
                 "menu_add_entities",
                 "menu_discovery_tools",
                 "menu_settings",
-            ],
-        )
-
-    async def async_step_menu_quick_setup(
-        self, user_input: Mapping[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        return self.async_show_menu(
-            step_id="menu_quick_setup",
-            menu_options=[
-                "auto_discovery",
-                "browse_nodes",
-                "add_stack_light_profile",
-                "init",
             ],
         )
 
@@ -1324,65 +1310,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             existing_ids.add(node_id)
             added += 1
         return added
-
-    async def async_step_add_stack_light_profile(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        if user_input is not None:
-            ns = int(user_input.get("namespace", 2))
-            base = str(user_input.get("base_path", "Machine.StackLight")).strip()
-            with_effect = bool(user_input.get("with_effect", False))
-            effect_node_id = str(user_input.get("effect_node_id", "")).strip()
-
-            nodes: list[dict[str, Any]] = []
-            color_defs = [
-                ("red", "Red", "mdi:alarm-light"),
-                ("yellow", "Yellow", "mdi:alarm-light-outline"),
-                ("green", "Green", "mdi:alarm-light"),
-            ]
-            for key, suffix, icon in color_defs:
-                if not bool(user_input.get(f"include_{key}", True)):
-                    continue
-                cfg: dict[str, Any] = {
-                    CONF_NODE_KIND: NODE_KIND_LIGHT,
-                    CONF_NODE_NAME: f"Stack Light {suffix}",
-                    CONF_NODE_ID: f"ns={ns};s={base}.{suffix}",
-                    CONF_NODE_ICON: icon,
-                }
-                if with_effect and effect_node_id:
-                    cfg[CONF_LIGHT_EFFECT_NODE_ID] = effect_node_id
-                    cfg[CONF_LIGHT_EFFECT_LIST] = ["off", "blink", "flash"]
-                nodes.append(cfg)
-
-            if bool(user_input.get("include_buzzer", False)):
-                nodes.append(
-                    {
-                        CONF_NODE_KIND: NODE_KIND_SWITCH,
-                        CONF_NODE_NAME: "Stack Buzzer",
-                        CONF_NODE_ID: f"ns={ns};s={base}.Buzzer",
-                        CONF_NODE_ICON: "mdi:bullhorn",
-                    }
-                )
-
-            self._append_unique_nodes(nodes)
-            await self._persist_options()
-            return await self.async_step_init()
-
-        schema = vol.Schema(
-            {
-                vol.Required("namespace", default=2): NumberSelector(
-                    NumberSelectorConfig(min=0, max=1000, step=1, mode="box")
-                ),
-                vol.Required("base_path", default="Machine.StackLight"): TextSelector(),
-                vol.Required("include_red", default=True): BooleanSelector(),
-                vol.Required("include_yellow", default=True): BooleanSelector(),
-                vol.Required("include_green", default=True): BooleanSelector(),
-                vol.Required("include_buzzer", default=False): BooleanSelector(),
-                vol.Required("with_effect", default=False): BooleanSelector(),
-                vol.Optional("effect_node_id"): TextSelector(),
-            }
-        )
-        return self.async_show_form(step_id="add_stack_light_profile", data_schema=schema)
 
     async def async_step_discover_servers(
         self, user_input: dict[str, Any] | None = None

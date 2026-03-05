@@ -299,7 +299,6 @@ async def run() -> dict:
         opt_init = await start_options_flow(entry_id)
         menu = set(opt_init.get("menu_options", []))
         expected = {
-            "menu_quick_setup",
             "menu_add_entities",
             "menu_discovery_tools",
             "menu_settings",
@@ -385,36 +384,15 @@ async def run() -> dict:
             add_check("auto_discovery_scan", False, f"navigation failed, step={auto_nav.get('step_id')}")
             add_check("auto_discovery_apply", False, "navigation to auto_discovery failed")
 
-        # 9) stack light profile (only on simulators exposing StackLight ManualTest)
-        if stacklight_base_path:
-            opt_s = await start_options_flow(entry_id)
-            fid_s = opt_s["flow_id"]
-            await opt_step(fid_s, {"next_step_id": "menu_quick_setup"})
-            await opt_step(fid_s, {"next_step_id": "add_stack_light_profile"})
-            stack = await opt_step(fid_s, {
-                "namespace": 2,
-                "base_path": stacklight_base_path,
-                "include_red": True,
-                "include_yellow": True,
-                "include_green": True,
-                "include_buzzer": True,
-                "with_effect": True,
-                "effect_node_id": f"ns=2;s={stacklight_base_path}.Effect",
-            })
-            add_check("stack_light_profile_apply", stack.get("step_id") == "init", f"step={stack.get('step_id')}")
-        else:
-            add_check("stack_light_profile_apply_optional", True, "simulator has no stack-light path")
+        # 9) stack light profile step removed from options flow
+        add_check("stack_light_profile_removed", True, "stack light profile no longer part of options flow")
 
         # 10) entity verification
         states = await call_api("GET", "states")
         endpoint_states = [s for s in states if (s.get("attributes") or {}).get("endpoint") == OPC_ENDPOINT]
         add_check("entities_for_endpoint_present_optional", True, f"count={len(endpoint_states)}")
         domains = Counter([s.get("entity_id", "").split(".")[0] for s in endpoint_states if s.get("entity_id")])
-        required_domains = ["light", "switch"] if stacklight_base_path else []
-        if required_domains:
-            add_check("entity_domains_expected_optional", True, f"required={required_domains} actual={dict(domains)}")
-        else:
-            add_check("entity_domains_expected_optional", True, f"actual={dict(domains)}")
+        add_check("entity_domains_expected_optional", True, f"actual={dict(domains)}")
 
         # 11) runtime notification event trigger (alarm false -> true), only if manual test node exists
         subscribed = await subscribe_event_capture("opcua_notification")

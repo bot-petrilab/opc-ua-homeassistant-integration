@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.13
+- Removed `Quick setup` from options-flow main menu.
+- Removed `add_stack_light_profile` step from options flow and related menu translations.
+- Updated regression expectations accordingly.
+
 ## 1.0.12
 - Fixed JSON syntax regression in translation files (`strings.json`, `translations/en.json`, `translations/de.json`) that caused config-flow 500 errors during integration add.
 - Keeps full-subtree discovery/browse descriptions valid and loadable in Home Assistant.

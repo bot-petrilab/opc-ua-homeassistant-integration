@@ -50,19 +50,9 @@
       "init": {
         "title": "OPC UA node setup",
         "menu_options": {
-          "menu_quick_setup": "Quick setup",
           "menu_add_entities": "Add entities",
           "menu_discovery_tools": "Discovery & browse",
           "menu_settings": "Manage existing setup"
-        }
-      },
-      "menu_quick_setup": {
-        "title": "Quick setup",
-        "menu_options": {
-          "auto_discovery": "Auto discovery (native + companion)",
-          "browse_nodes": "Browse OPC UA nodes",
-          "add_stack_light_profile": "Add stack light profile",
-          "init": "← Back to main menu"
         }
       },
       "menu_add_entities": {
@@ -181,20 +171,6 @@
           "effect_list": "Effect list (comma separated)",
           "transition_node_id": "Transition node ID",
           "flash_node_id": "Flash node ID"
-        }
-      },
-      "add_stack_light_profile": {
-        "title": "Add stack light profile",
-        "description": "Create common stack-light entities (R/Y/G and optional buzzer).",
-        "data": {
-          "namespace": "Namespace index",
-          "base_path": "Base path",
-          "include_red": "Include red light",
-          "include_yellow": "Include yellow light",
-          "include_green": "Include green light",
-          "include_buzzer": "Include buzzer switch",
-          "with_effect": "Attach effect node to lights",
-          "effect_node_id": "Effect node ID"
         }
       },
       "discover_servers": {
