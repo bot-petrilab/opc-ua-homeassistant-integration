@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5
+- Removed `Discover OPC UA servers` from the `Discovery & browse` menu in options flow.
+- Kept discovery/browse menu focused on endpoint-internal actions (`auto_discovery`, `browse_nodes`) after setup.
+
 ## 1.0.4
 - Removed leftover `done` / `Save and finish` translation entries from `en` and `de` locale files so the option no longer appears in UI labels.
 

@@ -574,7 +574,6 @@
       "menu_discovery_tools": {
         "title": "Discovery & browse",
         "menu_options": {
-          "discover_servers": "Discover OPC UA servers",
           "auto_discovery": "Auto discovery (native + companion)",
           "browse_nodes": "Browse OPC UA nodes",
           "init": "← Back to main menu"

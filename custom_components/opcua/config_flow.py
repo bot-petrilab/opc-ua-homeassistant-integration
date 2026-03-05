@@ -451,7 +451,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         return self.async_show_menu(
             step_id="menu_discovery_tools",
             menu_options=[
-                "discover_servers",
                 "auto_discovery",
                 "browse_nodes",
                 "init",
