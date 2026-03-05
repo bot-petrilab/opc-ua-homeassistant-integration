@@ -264,8 +264,10 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     errors[CONF_CLIENT_KEY_PATH] = "required"
 
             if not errors:
-                await self.async_set_unique_id(endpoint)
-                self._abort_if_unique_id_configured()
+                # Avoid false "already_in_progress" collisions with concurrent zeroconf flows.
+                for entry in self._async_current_entries():
+                    if str((entry.data or {}).get(CONF_ENDPOINT, "")).strip() == endpoint:
+                        return self.async_abort(reason="already_configured")
 
                 if validate_on_save:
                     try:

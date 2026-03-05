@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.12
+- Fixed JSON syntax regression in translation files (`strings.json`, `translations/en.json`, `translations/de.json`) that caused config-flow 500 errors during integration add.
+- Keeps full-subtree discovery/browse descriptions valid and loadable in Home Assistant.
+
+## 1.0.11
+- Fixed user config-flow duplicate detection to avoid `already_in_progress` collisions from concurrent discovery flows.
+- Uses endpoint-based duplicate checks against existing config entries instead of unique-id in-progress aborts during manual add.
+
+## 1.0.10
+- Improved regression runner robustness on HA dashboards where `ha-fab` is unavailable (UI brand-search check is now optional/skip-safe).
+- Added reusable full matrix script `tests/ha_opcua_regression/run_full_e2e_matrix.sh` for complete 3-endpoint regression runs.
+- Documented reusable matrix command in regression `README.md`.
+
 ## 1.0.9
 - Removed internal scan limits for options-flow discovery/browse from selected root nodes:
   - auto-discovery now runs without `depth`, `max_nodes`, and `import_limit` limits

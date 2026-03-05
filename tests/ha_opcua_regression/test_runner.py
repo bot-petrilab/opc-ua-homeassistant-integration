@@ -185,32 +185,38 @@ async def run() -> dict:
         await page.goto(HA_URL + "/config/integrations/dashboard")
         await page.wait_for_timeout(2500)
         await page.wait_for_function("() => !!document.querySelector('home-assistant')?.hass?.user")
-        await page.locator("ha-fab").click()
-        await page.wait_for_timeout(800)
 
-        # HA 2026.3 changed/translated add-integration dialog labels.
-        # Try a few robust selectors and keep this check non-fatal.
+        # UI-only smoke check (optional): some HA views/users may not expose the FAB.
         has_brand = False
-        try:
-            search = page.get_by_role("textbox", name="Search for a brand name")
-            await search.fill("opc")
-            await page.wait_for_timeout(1000)
-            aria = await page.get_by_role("alertdialog").aria_snapshot()
-            has_brand = ("OPC-UA" in aria) or ("OPC UA" in aria)
-        except Exception:
+        fab_count = await page.locator("ha-fab").count()
+        if fab_count > 0:
+            await page.locator("ha-fab").first.click()
+            await page.wait_for_timeout(800)
+
+            # HA labels vary by version/translation; keep check non-fatal.
             try:
-                search = page.locator("ha-dialog input").first
+                search = page.get_by_role("textbox", name="Search for a brand name")
                 await search.fill("opc")
                 await page.wait_for_timeout(1000)
-                body = await page.locator("ha-dialog").inner_text()
-                has_brand = ("OPC-UA" in body) or ("OPC UA" in body)
+                aria = await page.get_by_role("alertdialog").aria_snapshot()
+                has_brand = ("OPC-UA" in aria) or ("OPC UA" in aria)
             except Exception:
-                has_brand = False
+                try:
+                    search = page.locator("ha-dialog input").first
+                    await search.fill("opc")
+                    await page.wait_for_timeout(1000)
+                    body = await page.locator("ha-dialog").inner_text()
+                    has_brand = ("OPC-UA" in body) or ("OPC UA" in body)
+                except Exception:
+                    has_brand = False
 
-        add_check("ui_search_shows_opcua_optional", True, f"brand dialog contains OPC-UA={has_brand}")
+            await page.keyboard.press("Escape")
+            await page.wait_for_timeout(500)
+            add_check("ui_search_shows_opcua_optional", True, f"brand dialog contains OPC-UA={has_brand}")
+        else:
+            add_check("ui_search_shows_opcua_optional", True, "ha-fab not present; skipped ui brand search")
+
         await screenshot("02_add_dialog_search_opc")
-        await page.keyboard.press("Escape")
-        await page.wait_for_timeout(500)
 
         # 3) Cleanup existing OPC entries
         entries = await call_api("GET", "config/config_entries/entry")
@@ -223,6 +229,15 @@ async def run() -> dict:
 
         # 4) Create config entry
         init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+
+        # Recover from stale in-progress flows left behind by interrupted runs.
+        if init.get("type") == "abort" and init.get("reason") == "already_in_progress" and init.get("flow_id"):
+            try:
+                await call_api("DELETE", f"config/config_entries/flow/{init.get('flow_id')}")
+            except Exception:
+                pass
+            init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+
         flow_id = init.get("flow_id")
         if not flow_id:
             raise TestFailure(f"flow init missing flow_id: {init}")
@@ -232,21 +247,37 @@ async def run() -> dict:
         notify_fields = {"notify_enabled", "notify_service", "notify_title_prefix", "notify_keywords"}
         add_check("config_flow_has_notification_fields", notify_fields.issubset(init_fields), str(sorted(init_fields)))
 
-        submit = await call_api(
-            "POST",
-            f"config/config_entries/flow/{flow_id}",
-            {
-                "title": "OPC UA Regression",
-                "endpoint": OPC_ENDPOINT,
-                "security_policy": "None",
-                "scan_interval": 2,
-                "validate_on_save": False,
-                "notify_enabled": True,
-                "notify_service": "persistent_notification.create",
-                "notify_title_prefix": "OPC-UA",
-                "notify_keywords": "manualtest,alarm,warning,fault,error",
-            },
-        )
+        submit_payload = {
+            "title": "OPC UA Regression",
+            "endpoint": OPC_ENDPOINT,
+            "security_policy": "None",
+            "scan_interval": 2,
+            "validate_on_save": False,
+            "notify_enabled": True,
+            "notify_service": "persistent_notification.create",
+            "notify_title_prefix": "OPC-UA",
+            "notify_keywords": "manualtest,alarm,warning,fault,error",
+        }
+
+        submit = None
+        for _attempt in range(3):
+            submit = await call_api("POST", f"config/config_entries/flow/{flow_id}", submit_payload)
+            if submit.get("type") != "abort" or submit.get("reason") != "already_in_progress":
+                break
+
+            stale_flow_id = submit.get("flow_id")
+            if stale_flow_id:
+                try:
+                    await call_api("DELETE", f"config/config_entries/flow/{stale_flow_id}")
+                except Exception:
+                    pass
+
+            init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+            flow_id = init.get("flow_id")
+            if not flow_id:
+                break
+
+        submit = submit or {}
         submit_type = submit.get("type")
         submit_reason = submit.get("reason")
         add_check("config_flow_submit", submit_type in {"create_entry", "abort"}, f"type={submit_type} reason={submit_reason}")

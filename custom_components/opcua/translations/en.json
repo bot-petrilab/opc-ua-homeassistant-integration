@@ -213,7 +213,7 @@
       },
       "auto_discovery": {
         "title": "Auto discovery",
-        "description": "Scan from a root node and auto-map variables to entities. Discovery runs without depth/max/import limits (full subtree scan from the selected root)."
+        "description": "Scan from a root node and auto-map variables to entities. Discovery runs without depth/max/import limits (full subtree scan from the selected root).",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)",
           "companion_profiles": "Enable companion profile heuristics",
@@ -231,7 +231,7 @@
       },
       "browse_nodes": {
         "title": "Browse OPC UA nodes",
-        "description": "Browse a subtree and then choose how to import nodes. Browse runs without depth/max limits (full subtree scan from the selected root)."
+        "description": "Browse a subtree and then choose how to import nodes. Browse runs without depth/max limits (full subtree scan from the selected root).",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)"
         }
