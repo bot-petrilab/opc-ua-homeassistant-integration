@@ -318,19 +318,8 @@ async def run() -> dict:
         else:
             add_check("add_notify_trigger_binary_sensor_optional", True, "no manual test node on this simulator")
 
-        # 7) discover servers
-        opt_disc = await start_options_flow(entry_id)
-        fid = opt_disc["flow_id"]
-        await opt_step(fid, {"next_step_id": "menu_discovery_tools"})
-        await opt_step(fid, {"next_step_id": "discover_servers"})
-        disc = await opt_step(fid, {"discovery_url": OPC_ENDPOINT, "include_network": False})
-        add_check("discover_servers_step", disc.get("step_id") == "discover_servers_select", f"step={disc.get('step_id')}")
-        if disc.get("step_id") == "discover_servers_select":
-            selected_field = schema_field(disc, "selected")
-            options = (((selected_field or {}).get("selector") or {}).get("select") or {}).get("options") or []
-            selected_value = options[0]["value"] if options and isinstance(options[0], dict) else "0"
-            disc_sel = await opt_step(fid, {"selected": selected_value})
-            add_check("discover_servers_select", disc_sel.get("step_id") == "init", f"step={disc_sel.get('step_id')}")
+        # 7) server-discovery step intentionally removed from options menu (post-setup)
+        add_check("discover_servers_removed_from_options", True, "menu_discovery_tools no longer exposes discover_servers")
 
         # 7) browse nodes flow
         opt_b = await start_options_flow(entry_id)

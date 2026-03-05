@@ -1265,20 +1265,20 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         schema = vol.Schema(
             {
-                vol.Required("root_node_id", default="i=85"): TextSelector(),
-                vol.Required("depth", default=2): NumberSelector(
+                vol.Optional("root_node_id", default="i=85"): TextSelector(),
+                vol.Optional("depth", default=2): NumberSelector(
                     NumberSelectorConfig(min=1, max=6, step=1, mode="box")
                 ),
-                vol.Required("max_nodes", default=400): NumberSelector(
+                vol.Optional("max_nodes", default=400): NumberSelector(
                     NumberSelectorConfig(min=20, max=2000, step=20, mode="box")
                 ),
-                vol.Required("import_limit", default=200): NumberSelector(
+                vol.Optional("import_limit", default=200): NumberSelector(
                     NumberSelectorConfig(min=1, max=2000, step=1, mode="box")
                 ),
-                vol.Required("companion_profiles", default=True): BooleanSelector(),
-                vol.Required("include_readonly", default=True): BooleanSelector(),
-                vol.Required("include_standard_nodes", default=False): BooleanSelector(),
-                vol.Required("prefer_lights", default=True): BooleanSelector(),
+                vol.Optional("companion_profiles", default=True): BooleanSelector(),
+                vol.Optional("include_readonly", default=True): BooleanSelector(),
+                vol.Optional("include_standard_nodes", default=False): BooleanSelector(),
+                vol.Optional("prefer_lights", default=True): BooleanSelector(),
             }
         )
         return self.async_show_form(step_id="auto_discovery", data_schema=schema, errors=errors)
@@ -1542,11 +1542,11 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         schema = vol.Schema(
             {
-                vol.Required("root_node_id", default="i=85"): TextSelector(),
-                vol.Required("depth", default=2): NumberSelector(
+                vol.Optional("root_node_id", default="i=85"): TextSelector(),
+                vol.Optional("depth", default=2): NumberSelector(
                     NumberSelectorConfig(min=1, max=6, step=1, mode="box")
                 ),
-                vol.Required("max_nodes", default=200): NumberSelector(
+                vol.Optional("max_nodes", default=200): NumberSelector(
                     NumberSelectorConfig(min=10, max=1000, step=10, mode="box")
                 ),
             }

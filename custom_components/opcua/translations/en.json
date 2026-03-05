@@ -213,12 +213,12 @@
       },
       "auto_discovery": {
         "title": "Auto discovery",
-        "description": "Native OPC UA discovery with optional companion-style mapping.",
+        "description": "Scan from a root node and auto-map variables to entities. Depth/max nodes are optional; defaults are depth=2, max_nodes=400, import_limit=200.",
         "data": {
-          "root_node_id": "Root node ID",
-          "depth": "Depth",
-          "max_nodes": "Maximum nodes",
-          "import_limit": "Import limit",
+          "root_node_id": "Root node ID (optional, default: i=85)",
+          "depth": "Depth (optional, default: 2)",
+          "max_nodes": "Maximum nodes (optional, default: 400)",
+          "import_limit": "Import limit (optional, default: 200)",
           "companion_profiles": "Enable companion profile heuristics",
           "include_readonly": "Include read-only variables",
           "include_standard_nodes": "Include OPC UA standard namespace nodes (i=...)",
@@ -234,11 +234,11 @@
       },
       "browse_nodes": {
         "title": "Browse OPC UA nodes",
-        "description": "Scan the OPC UA tree and import nodes as entities.",
+        "description": "Browse a subtree and then choose how to import nodes. Depth/max nodes are optional; defaults are depth=2 and max_nodes=200.",
         "data": {
-          "root_node_id": "Root node ID",
-          "depth": "Depth",
-          "max_nodes": "Maximum nodes"
+          "root_node_id": "Root node ID (optional, default: i=85)",
+          "depth": "Depth (optional, default: 2)",
+          "max_nodes": "Maximum nodes (optional, default: 200)"
         }
       },
       "browse_pick_kind": {

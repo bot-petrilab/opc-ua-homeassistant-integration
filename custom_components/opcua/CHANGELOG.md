@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6
+- Made `depth` and `max_nodes` optional in `auto_discovery` and `browse_nodes` forms (defaults are applied automatically).
+- Improved field labels and descriptions (EN/DE) to clearly explain optional inputs and default values.
+
 ## 1.0.5
 - Removed `Discover OPC UA servers` from the `Discovery & browse` menu in options flow.
 - Kept discovery/browse menu focused on endpoint-internal actions (`auto_discovery`, `browse_nodes`) after setup.
