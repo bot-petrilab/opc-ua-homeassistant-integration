@@ -110,7 +110,6 @@
         "menu_options": {
           "remove_node": "Remove nodes",
           "set_poll_interval": "Set polling interval",
-          "done": "Save and finish",
           "init": "← Back to main menu"
         }
       },

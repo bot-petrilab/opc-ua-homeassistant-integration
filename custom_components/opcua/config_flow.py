@@ -466,7 +466,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             menu_options=[
                 "remove_node",
                 "set_poll_interval",
-                "done",
                 "init",
             ],
         )
@@ -1915,6 +1914,3 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="set_poll_interval", data_schema=schema)
 
-    async def async_step_done(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        # Changes are already auto-saved on each action.
-        return self.async_abort(reason="finished")
