@@ -30,6 +30,7 @@ for ep in "${ENDPOINTS[@]}"; do
   echo "=== E2E matrix run for $ep ==="
   HA_URL="$HA_URL" HA_USER="$HA_USER" HA_PASS="$HA_PASS" OPC_ENDPOINT="$ep" OUT_DIR="$OUT_DIR" "$VENV/bin/python" "$TEST_DIR/test_runner.py"
   HA_URL="$HA_URL" HA_USER="$HA_USER" HA_PASS="$HA_PASS" OPC_ENDPOINT="$ep" OUT_DIR="$OUT_DIR" "$VENV/bin/python" "$TEST_DIR/config_entry_add_remove_check.py"
+  HA_URL="$HA_URL" HA_USER="$HA_USER" HA_PASS="$HA_PASS" OPC_ENDPOINT="$ep" OUT_DIR="$OUT_DIR" "$VENV/bin/python" "$TEST_DIR/security_policy_matrix_check.py"
 done
 
 echo

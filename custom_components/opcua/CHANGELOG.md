@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.19
+- Added `security_policy_matrix_check.py` to regression suite to validate config-flow behavior across all offered security policies.
+- Integrated security-policy matrix check into reusable full matrix runner.
+- Documented security-policy matrix usage in regression README.
+
 ## 1.0.18
 - Implemented poll-speed groups (`fast`, `normal`, `slow`) with individually configurable intervals in options flow.
 - Added per-node poll-profile assignment in options flow.

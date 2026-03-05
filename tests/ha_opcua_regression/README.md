@@ -33,6 +33,14 @@ OPC_ENDPOINT_3=opc.tcp://10.60.0.100:4844 \
 /home/user/.openclaw/workspace/opc-ua-homeassistant-integration/tests/ha_opcua_regression/run_full_e2e_matrix.sh
 ```
 
+Security policy matrix check (create + required-field validation across policies):
+
+```bash
+HA_URL=http://10.60.0.100:8123 \
+OPC_ENDPOINT=opc.tcp://10.60.0.100:4840 \
+/home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/security_policy_matrix_check.py
+```
+
 Optional additional platform matrix test:
 
 ```bash
