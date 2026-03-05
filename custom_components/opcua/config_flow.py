@@ -1757,7 +1757,7 @@ class OpcUaOptionsFlow(OptionsFlow):
             if isinstance(selected_raw, str):
                 selected = {selected_raw}
             else:
-                selected = set(selected_raw)
+                selected = {str(v) for v in selected_raw}
 
             self._options[CONF_NODES] = [
                 node for idx, node in enumerate(nodes) if str(idx) not in selected

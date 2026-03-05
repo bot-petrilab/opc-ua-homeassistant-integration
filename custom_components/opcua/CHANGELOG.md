@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.16
+- Fixed `remove_node` options-flow handling for multi-select values by normalizing selected IDs to strings before filtering.
+- This fixes cases where selected entries appeared to be accepted but were not removed.
+
 ## 1.0.15
 - Removed `companion_profiles` from auto-discovery options, schema, and translations.
 - Renamed menu label from `Auto discovery (native + companion)` to `Auto discovery`.
