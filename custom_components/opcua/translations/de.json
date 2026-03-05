@@ -169,8 +169,7 @@
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)",
           "companion_profiles": "Companion-Profil-Heuristiken aktivieren",
           "include_readonly": "Read-only Variablen einbeziehen",
-          "include_standard_nodes": "OPC-UA Standard-Namespace-Nodes (i=...) einbeziehen",
-          "prefer_lights": "Für Stacklight-ähnliche Bool-Werte bevorzugt Lights anlegen"
+          "include_standard_nodes": "OPC-UA Standard-Namespace-Nodes (i=...) einbeziehen"
         }
       },
       "auto_discovery_review": {

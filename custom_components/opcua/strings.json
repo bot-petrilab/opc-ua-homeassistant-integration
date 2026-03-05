@@ -194,8 +194,7 @@
           "root_node_id": "Root node ID (optional, default: i=85)",
           "companion_profiles": "Enable companion profile heuristics",
           "include_readonly": "Include read-only variables",
-          "include_standard_nodes": "Include OPC UA standard namespace nodes (i=...)",
-          "prefer_lights": "Prefer light entities for stacklight-like booleans"
+          "include_standard_nodes": "Include OPC UA standard namespace nodes (i=...)"
         }
       },
       "auto_discovery_review": {

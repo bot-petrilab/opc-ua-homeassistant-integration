@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.14
+- Removed `prefer_lights` option from auto-discovery flow and translations.
+- Auto-discovery no longer maps stacklight-like booleans to `light` entities via this toggle; writable booleans are treated as switches.
+
 ## 1.0.13
 - Removed `Quick setup` from options-flow main menu.
 - Removed `add_stack_light_profile` step from options flow and related menu translations.

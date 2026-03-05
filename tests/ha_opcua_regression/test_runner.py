@@ -372,7 +372,6 @@ async def run() -> dict:
                 "companion_profiles": True,
                 "include_readonly": True,
                 "include_standard_nodes": False,
-                "prefer_lights": True,
             })
             add_check("auto_discovery_scan", auto.get("step_id") == "auto_discovery_review", f"step={auto.get('step_id')}")
             if auto.get("step_id") == "auto_discovery_review":

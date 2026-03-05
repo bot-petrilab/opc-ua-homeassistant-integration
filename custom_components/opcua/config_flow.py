@@ -728,7 +728,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         *,
         companion_profiles: bool,
         include_readonly: bool,
-        prefer_lights: bool,
     ) -> dict[str, Any] | None:
         if item.get("node_class") != "Variable":
             return None
@@ -751,13 +750,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         is_packml_state = any(k in marker for k in ["packml", "statecurrent", "machinestate", "machine_state"])
 
         if sample_type in ("bool", "boolean"):
-            if companion_profiles and prefer_lights and writable and is_stack_light:
-                return {
-                    CONF_NODE_KIND: NODE_KIND_LIGHT,
-                    CONF_NODE_NAME: name,
-                    CONF_NODE_ID: node_id,
-                    CONF_NODE_ICON: "mdi:alarm-light",
-                }
             if writable:
                 cfg = {
                     CONF_NODE_KIND: NODE_KIND_SWITCH,
@@ -1198,7 +1190,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             companion_profiles = bool(user_input.get("companion_profiles", True))
             include_readonly = bool(user_input.get("include_readonly", True))
             include_standard_nodes = bool(user_input.get("include_standard_nodes", False))
-            prefer_lights = bool(user_input.get("prefer_lights", True))
 
             manager = OpcUaClientManager(
                 endpoint=self._entry.data[CONF_ENDPOINT],
@@ -1234,7 +1225,6 @@ class OpcUaOptionsFlow(OptionsFlow):
                         item,
                         companion_profiles=companion_profiles,
                         include_readonly=include_readonly,
-                        prefer_lights=prefer_lights,
                     )
                     if cfg:
                         candidates.append(cfg)
@@ -1258,7 +1248,6 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Optional("companion_profiles", default=True): BooleanSelector(),
                 vol.Optional("include_readonly", default=True): BooleanSelector(),
                 vol.Optional("include_standard_nodes", default=False): BooleanSelector(),
-                vol.Optional("prefer_lights", default=True): BooleanSelector(),
             }
         )
         return self.async_show_form(step_id="auto_discovery", data_schema=schema, errors=errors)
