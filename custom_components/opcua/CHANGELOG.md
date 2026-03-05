@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.7
+- Removed `depth`, `max_nodes`, and `import_limit` inputs from the options UI for `auto_discovery` and `browse_nodes`.
+- Discovery/browse now always use built-in defaults (auto_discovery: depth=2, max_nodes=400, import_limit=200; browse: depth=2, max_nodes=200).
+- Updated EN/DE descriptions so the defaults are clearly visible in the form text.
+
 ## 1.0.6
 - Made `depth` and `max_nodes` optional in `auto_discovery` and `browse_nodes` forms (defaults are applied automatically).
 - Improved field labels and descriptions (EN/DE) to clearly explain optional inputs and default values.

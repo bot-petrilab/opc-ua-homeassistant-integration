@@ -1203,9 +1203,9 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             root_node_id = str(user_input.get("root_node_id", "i=85")).strip() or "i=85"
-            depth = int(user_input.get("depth", 2))
-            max_nodes = int(user_input.get("max_nodes", 400))
-            import_limit = int(user_input.get("import_limit", 200))
+            depth = 2
+            max_nodes = 400
+            import_limit = 200
             companion_profiles = bool(user_input.get("companion_profiles", True))
             include_readonly = bool(user_input.get("include_readonly", True))
             include_standard_nodes = bool(user_input.get("include_standard_nodes", False))
@@ -1266,15 +1266,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Optional("root_node_id", default="i=85"): TextSelector(),
-                vol.Optional("depth", default=2): NumberSelector(
-                    NumberSelectorConfig(min=1, max=6, step=1, mode="box")
-                ),
-                vol.Optional("max_nodes", default=400): NumberSelector(
-                    NumberSelectorConfig(min=20, max=2000, step=20, mode="box")
-                ),
-                vol.Optional("import_limit", default=200): NumberSelector(
-                    NumberSelectorConfig(min=1, max=2000, step=1, mode="box")
-                ),
                 vol.Optional("companion_profiles", default=True): BooleanSelector(),
                 vol.Optional("include_readonly", default=True): BooleanSelector(),
                 vol.Optional("include_standard_nodes", default=False): BooleanSelector(),
@@ -1510,8 +1501,8 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if user_input is not None:
             root_node_id = str(user_input.get("root_node_id", "i=85")).strip() or "i=85"
-            depth = int(user_input.get("depth", 2))
-            max_nodes = int(user_input.get("max_nodes", 200))
+            depth = 2
+            max_nodes = 200
 
             manager = OpcUaClientManager(
                 endpoint=self._entry.data[CONF_ENDPOINT],
@@ -1543,12 +1534,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Optional("root_node_id", default="i=85"): TextSelector(),
-                vol.Optional("depth", default=2): NumberSelector(
-                    NumberSelectorConfig(min=1, max=6, step=1, mode="box")
-                ),
-                vol.Optional("max_nodes", default=200): NumberSelector(
-                    NumberSelectorConfig(min=10, max=1000, step=10, mode="box")
-                ),
             }
         )
         return self.async_show_form(step_id="browse_nodes", data_schema=schema, errors=errors)

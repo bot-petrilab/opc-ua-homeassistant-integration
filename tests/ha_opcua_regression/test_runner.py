@@ -326,7 +326,7 @@ async def run() -> dict:
         fid_b = opt_b["flow_id"]
         await opt_step(fid_b, {"next_step_id": "menu_discovery_tools"})
         await opt_step(fid_b, {"next_step_id": "browse_nodes"})
-        browse = await opt_step(fid_b, {"root_node_id": "ns=2;s=Machine", "depth": 4, "max_nodes": 300})
+        browse = await opt_step(fid_b, {"root_node_id": "ns=2;s=Machine"})
         browse_step = browse.get("step_id")
         add_check("browse_nodes_scan_optional", True, f"step={browse_step}")
 
@@ -339,9 +339,6 @@ async def run() -> dict:
         if auto_nav.get("step_id") == "auto_discovery":
             auto = await opt_step(fid_a, {
                 "root_node_id": "ns=2;s=Machine",
-                "depth": 4,
-                "max_nodes": 500,
-                "import_limit": 120,
                 "companion_profiles": True,
                 "include_readonly": True,
                 "include_standard_nodes": False,

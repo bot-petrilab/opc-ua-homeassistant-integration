@@ -180,12 +180,9 @@
       },
       "auto_discovery": {
         "title": "Auto-Discovery",
-        "description": "Scannt ab einer Root-Node und mappt Variablen automatisch auf Entitäten. Tiefe/Max-Nodes sind optional; Standardwerte sind Tiefe=2, Max-Nodes=400, Import-Limit=200.",
+        "description": "Scannt ab einer Root-Node und mappt Variablen automatisch auf Entitäten. Erweiterte Limits laufen automatisch (Tiefe=2, Max-Nodes=400, Import-Limit=200) und müssen nicht mehr eingegeben werden.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)",
-          "depth": "Tiefe (optional, Standard: 2)",
-          "max_nodes": "Maximale Nodes (optional, Standard: 400)",
-          "import_limit": "Import-Limit (optional, Standard: 200)",
           "companion_profiles": "Companion-Profil-Heuristiken aktivieren",
           "include_readonly": "Read-only Variablen einbeziehen",
           "include_standard_nodes": "OPC-UA Standard-Namespace-Nodes (i=...) einbeziehen",
@@ -201,11 +198,9 @@
       },
       "browse_nodes": {
         "title": "OPC-UA Nodes browsen",
-        "description": "Durchsucht einen Teilbaum und lässt dich danach den Importtyp wählen. Tiefe/Max-Nodes sind optional; Standardwerte sind Tiefe=2 und Max-Nodes=200.",
+        "description": "Durchsucht einen Teilbaum und lässt dich danach den Importtyp wählen. Scan-Limits laufen automatisch (Tiefe=2, Max-Nodes=200) und müssen nicht mehr eingegeben werden.",
         "data": {
-          "root_node_id": "Root-Node-ID (optional, Standard: i=85)",
-          "depth": "Tiefe (optional, Standard: 2)",
-          "max_nodes": "Maximale Nodes (optional, Standard: 200)"
+          "root_node_id": "Root-Node-ID (optional, Standard: i=85)"
         }
       },
       "browse_pick_kind": {
