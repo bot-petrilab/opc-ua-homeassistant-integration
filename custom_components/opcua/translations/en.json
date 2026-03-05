@@ -89,7 +89,7 @@
       "menu_discovery_tools": {
         "title": "Discovery & browse",
         "menu_options": {
-          "auto_discovery": "Auto discovery (native + companion)",
+          "auto_discovery": "Auto discovery",
           "browse_nodes": "Browse OPC UA nodes",
           "init": "← Back to main menu"
         }
@@ -192,7 +192,6 @@
         "description": "Scan from a root node and auto-map variables to entities. Discovery runs without depth/max/import limits (full subtree scan from the selected root).",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)",
-          "companion_profiles": "Enable companion profile heuristics",
           "include_readonly": "Include read-only variables",
           "include_standard_nodes": "Include OPC UA standard namespace nodes (i=...)"
         }

@@ -726,7 +726,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         self,
         item: dict[str, Any],
         *,
-        companion_profiles: bool,
         include_readonly: bool,
     ) -> dict[str, Any] | None:
         if item.get("node_class") != "Variable":
@@ -744,31 +743,19 @@ class OpcUaOptionsFlow(OptionsFlow):
         if not include_readonly and not writable:
             return None
 
-        marker = f"{name} {path} {item.get('type_definition', '')}".lower()
-        is_alarm = any(k in marker for k in ["alarm", "condition", "offnormal"])
-        is_stack_light = any(k in marker for k in ["stacklight", "towerlight", "beacon", "signal light", "lamp"])
-        is_packml_state = any(k in marker for k in ["packml", "statecurrent", "machinestate", "machine_state"])
-
         if sample_type in ("bool", "boolean"):
             if writable:
-                cfg = {
+                return {
                     CONF_NODE_KIND: NODE_KIND_SWITCH,
                     CONF_NODE_NAME: name,
                     CONF_NODE_ID: node_id,
                 }
-                if companion_profiles and is_stack_light:
-                    cfg[CONF_NODE_ICON] = "mdi:light-switch"
-                return cfg
 
-            cfg = {
+            return {
                 CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR,
                 CONF_NODE_NAME: name,
                 CONF_NODE_ID: node_id,
             }
-            if companion_profiles and is_alarm:
-                cfg[CONF_NODE_DEVICE_CLASS] = "problem"
-                cfg[CONF_NODE_ICON] = "mdi:alert-circle"
-            return cfg
 
         if sample_type in ("int", "float", "int32", "int64", "uint16", "uint32", "uint64", "double"):
             cfg = {
@@ -779,8 +766,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             unit = self._guess_unit(name, path, item.get("engineering_units"))
             if unit:
                 cfg[CONF_NODE_UNIT] = unit
-            if companion_profiles and is_packml_state:
-                cfg[CONF_NODE_ICON] = "mdi:state-machine"
             return cfg
 
         if sample_type in ("str", "string"):
@@ -1187,7 +1172,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             depth = None
             max_nodes = None
             import_limit = None
-            companion_profiles = bool(user_input.get("companion_profiles", True))
             include_readonly = bool(user_input.get("include_readonly", True))
             include_standard_nodes = bool(user_input.get("include_standard_nodes", False))
 
@@ -1223,7 +1207,6 @@ class OpcUaOptionsFlow(OptionsFlow):
 
                     cfg = self._map_discovered_item(
                         item,
-                        companion_profiles=companion_profiles,
                         include_readonly=include_readonly,
                     )
                     if cfg:
@@ -1245,7 +1228,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Optional("root_node_id", default="i=85"): TextSelector(),
-                vol.Optional("companion_profiles", default=True): BooleanSelector(),
                 vol.Optional("include_readonly", default=True): BooleanSelector(),
                 vol.Optional("include_standard_nodes", default=False): BooleanSelector(),
             }

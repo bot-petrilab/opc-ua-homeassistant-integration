@@ -55,7 +55,7 @@
           "add_switch": "Switch hinzufügen",
           "add_light": "Light hinzufügen",
           "discover_servers": "OPC-UA Server entdecken",
-          "auto_discovery": "Auto-Discovery (nativ + Companion)",
+          "auto_discovery": "Auto-Discovery",
           "browse_nodes": "OPC-UA Nodes browsen",
           "remove_node": "Nodes entfernen",
           "set_poll_interval": "Polling-Intervall setzen",
@@ -167,7 +167,6 @@
         "description": "Scannt ab einer Root-Node und mappt Variablen automatisch auf Entitäten. Discovery läuft ohne Tiefe/Max-Nodes/Import-Limit (vollständiger Teilbaum-Scan ab der gewählten Root-Node).",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)",
-          "companion_profiles": "Companion-Profil-Heuristiken aktivieren",
           "include_readonly": "Read-only Variablen einbeziehen",
           "include_standard_nodes": "OPC-UA Standard-Namespace-Nodes (i=...) einbeziehen"
         }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.15
+- Removed `companion_profiles` from auto-discovery options, schema, and translations.
+- Renamed menu label from `Auto discovery (native + companion)` to `Auto discovery`.
+- Removed companion-specific discovery heuristics from mapping logic.
+
 ## 1.0.14
 - Removed `prefer_lights` option from auto-discovery flow and translations.
 - Auto-discovery no longer maps stacklight-like booleans to `light` entities via this toggle; writable booleans are treated as switches.

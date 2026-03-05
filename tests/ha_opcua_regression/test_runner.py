@@ -369,7 +369,6 @@ async def run() -> dict:
         if auto_nav.get("step_id") == "auto_discovery":
             auto = await opt_step(fid_a, {
                 "root_node_id": "ns=2;s=Machine",
-                "companion_profiles": True,
                 "include_readonly": True,
                 "include_standard_nodes": False,
             })
