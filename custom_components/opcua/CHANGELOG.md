@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.17
+- Added cleanup of orphaned entity-registry entries when options nodes are persisted.
+- Removing nodes in options flow now also removes stale entities from HA registry, avoiding "not provided by integration" leftovers.
+
 ## 1.0.16
 - Fixed `remove_node` options-flow handling for multi-select values by normalizing selected IDs to strings before filtering.
 - This fixes cases where selected entries appeared to be accepted but were not removed.

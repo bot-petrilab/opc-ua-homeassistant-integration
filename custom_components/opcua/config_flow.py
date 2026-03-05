@@ -8,6 +8,7 @@ import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.selector import (
     BooleanSelector,
     NumberSelector,
@@ -382,7 +383,31 @@ class OpcUaOptionsFlow(OptionsFlow):
     async def _persist_options(self) -> None:
         """Persist options immediately and reload entry so entities appear at once."""
         self.hass.config_entries.async_update_entry(self._entry, options=self._options)
+        await self._cleanup_orphan_entity_registry_entries()
         await self.hass.config_entries.async_reload(self._entry.entry_id)
+
+    async def _cleanup_orphan_entity_registry_entries(self) -> None:
+        """Remove entity-registry entries that are no longer present in options nodes."""
+        registry = er.async_get(self.hass)
+
+        wanted_node_ids = {
+            str(node.get(CONF_NODE_ID, ""))
+            for node in self._options.get(CONF_NODES, [])
+            if node.get(CONF_NODE_ID)
+        }
+
+        for entry in er.async_entries_for_config_entry(registry, self._entry.entry_id):
+            uid = str(entry.unique_id or "")
+            # unique_id format in this integration: "{entry_id}:{entity_kind}:{node_id}"
+            parts = uid.split(":", 2)
+            if len(parts) != 3:
+                continue
+            if parts[0] != self._entry.entry_id:
+                continue
+
+            node_id = parts[2]
+            if node_id not in wanted_node_ids:
+                registry.async_remove(entry.entity_id)
 
     async def async_step_init(self, user_input: Mapping[str, Any] | None = None) -> ConfigFlowResult:
         return self.async_show_menu(
