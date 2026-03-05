@@ -53,8 +53,7 @@
           "menu_quick_setup": "Quick setup",
           "menu_add_entities": "Add entities",
           "menu_discovery_tools": "Discovery & browse",
-          "menu_settings": "Manage existing setup",
-          "done": "Save and finish"
+          "menu_settings": "Manage existing setup"
         }
       },
       "menu_quick_setup": {
@@ -111,6 +110,7 @@
         "menu_options": {
           "remove_node": "Remove nodes",
           "set_poll_interval": "Set polling interval",
+          "done": "Save and finish",
           "init": "← Back to main menu"
         }
       },

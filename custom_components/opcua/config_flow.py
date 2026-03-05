@@ -390,7 +390,6 @@ class OpcUaOptionsFlow(OptionsFlow):
                 "menu_add_entities",
                 "menu_discovery_tools",
                 "menu_settings",
-                "done",
             ],
         )
 
@@ -467,6 +466,7 @@ class OpcUaOptionsFlow(OptionsFlow):
             menu_options=[
                 "remove_node",
                 "set_poll_interval",
+                "done",
                 "init",
             ],
         )

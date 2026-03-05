@@ -272,7 +272,6 @@ async def run() -> dict:
             "menu_add_entities",
             "menu_discovery_tools",
             "menu_settings",
-            "done",
         }
         add_check("options_menu_expected_items", expected.issubset(menu), str(sorted(menu)))
 
