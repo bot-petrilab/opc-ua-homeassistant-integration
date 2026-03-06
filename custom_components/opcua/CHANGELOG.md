@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.21
+- `server_entity_matrix.py` switched to deterministic static mode (no random autonomous value changes); values now only change on explicit client writes/commands.
+- Fixed number write typing to match underlying OPC UA node types (`int`/`float`) and avoid `BadTypeMismatch` on `number.set_value`.
+- Fixed `date`, `time`, and `datetime` writes to preserve OPC UA datetime node compatibility and avoid `BadTypeMismatch`/invalid time format issues.
+- Enabled explicit fan `turn_on` / `turn_off` support flags in `fan` entities.
+
 ## 1.0.20
 - Added a dedicated OPC UA entity-matrix simulator: `testbed/opcua-sim/server_entity_matrix.py` (endpoint `opc.tcp://127.0.0.1:4846`).
 - Added `setup_entity_matrix_entry.py` to auto-bind the new test server in Home Assistant and create all supported OPC-UA entity platforms with varied options.

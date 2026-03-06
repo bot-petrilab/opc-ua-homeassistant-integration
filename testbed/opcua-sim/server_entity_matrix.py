@@ -1,6 +1,5 @@
 import asyncio
 import datetime as dt
-import random
 import socket
 
 from asyncua import Server, ua
@@ -57,7 +56,13 @@ async def main() -> None:
     speed_setpoint = await _add_var(process, f"ns={idx};s=EntityMatrix.Process.SpeedSetpoint", "SpeedSetpoint", 1200, True)
     recipe_name = await _add_var(process, f"ns={idx};s=EntityMatrix.Process.RecipeName", "RecipeName", "Recipe-A", True)
 
-    last_start_utc = await _add_var(operation, f"ns={idx};s=EntityMatrix.Operation.LastStartUtc", "LastStartUtc", dt.datetime.utcnow(), True)
+    last_start_utc = await _add_var(
+        operation,
+        f"ns={idx};s=EntityMatrix.Operation.LastStartUtc",
+        "LastStartUtc",
+        dt.datetime.now(dt.UTC),
+        True,
+    )
 
     cmd_start = await _add_var(control, f"ns={idx};s=EntityMatrix.Control.Commands.Start", "Start", False, True)
     cmd_stop = await _add_var(control, f"ns={idx};s=EntityMatrix.Control.Commands.Stop", "Stop", False, True)
@@ -78,10 +83,6 @@ async def main() -> None:
     weather_condition = await _add_var(weather, f"ns={idx};s=EntityMatrix.Weather.Condition", "Condition", "sunny", True)
     weather_message = await _add_var(diagnostics, f"ns={idx};s=EntityMatrix.Diagnostics.Message", "Message", "System OK", True)
     weather_title = await _add_var(diagnostics, f"ns={idx};s=EntityMatrix.Diagnostics.Title", "Title", "Matrix", True)
-
-    modes = ["Idle", "Run", "Service"]
-    conditions = ["sunny", "cloudy", "rainy", "partlycloudy"]
-    recipes = ["Recipe-A", "Recipe-B", "Recipe-C"]
 
     zeroconf: Zeroconf | None = None
     service_info: ServiceInfo | None = None
@@ -111,13 +112,12 @@ async def main() -> None:
         async with server:
             print(f"OPC UA entity-matrix simulator running at opc.tcp://0.0.0.0:{PORT}")
             print(f"Namespace URI: {uri} (ns={idx})")
-            counter = 0
+            print("Entity matrix runs in static mode: values stay unchanged unless a client writes them.")
             while True:
-                counter += 1
                 if await cmd_start.read_value():
                     await running.write_value(True)
                     await cmd_start.write_value(False)
-                    await last_start_utc.write_value(dt.datetime.utcnow())
+                    await last_start_utc.write_value(dt.datetime.now(dt.UTC))
                 if await cmd_stop.read_value():
                     await running.write_value(False)
                     await cmd_stop.write_value(False)
@@ -132,37 +132,7 @@ async def main() -> None:
                     await light_effect.write_value("pulse")
                     await cmd_scene.write_value(False)
 
-                run = bool(await running.read_value())
-                temp = float(await temperature.read_value())
-                temp = min(32.0, temp + random.uniform(0.1, 0.6)) if run else max(18.0, temp - random.uniform(0.1, 0.4))
-
-                await temperature.write_value(round(temp, 2))
-                await humidity.write_value(round(40 + random.uniform(-8, 8), 1))
-                await pressure.write_value(round(1.0 + random.uniform(-0.08, 0.08), 3))
-                await wind_speed.write_value(round(10 + random.uniform(0, 8), 1))
-                await heartbeat.write_value(counter)
-
-                if counter % 20 == 0:
-                    await mode.write_value(modes[(counter // 20) % len(modes)])
-                if counter % 25 == 0:
-                    await recipe_name.write_value(recipes[(counter // 25) % len(recipes)])
-                if counter % 15 == 0:
-                    await weather_condition.write_value(conditions[(counter // 15) % len(conditions)])
-                if counter % 30 == 0:
-                    await weather_message.write_value(f"Status tick {counter}")
-
-                # Keep light related values moving
-                if bool(await light_on.read_value()):
-                    await light_brightness.write_value(int(max(1, min(255, await light_brightness.read_value() + random.randint(-10, 10)))))
-                    await light_hue.write_value(float((await light_hue.read_value() + 7) % 360))
-                    await light_sat.write_value(float(max(1, min(100, await light_sat.read_value() + random.uniform(-3, 3)))))
-
-                # Random alarm pulses for binary sensor / notify testing
-                if counter % 40 == 0:
-                    await alarm.write_value(True)
-                elif counter % 40 == 6:
-                    await alarm.write_value(False)
-
+                # Keep all process/weather/diagnostics values static for deterministic tests.
                 await asyncio.sleep(1)
     finally:
         if zeroconf is not None and service_info is not None:

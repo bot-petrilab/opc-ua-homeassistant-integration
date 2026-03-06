@@ -56,5 +56,12 @@ class OpcUaTime(OpcUaBaseEntity, TimeEntity):
         return _as_time(self._raw_value())
 
     async def async_set_value(self, value: time) -> None:
-        await self.coordinator.manager.write_node(self._node_id, value.isoformat())
+        current = self._raw_value()
+        if isinstance(current, datetime):
+            payload = datetime.combine(current.date(), value.replace(microsecond=0))
+        elif isinstance(current, time):
+            payload = value.replace(microsecond=0)
+        else:
+            payload = value.replace(microsecond=0).isoformat()
+        await self.coordinator.manager.write_node(self._node_id, payload)
         await self.coordinator.async_request_refresh()

@@ -42,7 +42,10 @@ class OpcUaFan(OpcUaBaseEntity, FanEntity):
         self._cfg = node_cfg
         self._invert = bool(node_cfg.get(CONF_NODE_INVERT, False))
         self._speed_node_id = node_cfg.get(CONF_FAN_SPEED_NODE_ID)
-        self._attr_supported_features = FanEntityFeature.SET_SPEED if self._speed_node_id else FanEntityFeature(0)
+        features = FanEntityFeature.TURN_ON | FanEntityFeature.TURN_OFF
+        if self._speed_node_id:
+            features |= FanEntityFeature.SET_SPEED
+        self._attr_supported_features = features
 
     @property
     def is_on(self) -> bool | None:

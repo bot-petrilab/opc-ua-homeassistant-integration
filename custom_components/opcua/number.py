@@ -57,5 +57,14 @@ class OpcUaNumber(OpcUaBaseEntity, NumberEntity):
         return _to_float(self._raw_value())
 
     async def async_set_native_value(self, value: float) -> None:
-        await self.coordinator.manager.write_node(self._node_id, float(value))
+        current = self._raw_value()
+        if isinstance(current, bool):
+            payload = bool(value)
+        elif isinstance(current, int):
+            payload = int(round(value))
+        elif isinstance(current, float):
+            payload = float(value)
+        else:
+            payload = float(value)
+        await self.coordinator.manager.write_node(self._node_id, payload)
         await self.coordinator.async_request_refresh()
