@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.25
+- Reworked `tests/components/opcua/` to mirror the KNX-style split test layout with dedicated per-platform test modules.
+- Added per-entity tests for all OPC-UA platforms:
+  - `test_sensor.py`, `test_binary_sensor.py`, `test_switch.py`, `test_light.py`, `test_button.py`, `test_climate.py`, `test_cover.py`, `test_date.py`, `test_datetime.py`, `test_fan.py`, `test_notify.py`, `test_number.py`, `test_scene.py`, `test_select.py`, `test_text.py`, `test_time.py`, `test_weather.py`
+- Added `test_config_flow.py` guard test for full entity-kind/options coverage and shared fixture helpers under `tests/components/opcua/fixtures/`.
+- Installed pytest tooling in local dev venv and validated test suite:
+  - `pytest tests/components/opcua -q` → `27 passed`.
+
 ## 1.0.24
 - Installed pytest tooling in the local dev venv (`pytest`, `pytest-asyncio`) and validated test execution.
 - Extended Home Assistant-style component tests to cover all OPC-UA entity platforms in `tests/components/opcua/test_entities_all.py`:
