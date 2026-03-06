@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.26
+- Strengthened KNX-style config/options coverage tests for OPC-UA by adding `tests/components/opcua/test_config_flow.py` with source-level assertions for:
+  - all `async_step_add_*` option handlers
+  - all `async_step_browse_add_*` handlers
+  - base/advanced options-menu platform entries
+- Verified complete component test suite:
+  - `pytest tests/components/opcua -q` → `29 passed`.
+
 ## 1.0.25
 - Reworked `tests/components/opcua/` to mirror the KNX-style split test layout with dedicated per-platform test modules.
 - Added per-entity tests for all OPC-UA platforms:
