@@ -18,7 +18,7 @@ Basis:
 - [x] `entity_unique_id` – eindeutige IDs pro Entity
 - [x] `config_entry_unloading` – Unload implementiert
 - [x] `discovery` – Zeroconf + Discovery-Flows vorhanden
-- [ ] `config-flow-test-coverage` – für Core: pytest-Tests in `tests/components/opcua` ergänzen
+- [x] `config-flow-test-coverage` – pytest-Tests in `tests/components/opcua` vorhanden (`test_config_flow.py` + split platform tests)
 - [ ] `brands` – Brand assets im Core/brands prüfen (separater PR/Asset-Pfad)
 - [ ] `has_entity_name` – pro Plattform validieren und ggf. nachziehen
 - [ ] `docs-*` – Endnutzer-Doku im core-docs Stil finalisieren

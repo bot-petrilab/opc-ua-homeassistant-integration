@@ -1,6 +1,6 @@
 # OPC-UA → Home Assistant Core PR Prep
 
-Stand: 2026-03-01
+Stand: 2026-03-06
 
 ## Ziel
 Diese Checkliste bereitet die bestehende `opcua`-Integration für einen PR gegen `home-assistant/core` vor.
@@ -24,10 +24,11 @@ Diese Checkliste bereitet die bestehende `opcua`-Integration für einen PR gegen
 
 ## Verifizierte Tests (lokal)
 
-- `tests/ha_opcua_regression/run.sh` → PASS (22/0)
-- `tests/ha_opcua_regression/platform_coverage_check.py` → PASS
-- `tests/ha_opcua_regression/notification_e2e_check.py` → PASS
-- `tests/ha_opcua_regression/security_configflow_check.py` → PASS
+- `tests/ha_opcua_regression/run_full_e2e_matrix.sh` (Endpoints 4840/4842/4844) → PASS
+- `tests/ha_opcua_regression/setup_entity_matrix_entry.py` → PASS
+- `tests/ha_opcua_regression/entity_matrix_service_actions_check.py` → PASS
+  - `number.set_value`, `date.set_value`, `time.set_value`, `fan.turn_on`
+- `pytest tests/components/opcua -q` → PASS (`29 passed`)
 - `tests/ci_smoke.py` → PASS
 
 ## Verifizierte CI (Repo)
@@ -45,10 +46,10 @@ Diese Checkliste bereitet die bestehende `opcua`-Integration für einen PR gegen
    - Nach: `homeassistant/components/opcua/*`
 
 2. **Core-konforme Test-Suite ergänzen**
-   - `tests/components/opcua/test_config_flow.py`
-   - `tests/components/opcua/test_init.py`
-   - `tests/components/opcua/test_coordinator.py`
-   - `tests/components/opcua/test_<platform>.py` (mind. repräsentative Plattformen)
+   - [x] `tests/components/opcua/test_config_flow.py`
+   - [x] `tests/components/opcua/test_init.py`
+   - [ ] `tests/components/opcua/test_coordinator.py`
+   - [x] `tests/components/opcua/test_<platform>.py` (alle unterstützten Plattformen vorhanden)
 
 3. **Core-typische Artefakte/Standards prüfen**
    - Diagnostics (`diagnostics.py`) erwägen
@@ -56,7 +57,7 @@ Diese Checkliste bereitet die bestehende `opcua`-Integration für einen PR gegen
    - Translation-Keys/strings auf Core-Review-Niveau aufräumen
 
 4. **Smoke-Hilfscode entfernen**
-   - Fallback in `const.py` für `Platform` (nur für Standalone-Smoke) vor Core-PR entfernen.
+   - [ ] Fallback in `const.py` für `Platform` (nur für Standalone-Smoke) vor Core-PR entfernen.
 
 5. **Minimalen, reviewbaren Scope festlegen**
    - Empfehlung: initialer Core-PR mit kleinerem Plattform-Umfang (z. B. `sensor`, `binary_sensor`, `switch`, `light`) und Folge-PRs für weitere Typen.

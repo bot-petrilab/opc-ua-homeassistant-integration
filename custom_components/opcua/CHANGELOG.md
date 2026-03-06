@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.27
+- Prepared repository for immediate PR creation to Home Assistant Core:
+  - Updated `PR_PREP_HOME_ASSISTANT_CORE.md` with current test evidence and remaining deltas
+  - Updated `PR_BODY_CORE_DRAFT.md` with KNX-style split-test + matrix validation results
+  - Updated `CORE_PR_CHECKLIST.md` and marked config-flow test coverage complete
+- Re-ran component tests to confirm readiness: `pytest tests/components/opcua -q` → `29 passed`.
+
 ## 1.0.26
 - Strengthened KNX-style config/options coverage tests for OPC-UA by adding `tests/components/opcua/test_config_flow.py` with source-level assertions for:
   - all `async_step_add_*` option handlers
