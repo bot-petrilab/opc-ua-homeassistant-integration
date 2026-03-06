@@ -19,9 +19,11 @@ Custom Home Assistant integration (domain: `opcua`) with display name **OPC-UA**
 - `testbed/opcua-sim/server_entity_matrix.py` provides an all-platform matrix model (including advanced platform mappings/options).
 - `tests/ha_opcua_regression/setup_entity_matrix_entry.py` can automatically bind the matrix server into Home Assistant and create one entity for each supported platform.
 
-## Local UI regression tests
+## Tests
 
-See `tests/ha_opcua_regression/README.md`.
+- Home Assistant-style component tests (pytest layout): `tests/components/opcua/`
+  - `__init__.py`, `conftest.py`, `test_init.py`, `test_*.py`
+- Local UI/E2E regression tests: `tests/ha_opcua_regression/README.md`
 
 ## CI
 

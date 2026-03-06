@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.23
+- Added Home Assistant-style integration test structure under `tests/components/opcua/`:
+  - `__init__.py`
+  - `conftest.py`
+  - `test_init.py`
+  - `test_entity_writes.py`
+  - `test_fan.py`
+- Added focused unit tests for OPC-UA write type handling (`number`, `date`, `time`, `datetime`) and fan service behavior.
+- Updated README test section to document pytest layout + existing E2E regression suite.
+
 ## 1.0.22
 - Fixed `fan.turn_on` compatibility with current HA service signature by accepting `(percentage, preset_mode, **kwargs)`.
 - Added targeted regression check `entity_matrix_service_actions_check.py` for `number.set_value`, `date.set_value`, `time.set_value`, and `fan.turn_on` on matrix entities.
