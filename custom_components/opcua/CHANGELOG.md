@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.24
+- Installed pytest tooling in the local dev venv (`pytest`, `pytest-asyncio`) and validated test execution.
+- Extended Home Assistant-style component tests to cover all OPC-UA entity platforms in `tests/components/opcua/test_entities_all.py`:
+  - `sensor`, `binary_sensor`, `switch`, `light`, `button`, `climate`, `cover`, `date`, `datetime`, `fan`, `notify`, `number`, `scene`, `select`, `text`, `time`, `weather`
+- Added comprehensive Home Assistant module stubs in test `conftest.py` so component tests run standalone in this repository.
+- Verified with `pytest tests/components/opcua -q` → `10 passed`.
+
 ## 1.0.23
 - Added Home Assistant-style integration test structure under `tests/components/opcua/`:
   - `__init__.py`
