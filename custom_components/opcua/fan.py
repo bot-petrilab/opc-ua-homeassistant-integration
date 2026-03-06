@@ -65,7 +65,12 @@ class OpcUaFan(OpcUaBaseEntity, FanEntity):
             return None
         return max(0, min(100, value))
 
-    async def async_turn_on(self, percentage: int | None = None, **kwargs: Any) -> None:
+    async def async_turn_on(
+        self,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs: Any,
+    ) -> None:
         await self.coordinator.manager.write_node(self._node_id, False if self._invert else True)
         if percentage is not None and self._speed_node_id:
             await self.coordinator.manager.write_node(self._speed_node_id, int(max(0, min(100, percentage))))

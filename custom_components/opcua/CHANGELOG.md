@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.22
+- Fixed `fan.turn_on` compatibility with current HA service signature by accepting `(percentage, preset_mode, **kwargs)`.
+- Added targeted regression check `entity_matrix_service_actions_check.py` for `number.set_value`, `date.set_value`, `time.set_value`, and `fan.turn_on` on matrix entities.
+
 ## 1.0.21
 - `server_entity_matrix.py` switched to deterministic static mode (no random autonomous value changes); values now only change on explicit client writes/commands.
 - Fixed number write typing to match underlying OPC UA node types (`int`/`float`) and avoid `BadTypeMismatch` on `number.set_value`.

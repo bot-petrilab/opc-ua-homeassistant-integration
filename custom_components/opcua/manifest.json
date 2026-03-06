@@ -1,7 +1,7 @@
 {
   "domain": "opcua",
   "name": "OPC-UA",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "config_flow": true,
   "documentation": "https://github.com/FreeOpcUa/opcua-asyncio",
   "requirements": ["asyncua @ git+https://github.com/FreeOpcUa/opcua-asyncio.git@c08c1bfd7f58b3a21e66d3c94333386b7bca0585"],
