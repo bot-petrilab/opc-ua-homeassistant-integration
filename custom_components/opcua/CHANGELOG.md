@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.20
+- Added a dedicated OPC UA entity-matrix simulator: `testbed/opcua-sim/server_entity_matrix.py` (endpoint `opc.tcp://127.0.0.1:4846`).
+- Added `setup_entity_matrix_entry.py` to auto-bind the new test server in Home Assistant and create all supported OPC-UA entity platforms with varied options.
+
 ## 1.0.19
 - Added `security_policy_matrix_check.py` to regression suite to validate config-flow behavior across all offered security policies.
 - Integrated security-policy matrix check into reusable full matrix runner.

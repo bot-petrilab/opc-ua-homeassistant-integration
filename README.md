@@ -15,7 +15,9 @@ Custom Home Assistant integration (domain: `opcua`) with display name **OPC-UA**
 
 ## Development testbed
 
-`testbed/opcua-sim/server.py` provides a rich OPC-UA simulator model.
+- `testbed/opcua-sim/server.py` provides a rich OPC-UA simulator model.
+- `testbed/opcua-sim/server_entity_matrix.py` provides an all-platform matrix model (including advanced platform mappings/options).
+- `tests/ha_opcua_regression/setup_entity_matrix_entry.py` can automatically bind the matrix server into Home Assistant and create one entity for each supported platform.
 
 ## Local UI regression tests
 
