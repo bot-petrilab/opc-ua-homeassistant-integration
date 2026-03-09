@@ -10,7 +10,7 @@ from playwright.async_api import async_playwright
 HA_URL = os.getenv("HA_URL", "http://localhost:8123")
 HA_USER = os.getenv("HA_USER", "admin")
 HA_PASS = os.getenv("HA_PASS", "Admin123")
-OPC_ENDPOINT = os.getenv("OPC_ENDPOINT", "opc.tcp://127.0.0.1:4846")
+OPC_ENDPOINT = os.getenv("OPC_ENDPOINT", "opc.tcp://127.0.0.1:4842")
 TITLE = os.getenv("OPC_TITLE", "OPC UA Entity Matrix")
 
 
@@ -153,9 +153,40 @@ async def main() -> None:
             (
                 "add_light",
                 {
-                    "name": "Matrix Light Main",
-                    "node_id": "ns=2;s=EntityMatrix.Lighting.Main.On",
+                    "name": "Matrix Light Rainbow Pro",
+                    "node_id": "ns=2;s=Home.Lights.RainbowPro.State",
                     "invert": False,
+                    "brightness_node_id": "ns=2;s=Home.Lights.RainbowPro.Brightness",
+                    "brightness_scale": 255,
+                    "color_temp_node_id": "ns=2;s=Home.Lights.RainbowPro.ColorTempKelvin",
+                    "color_temp_min_kelvin": 2000,
+                    "color_temp_max_kelvin": 6500,
+                    "hs_hue_node_id": "ns=2;s=Home.Lights.RainbowPro.Hue",
+                    "hs_saturation_node_id": "ns=2;s=Home.Lights.RainbowPro.Saturation",
+                    "hs_hue_scale": 360,
+                    "hs_saturation_scale": 100,
+                    "rgb_r_node_id": "ns=2;s=Home.Lights.RainbowPro.R",
+                    "rgb_g_node_id": "ns=2;s=Home.Lights.RainbowPro.G",
+                    "rgb_b_node_id": "ns=2;s=Home.Lights.RainbowPro.B",
+                    "rgb_scale": 255,
+                    "rgbw_r_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBW_R",
+                    "rgbw_g_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBW_G",
+                    "rgbw_b_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBW_B",
+                    "rgbw_w_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBW_W",
+                    "rgbww_r_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBWW_R",
+                    "rgbww_g_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBWW_G",
+                    "rgbww_b_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBWW_B",
+                    "rgbww_cw_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBWW_CW",
+                    "rgbww_ww_node_id": "ns=2;s=Home.Lights.RainbowPro.RGBWW_WW",
+                    "white_node_id": "ns=2;s=Home.Lights.RainbowPro.White",
+                    "white_scale": 255,
+                    "xy_x_node_id": "ns=2;s=Home.Lights.RainbowPro.X",
+                    "xy_y_node_id": "ns=2;s=Home.Lights.RainbowPro.Y",
+                    "xy_scale": "1.0",
+                    "effect_node_id": "ns=2;s=Home.Lights.RainbowPro.Effect",
+                    "effect_list": "off,rainbow,pulse,random",
+                    "transition_node_id": "ns=2;s=Home.Lights.RainbowPro.Transition",
+                    "flash_node_id": "ns=2;s=Home.Lights.RainbowPro.Flash",
                     "icon": "mdi:lightbulb-group",
                 },
                 False,

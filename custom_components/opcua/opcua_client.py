@@ -216,6 +216,17 @@ class OpcUaClientManager:
                         "level": level + 1,
                     }
 
+                    # Type definition can be useful for Object and Variable discovery.
+                    try:
+                        type_def = await child.read_type_definition()
+                        item["type_definition"] = (
+                            type_def.to_string()
+                            if hasattr(type_def, "to_string")
+                            else str(type_def)
+                        )
+                    except Exception:
+                        pass
+
                     if str(node_class) == "Variable":
                         # Access / writable
                         try:
@@ -226,7 +237,7 @@ class OpcUaClientManager:
                         except Exception:
                             item["is_writable"] = False
 
-                        # Data type / type definition
+                        # Data type
                         try:
                             data_type = await child.read_data_type()
                             item["data_type"] = (
@@ -237,20 +248,12 @@ class OpcUaClientManager:
                         except Exception:
                             pass
 
-                        try:
-                            type_def = await child.read_type_definition()
-                            item["type_definition"] = (
-                                type_def.to_string()
-                                if hasattr(type_def, "to_string")
-                                else str(type_def)
-                            )
-                        except Exception:
-                            pass
-
-                        # Sample type
+                        # Sample type/value (scalar sample_value helps higher-level discovery)
                         try:
                             sample_value = await child.read_value()
                             item["sample_type"] = type(sample_value).__name__
+                            if isinstance(sample_value, (bool, int, float, str)) or sample_value is None:
+                                item["sample_value"] = sample_value
                         except Exception:
                             pass
 

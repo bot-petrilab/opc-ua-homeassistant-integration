@@ -6,7 +6,7 @@ from asyncua import Server, ua
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 SIM_VERSION = "0.1.0-entity-matrix"
-PORT = 4846
+PORT = 4842
 
 
 async def _add_var(parent, node_id: str, name: str, initial, writable: bool = False):
@@ -79,6 +79,56 @@ async def main() -> None:
     light_effect = await _add_var(lighting, f"ns={idx};s=EntityMatrix.Lighting.Main.Effect", "Effect", "off", True)
     light_transition = await _add_var(lighting, f"ns={idx};s=EntityMatrix.Lighting.Main.Transition", "Transition", 1, True)
     light_flash = await _add_var(lighting, f"ns={idx};s=EntityMatrix.Lighting.Main.Flash", "Flash", "short", True)
+
+    # Object-based Light discovery testbed (LightType + EntityDomain="light")
+    light_type = await server.nodes.base_object_type.add_object_type(
+        f"ns={idx};s=EntityMatrix.Types.LightType", "LightType"
+    )
+
+    home = await server.nodes.objects.add_object(f"ns={idx};s=Home", "Home")
+    home_lights = await home.add_object(f"ns={idx};s=Home.Lights", "Lights")
+
+    light_obj_main = await home_lights.add_object(
+        f"ns={idx};s=Home.Lights.MatrixMain", "Matrix Main", objecttype=light_type
+    )
+    await _add_var(light_obj_main, f"ns={idx};s=Home.Lights.MatrixMain.EntityDomain", "EntityDomain", "light", False)
+    await _add_var(light_obj_main, f"ns={idx};s=Home.Lights.MatrixMain.State", "State", False, True)
+    await _add_var(light_obj_main, f"ns={idx};s=Home.Lights.MatrixMain.Brightness", "Brightness", 128, True)
+
+    light_obj_corridor = await home_lights.add_object(
+        f"ns={idx};s=Home.Lights.Corridor", "Corridor", objecttype=light_type
+    )
+    await _add_var(light_obj_corridor, f"ns={idx};s=Home.Lights.Corridor.EntityDomain", "EntityDomain", "light", False)
+    await _add_var(light_obj_corridor, f"ns={idx};s=Home.Lights.Corridor.State", "State", True, True)
+
+    # Full-featured light object for Home Assistant light platform options coverage
+    light_obj_full = await home_lights.add_object(
+        f"ns={idx};s=Home.Lights.RainbowPro", "Rainbow Pro", objecttype=light_type
+    )
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.EntityDomain", "EntityDomain", "light", False)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.State", "State", False, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Brightness", "Brightness", 180, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.ColorTempKelvin", "ColorTempKelvin", 3500, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Hue", "Hue", 210.0, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Saturation", "Saturation", 65.0, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.R", "R", 120, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.G", "G", 90, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.B", "B", 255, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBW_R", "RGBW_R", 120, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBW_G", "RGBW_G", 90, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBW_B", "RGBW_B", 255, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBW_W", "RGBW_W", 40, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBWW_R", "RGBWW_R", 120, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBWW_G", "RGBWW_G", 90, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBWW_B", "RGBWW_B", 255, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBWW_CW", "RGBWW_CW", 45, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.RGBWW_WW", "RGBWW_WW", 55, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.White", "White", 80, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.X", "X", 0.31, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Y", "Y", 0.33, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Effect", "Effect", "off", True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Transition", "Transition", 1.0, True)
+    await _add_var(light_obj_full, f"ns={idx};s=Home.Lights.RainbowPro.Flash", "Flash", "short", True)
 
     weather_condition = await _add_var(weather, f"ns={idx};s=EntityMatrix.Weather.Condition", "Condition", "sunny", True)
     weather_message = await _add_var(diagnostics, f"ns={idx};s=EntityMatrix.Diagnostics.Message", "Message", "System OK", True)

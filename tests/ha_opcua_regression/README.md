@@ -23,13 +23,12 @@ cd /home/user/.openclaw/workspace
 tests/ha_opcua_regression/run.sh
 ```
 
-Reusable full 3-endpoint matrix run (detailed regression):
+Reusable full 2-endpoint matrix run (detailed regression):
 
 ```bash
 HA_URL=http://10.60.0.100:8123 \
 OPC_ENDPOINT_1=opc.tcp://10.60.0.100:4840 \
 OPC_ENDPOINT_2=opc.tcp://10.60.0.100:4842 \
-OPC_ENDPOINT_3=opc.tcp://10.60.0.100:4844 \
 /home/user/.openclaw/workspace/opc-ua-homeassistant-integration/tests/ha_opcua_regression/run_full_e2e_matrix.sh
 ```
 
@@ -51,6 +50,29 @@ Optional notification event bridge test:
 
 ```bash
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/notification_e2e_check.py
+```
+
+## LightType + EntityDomain(light) Discovery Test
+
+Starte den Matrix-Server (enthält jetzt auch LightType-Objekte) (Terminal 1):
+
+```bash
+cd /home/user/.openclaw/workspace/opc-ua-homeassistant-integration
+python3 testbed/opcua-sim/server_entity_matrix.py
+```
+
+Binde die Integration in Home Assistant ein und führe Auto-Discovery aus (Terminal 2):
+
+```bash
+cd /home/user/.openclaw/workspace/opc-ua-homeassistant-integration
+/home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/setup_lighttype_autodiscovery_entry.py
+```
+
+Optional mit explizitem Endpoint:
+
+```bash
+OPC_ENDPOINT=opc.tcp://127.0.0.1:4842 \
+/home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/setup_lighttype_autodiscovery_entry.py
 ```
 
 ## Env vars (optional)

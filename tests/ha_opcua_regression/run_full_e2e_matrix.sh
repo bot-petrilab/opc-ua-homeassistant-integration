@@ -19,7 +19,6 @@ OUT_DIR="${OUT_DIR:-$TEST_DIR/out}"
 ENDPOINTS=(
   "${OPC_ENDPOINT_1:-opc.tcp://127.0.0.1:4840}"
   "${OPC_ENDPOINT_2:-opc.tcp://127.0.0.1:4842}"
-  "${OPC_ENDPOINT_3:-opc.tcp://127.0.0.1:4844}"
 )
 
 echo "HA_URL=$HA_URL"

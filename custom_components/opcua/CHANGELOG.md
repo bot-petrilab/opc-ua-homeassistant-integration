@@ -1,5 +1,66 @@
 # Changelog
 
+## 1.0.34
+- Fixed advanced auto-discovered lights being dropped by Home Assistant due invalid color-mode combinations.
+- Light entities now normalize discovered color capabilities to a HA-safe single strongest color mode priority:
+  `RGBWW > RGBW > RGB > HS > XY > COLOR_TEMP > WHITE > BRIGHTNESS > ONOFF`.
+- This allows full-featured discovered lights (e.g. `Rainbow Pro`) to be created reliably in discovery mode.
+
+## 1.0.33
+- Extended Light Object auto-discovery to map advanced light feature nodes automatically when present under `LightType` objects:
+  - color temperature
+  - HS color
+  - RGB / RGBW / RGBWW
+  - white channel
+  - XY
+  - effect / transition / flash
+- Auto-discovered light entities now expose color controls in Home Assistant without manual node mapping for matching child names.
+
+## 1.0.32
+- Added a full-featured OPC-UA light object to the entity-matrix simulator:
+  - `Home.Lights.RainbowPro` (`LightType` object)
+  - includes nodes for on/off, brightness, color temperature, HS, RGB, RGBW, RGBWW, white, XY, effect, transition, flash
+- Updated matrix Home Assistant setup script to create a light entity with all supported light option mappings (`add_light` payload fully populated for `Rainbow Pro`).
+
+## 1.0.31
+- Fixed `light.turn_on` `BadTypeMismatch` on numeric light attributes by preserving OPC-UA node numeric types on write:
+  - scaled HA values are now written as `int` when current OPC-UA value is integer-like
+  - fallback remains `float` for float-based nodes
+- Applies to brightness and color-channel style writes (`brightness`, `rgb*`, `white`).
+
+## 1.0.30
+- Light object auto-discovery now uses **only OPC-UA Object TypeDefinition** as marker:
+  - requires object `type_definition` containing `LightType`
+  - removed `EntityDomain="light"` as discovery criterion
+- Keeps object-child mapping behavior (`State` with `On/Power` fallback, optional `Brightness/Dimmer/Level`).
+
+## 1.0.29
+- Consolidated testbed to exactly two OPC-UA simulators:
+  - `testbed/opcua-sim/server.py` on `4840`
+  - `testbed/opcua-sim/server_entity_matrix.py` on `4842`
+- Removed legacy standalone simulators:
+  - `server_line_b.py`
+  - `server_machinery.py`
+  - `server_lighttype.py`
+- Extended `server_entity_matrix.py` with object-based light discovery nodes (`LightType` + `EntityDomain="light"`) so dedicated light-discovery testing is covered by the matrix server.
+- Updated regression scripts/docs to the two-server standard.
+- Added `tests/ha_opcua_regression/setup_two_server_entries.py` to bind both test servers into Home Assistant automatically.
+
+## 1.0.28
+- Added Light object auto-discovery based on OPC-UA object semantics:
+  - Recognizes `LightType` via object `type_definition`
+  - Recognizes marker property `EntityDomain = "light"`
+  - Maps `State` (`On`/`Power` fallback) to HA light main node
+  - Maps optional `Brightness` (`Dimmer`/`Level` fallback) automatically
+  - Prevents duplicate mapping of consumed light nodes as generic sensor/switch
+- Extended browse metadata in OPC-UA client:
+  - `type_definition` now captured for objects
+  - scalar `sample_value` captured for variables to support marker-based discovery
+- Added dedicated LightType test assets:
+  - `testbed/opcua-sim/server_lighttype.py`
+  - `tests/ha_opcua_regression/setup_lighttype_autodiscovery_entry.py`
+  - regression README usage instructions
+
 ## 1.0.27
 - Prepared repository for immediate PR creation to Home Assistant Core:
   - Updated `PR_PREP_HOME_ASSISTANT_CORE.md` with current test evidence and remaining deltas

@@ -767,6 +767,180 @@ class OpcUaOptionsFlow(OptionsFlow):
             return "rpm"
         return None
 
+    @staticmethod
+    def _normalize_discovery_name(name: str) -> str:
+        return "".join(ch for ch in str(name).strip().lower() if ch.isalnum() or ch == "_")
+
+    def _discover_light_object_nodes(
+        self,
+        browsed: list[dict[str, Any]],
+        *,
+        include_readonly: bool,
+    ) -> tuple[list[dict[str, Any]], set[str]]:
+        """Detect OPC-UA Light objects via Object TypeDefinition (LightType).
+
+        Returns a tuple: (light_node_configs, consumed_node_ids)
+        consumed_node_ids are skipped by generic scalar discovery to avoid duplicates.
+        """
+        by_id: dict[str, dict[str, Any]] = {
+            str(item.get("node_id")): item for item in browsed if item.get("node_id")
+        }
+
+        children_by_parent: dict[str, list[dict[str, Any]]] = {}
+        for item in browsed:
+            parent = str(item.get("parent_node_id") or "")
+            if not parent:
+                continue
+            children_by_parent.setdefault(parent, []).append(item)
+
+        discovered: list[dict[str, Any]] = []
+        consumed_ids: set[str] = set()
+
+        for node_id, item in by_id.items():
+            if str(item.get("node_class")) != "Object":
+                continue
+
+            type_def = str(item.get("type_definition") or "")
+            type_is_light = "lighttype" in type_def.lower()
+
+            children = children_by_parent.get(node_id, [])
+            child_by_name: dict[str, dict[str, Any]] = {}
+            for child in children:
+                normalized = self._normalize_discovery_name(str(child.get("name") or ""))
+                if normalized and normalized not in child_by_name:
+                    child_by_name[normalized] = child
+
+            if not type_is_light:
+                continue
+
+            state_node = (
+                child_by_name.get("state")
+                or child_by_name.get("on")
+                or child_by_name.get("power")
+            )
+            if not state_node:
+                continue
+
+            state_node_id = str(state_node.get("node_id") or "")
+            if not state_node_id:
+                continue
+
+            state_writable = bool(state_node.get("is_writable", False))
+            if not include_readonly and not state_writable:
+                continue
+
+            cfg: dict[str, Any] = {
+                CONF_NODE_KIND: NODE_KIND_LIGHT,
+                CONF_NODE_NAME: str(item.get("name") or state_node.get("name") or state_node_id),
+                CONF_NODE_ID: state_node_id,
+            }
+
+            def _pick(*names: str) -> str | None:
+                for n in names:
+                    child = child_by_name.get(n)
+                    if child and str(child.get("node_id") or ""):
+                        return str(child.get("node_id"))
+                return None
+
+            brightness_id = _pick("brightness", "dimmer", "level")
+            if brightness_id:
+                cfg[CONF_LIGHT_BRIGHTNESS_NODE_ID] = brightness_id
+
+            color_temp_id = _pick("colortemp", "colortempkelvin", "colortemperature")
+            if color_temp_id:
+                cfg[CONF_LIGHT_COLOR_TEMP_NODE_ID] = color_temp_id
+
+            hs_hue_id = _pick("hue", "h")
+            hs_sat_id = _pick("saturation", "sat", "s")
+            if hs_hue_id and hs_sat_id:
+                cfg[CONF_LIGHT_HS_HUE_NODE_ID] = hs_hue_id
+                cfg[CONF_LIGHT_HS_SAT_NODE_ID] = hs_sat_id
+
+            rgb_r_id = _pick("r", "red")
+            rgb_g_id = _pick("g", "green")
+            rgb_b_id = _pick("b", "blue")
+            if rgb_r_id and rgb_g_id and rgb_b_id:
+                cfg[CONF_LIGHT_RGB_R_NODE_ID] = rgb_r_id
+                cfg[CONF_LIGHT_RGB_G_NODE_ID] = rgb_g_id
+                cfg[CONF_LIGHT_RGB_B_NODE_ID] = rgb_b_id
+
+            rgbw_r_id = _pick("rgbw_r")
+            rgbw_g_id = _pick("rgbw_g")
+            rgbw_b_id = _pick("rgbw_b")
+            rgbw_w_id = _pick("rgbw_w")
+            if rgbw_r_id and rgbw_g_id and rgbw_b_id and rgbw_w_id:
+                cfg[CONF_LIGHT_RGBW_R_NODE_ID] = rgbw_r_id
+                cfg[CONF_LIGHT_RGBW_G_NODE_ID] = rgbw_g_id
+                cfg[CONF_LIGHT_RGBW_B_NODE_ID] = rgbw_b_id
+                cfg[CONF_LIGHT_RGBW_W_NODE_ID] = rgbw_w_id
+
+            rgbww_r_id = _pick("rgbww_r")
+            rgbww_g_id = _pick("rgbww_g")
+            rgbww_b_id = _pick("rgbww_b")
+            rgbww_cw_id = _pick("rgbww_cw")
+            rgbww_ww_id = _pick("rgbww_ww")
+            if rgbww_r_id and rgbww_g_id and rgbww_b_id and rgbww_cw_id and rgbww_ww_id:
+                cfg[CONF_LIGHT_RGBWW_R_NODE_ID] = rgbww_r_id
+                cfg[CONF_LIGHT_RGBWW_G_NODE_ID] = rgbww_g_id
+                cfg[CONF_LIGHT_RGBWW_B_NODE_ID] = rgbww_b_id
+                cfg[CONF_LIGHT_RGBWW_CW_NODE_ID] = rgbww_cw_id
+                cfg[CONF_LIGHT_RGBWW_WW_NODE_ID] = rgbww_ww_id
+
+            white_id = _pick("white")
+            if white_id:
+                cfg[CONF_LIGHT_WHITE_NODE_ID] = white_id
+
+            xy_x_id = _pick("x")
+            xy_y_id = _pick("y")
+            if xy_x_id and xy_y_id:
+                cfg[CONF_LIGHT_XY_X_NODE_ID] = xy_x_id
+                cfg[CONF_LIGHT_XY_Y_NODE_ID] = xy_y_id
+
+            effect_id = _pick("effect")
+            if effect_id:
+                cfg[CONF_LIGHT_EFFECT_NODE_ID] = effect_id
+
+            transition_id = _pick("transition")
+            if transition_id:
+                cfg[CONF_LIGHT_TRANSITION_NODE_ID] = transition_id
+
+            flash_id = _pick("flash")
+            if flash_id:
+                cfg[CONF_LIGHT_FLASH_NODE_ID] = flash_id
+
+            discovered.append(cfg)
+
+            consumed_ids.add(node_id)
+            consumed_ids.add(state_node_id)
+            for optional_id in [
+                brightness_id,
+                color_temp_id,
+                hs_hue_id,
+                hs_sat_id,
+                rgb_r_id,
+                rgb_g_id,
+                rgb_b_id,
+                rgbw_r_id,
+                rgbw_g_id,
+                rgbw_b_id,
+                rgbw_w_id,
+                rgbww_r_id,
+                rgbww_g_id,
+                rgbww_b_id,
+                rgbww_cw_id,
+                rgbww_ww_id,
+                white_id,
+                xy_x_id,
+                xy_y_id,
+                effect_id,
+                transition_id,
+                flash_id,
+            ]:
+                if optional_id:
+                    consumed_ids.add(optional_id)
+
+        return discovered, consumed_ids
+
     def _map_discovered_item(
         self,
         item: dict[str, Any],
@@ -1244,9 +1418,16 @@ class OpcUaOptionsFlow(OptionsFlow):
                 await manager.disconnect()
 
             if not errors:
-                candidates: list[dict[str, Any]] = []
+                light_candidates, consumed_node_ids = self._discover_light_object_nodes(
+                    browsed,
+                    include_readonly=include_readonly,
+                )
+
+                candidates: list[dict[str, Any]] = list(light_candidates)
                 for item in browsed:
                     node_id = str(item.get("node_id", ""))
+                    if not node_id or node_id in consumed_node_ids:
+                        continue
                     if not include_standard_nodes and node_id.startswith("i="):
                         continue
 
