@@ -28,8 +28,8 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         hass: HomeAssistant,
         manager: OpcUaClientManager,
         nodes: list[dict[str, Any]],
-        scan_interval_seconds: int,
-        poll_intervals: dict[str, int] | None,
+        scan_interval_seconds: float,
+        poll_intervals: dict[str, float] | None,
         entry_id: str,
         endpoint: str,
         notify_enabled: bool,
@@ -51,14 +51,14 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._notification_primed = False
         self._node_last_polled: dict[str, float] = {}
 
-        merged_intervals = {"fast": 1, "normal": max(1, int(scan_interval_seconds)), "slow": 30}
+        merged_intervals = {"fast": 1.0, "normal": max(0.1, float(scan_interval_seconds)), "slow": 30.0}
         if poll_intervals:
             for k, v in poll_intervals.items():
                 if k in merged_intervals:
-                    merged_intervals[k] = max(1, int(v))
+                    merged_intervals[k] = max(0.1, float(v))
         self.poll_intervals = merged_intervals
 
-        min_interval = min(self.poll_intervals.values()) if self.poll_intervals else max(1, int(scan_interval_seconds))
+        min_interval = min(self.poll_intervals.values()) if self.poll_intervals else max(0.1, float(scan_interval_seconds))
 
         super().__init__(
             hass,
@@ -77,7 +77,7 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 continue
 
             profile = str(node.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE) or DEFAULT_POLL_PROFILE).lower()
-            interval = int(self.poll_intervals.get(profile, self.poll_intervals.get("normal", 5)))
+            interval = float(self.poll_intervals.get(profile, self.poll_intervals.get("normal", 5.0)))
 
             last = self._node_last_polled.get(main_node_id)
             if last is None or (now - last) >= interval:

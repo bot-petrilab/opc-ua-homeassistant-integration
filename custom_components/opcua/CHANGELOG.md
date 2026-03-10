@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.39
+- Polling intervals now support decimal seconds (0.1s granularity) across setup and options flows.
+- You can now configure values like `0.5` seconds (500 ms) for base interval and poll groups.
+- Coordinator timing now uses float intervals and allows sub-second scheduling (minimum `0.1s`).
+
 ## 1.0.38
 - Testbed consolidated to exactly two committed OPC-UA servers:
   - `server_all_entities.py` (4840): all datatypes + all supported integration entity kinds

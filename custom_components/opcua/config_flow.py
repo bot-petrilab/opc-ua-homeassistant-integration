@@ -264,7 +264,7 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                 notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
 
             validate_on_save = bool(user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE))
-            scan_interval = int(user_input[CONF_SCAN_INTERVAL])
+            scan_interval = float(user_input[CONF_SCAN_INTERVAL])
 
             if not endpoint:
                 errors[CONF_ENDPOINT] = "required"
@@ -364,7 +364,7 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     default=",".join(DEFAULT_NOTIFY_KEYWORDS),
                 ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
                 vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS): NumberSelector(
-                    NumberSelectorConfig(min=1, max=60, step=1, mode="box")
+                    NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
                 ),
                 vol.Required(CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE): BooleanSelector(),
             }
@@ -385,7 +385,7 @@ class OpcUaOptionsFlow(OptionsFlow):
         self._options: dict[str, Any] = dict(config_entry.options)
         self._options.setdefault(
             CONF_SCAN_INTERVAL,
-            int(config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)),
+            float(config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)),
         )
         self._options.setdefault(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)
         self._options.setdefault(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)
@@ -2132,9 +2132,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
-            self._options[CONF_POLL_FAST_INTERVAL] = int(user_input[CONF_POLL_FAST_INTERVAL])
-            self._options[CONF_POLL_NORMAL_INTERVAL] = int(user_input[CONF_POLL_NORMAL_INTERVAL])
-            self._options[CONF_POLL_SLOW_INTERVAL] = int(user_input[CONF_POLL_SLOW_INTERVAL])
+            self._options[CONF_POLL_FAST_INTERVAL] = float(user_input[CONF_POLL_FAST_INTERVAL])
+            self._options[CONF_POLL_NORMAL_INTERVAL] = float(user_input[CONF_POLL_NORMAL_INTERVAL])
+            self._options[CONF_POLL_SLOW_INTERVAL] = float(user_input[CONF_POLL_SLOW_INTERVAL])
             await self._persist_options()
             return await self.async_step_menu_settings()
 
@@ -2142,16 +2142,16 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(
                     CONF_POLL_FAST_INTERVAL,
-                    default=int(self._options.get(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=1, max=120, step=1, mode="box")),
+                    default=float(self._options.get(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)),
+                ): NumberSelector(NumberSelectorConfig(min=0.1, max=120, step=0.1, mode="box")),
                 vol.Required(
                     CONF_POLL_NORMAL_INTERVAL,
-                    default=int(self._options.get(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=1, max=300, step=1, mode="box")),
+                    default=float(self._options.get(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)),
+                ): NumberSelector(NumberSelectorConfig(min=0.1, max=300, step=0.1, mode="box")),
                 vol.Required(
                     CONF_POLL_SLOW_INTERVAL,
-                    default=int(self._options.get(CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=1, max=1200, step=1, mode="box")),
+                    default=float(self._options.get(CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS)),
+                ): NumberSelector(NumberSelectorConfig(min=0.1, max=1200, step=0.1, mode="box")),
             }
         )
         return self.async_show_form(step_id="set_poll_groups", data_schema=schema)
@@ -2160,7 +2160,7 @@ class OpcUaOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
-            self._options[CONF_SCAN_INTERVAL] = int(user_input[CONF_SCAN_INTERVAL])
+            self._options[CONF_SCAN_INTERVAL] = float(user_input[CONF_SCAN_INTERVAL])
             await self._persist_options()
             return await self.async_step_menu_settings()
 
@@ -2168,8 +2168,8 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(
                     CONF_SCAN_INTERVAL,
-                    default=int(self._options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=1, max=60, step=1, mode="box"))
+                    default=float(self._options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)),
+                ): NumberSelector(NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box"))
             }
         )
         return self.async_show_form(step_id="set_poll_interval", data_schema=schema)
