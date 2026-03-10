@@ -10,7 +10,7 @@ from playwright.async_api import async_playwright
 HA_URL = os.getenv("HA_URL", "http://localhost:8123")
 HA_USER = os.getenv("HA_USER", "admin")
 HA_PASS = os.getenv("HA_PASS", "Admin123")
-OPC_ENDPOINT = os.getenv("OPC_ENDPOINT", "opc.tcp://127.0.0.1:4842")
+OPC_ENDPOINT = os.getenv("OPC_ENDPOINT", "opc.tcp://127.0.0.1:4840")
 TITLE = os.getenv("OPC_TITLE", "OPC UA Entity Matrix")
 
 
@@ -110,7 +110,10 @@ async def main() -> None:
             x
             for x in entries
             if x.get("domain") == "opcua"
-            and (x.get("title") == TITLE or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT))
+            and (
+                x.get("title") == TITLE
+                or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT)
+            )
         ]
         if not target:
             raise RuntimeError("Failed to find created OPC UA entry")

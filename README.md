@@ -15,13 +15,13 @@ Custom Home Assistant integration (domain: `opcua`) with display name **OPC-UA**
 
 ## Development testbed
 
-Es gibt jetzt **genau zwei** Test-Server:
+Es gibt **genau zwei** Test-Server:
 
-- `testbed/opcua-sim/server.py` (Port `4840`): reiches Maschinenmodell für Browse/Discovery/Generaltests
-- `testbed/opcua-sim/server_entity_matrix.py` (Port `4842`): deterministische Entity-Matrix für alle Plattformen inkl. LightType/EntityDomain-Lichtobjekte
+- `testbed/opcua-sim/server_all_entities.py` (Port `4840`): alle Datentypen + alle von der Integration unterstützten Entity-Typen
+- `testbed/opcua-sim/server_device_split.py` (Port `4842`): Datentypen + Lichtobjekte über mehrere Geräte (`DeviceType` / `LightType` via HasTypeDefinition)
 
 Hilfsskripte:
-- `tests/ha_opcua_regression/setup_entity_matrix_entry.py` bindet die Matrix in Home Assistant ein und erstellt alle Plattform-Entities
+- `tests/ha_opcua_regression/setup_entity_matrix_entry.py` bindet den All-Entities-Server in Home Assistant ein und erstellt alle Plattform-Entities
 - `tests/ha_opcua_regression/setup_two_server_entries.py` bindet beide Standard-Server (`4840`, `4842`) in Home Assistant an
 
 ## Tests

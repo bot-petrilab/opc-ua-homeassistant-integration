@@ -52,13 +52,13 @@ Optional notification event bridge test:
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/notification_e2e_check.py
 ```
 
-## LightType + EntityDomain(light) Discovery Test
+## LightType Discovery Test (HasTypeDefinition)
 
-Starte den Matrix-Server (enthält jetzt auch LightType-Objekte) (Terminal 1):
+Starte den Device-Split-Server (LightType/DeviceType) (Terminal 1):
 
 ```bash
 cd /home/user/.openclaw/workspace/opc-ua-homeassistant-integration
-python3 testbed/opcua-sim/server_entity_matrix.py
+python3 testbed/opcua-sim/server_device_split.py
 ```
 
 Binde die Integration in Home Assistant ein und führe Auto-Discovery aus (Terminal 2):

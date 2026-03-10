@@ -78,6 +78,11 @@ CONF_NODE_DEVICE_CLASS = "device_class"
 CONF_NODE_STATE_CLASS = "state_class"
 CONF_NODE_ICON = "icon"
 CONF_NODE_INVERT = "invert"
+CONF_NODE_DEVICE_ID = "device_id"
+CONF_NODE_DEVICE_NAME = "device_name"
+CONF_NODE_DEVICE_MANUFACTURER = "device_manufacturer"
+CONF_NODE_DEVICE_MODEL = "device_model"
+CONF_NODE_DEVICE_SERIAL = "device_serial"
 
 # Generic optional node mapping for write-capable entities
 CONF_NODE_TARGET_NODE_ID = "target_node_id"

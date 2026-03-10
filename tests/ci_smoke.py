@@ -12,7 +12,7 @@ import types
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SIM_SERVER = REPO_ROOT / "testbed" / "opcua-sim" / "server.py"
+SIM_SERVER = REPO_ROOT / "testbed" / "opcua-sim" / "server_all_entities.py"
 COMPONENT_DIR = REPO_ROOT / "custom_components" / "opcua"
 CLIENT_MODULE = COMPONENT_DIR / "opcua_client.py"
 

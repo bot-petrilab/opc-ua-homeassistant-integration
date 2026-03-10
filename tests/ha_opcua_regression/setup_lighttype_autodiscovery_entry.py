@@ -131,7 +131,7 @@ async def main() -> None:
         states = await call_api("GET", "states")
 
         # robust check for this integration: friendly names from simulator objects
-        expected = {"Matrix Main", "Corridor"}
+        expected = {"Matrix Main", "Corridor", "Rainbow Pro"}
         found = {
             str((s.get("attributes") or {}).get("friendly_name", ""))
             for s in states

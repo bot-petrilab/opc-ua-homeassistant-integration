@@ -68,6 +68,11 @@ from .const import (
     CONF_LIGHT_XY_X_NODE_ID,
     CONF_LIGHT_XY_Y_NODE_ID,
     CONF_NODE_DEVICE_CLASS,
+    CONF_NODE_DEVICE_ID,
+    CONF_NODE_DEVICE_MANUFACTURER,
+    CONF_NODE_DEVICE_MODEL,
+    CONF_NODE_DEVICE_NAME,
+    CONF_NODE_DEVICE_SERIAL,
     CONF_NODE_ICON,
     CONF_NODE_ID,
     CONF_NODE_INVERT,
@@ -771,11 +776,71 @@ class OpcUaOptionsFlow(OptionsFlow):
     def _normalize_discovery_name(name: str) -> str:
         return "".join(ch for ch in str(name).strip().lower() if ch.isalnum() or ch == "_")
 
+    def _extract_device_contexts(self, browsed: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
+        """Build per-node device metadata by finding nearest device-like parent object."""
+        by_id: dict[str, dict[str, Any]] = {
+            str(item.get("node_id")): item for item in browsed if item.get("node_id")
+        }
+        children_by_parent: dict[str, list[dict[str, Any]]] = {}
+        for item in browsed:
+            parent = str(item.get("parent_node_id") or "")
+            if not parent:
+                continue
+            children_by_parent.setdefault(parent, []).append(item)
+
+        def _read_child_value(children: list[dict[str, Any]], *names: str) -> str | None:
+            wanted = set(names)
+            for child in children:
+                if str(child.get("node_class")) != "Variable":
+                    continue
+                n = self._normalize_discovery_name(str(child.get("name") or ""))
+                if n in wanted:
+                    value = child.get("sample_value")
+                    if value is not None and str(value).strip() != "":
+                        return str(value).strip()
+            return None
+
+        device_nodes: dict[str, dict[str, str]] = {}
+        for node_id, item in by_id.items():
+            if str(item.get("node_class")) != "Object":
+                continue
+
+            children = children_by_parent.get(node_id, [])
+            manufacturer = _read_child_value(children, "manufacturer", "vendorname")
+            model = _read_child_value(children, "model", "modelname")
+            serial = _read_child_value(children, "serialnumber", "serial", "serialno")
+            device_name = _read_child_value(children, "devicename", "name") or str(item.get("name") or "")
+
+            type_def = str(item.get("type_definition") or "").lower()
+            # Device classification strictly via HasTypeDefinition marker.
+            if "devicetype" not in type_def:
+                continue
+
+            device_nodes[node_id] = {
+                CONF_NODE_DEVICE_ID: node_id,
+                CONF_NODE_DEVICE_NAME: device_name or node_id,
+                CONF_NODE_DEVICE_MANUFACTURER: manufacturer or "OPC Foundation / PLC Vendor",
+                CONF_NODE_DEVICE_MODEL: model or "OPC UA Device",
+                CONF_NODE_DEVICE_SERIAL: serial or "",
+            }
+
+        contexts: dict[str, dict[str, str]] = {}
+        for node_id in by_id:
+            current = node_id
+            while current:
+                if current in device_nodes:
+                    contexts[node_id] = device_nodes[current]
+                    break
+                current = str(by_id.get(current, {}).get("parent_node_id") or "")
+
+        return contexts
+
     def _discover_light_object_nodes(
         self,
         browsed: list[dict[str, Any]],
         *,
         include_readonly: bool,
+        device_contexts: dict[str, dict[str, str]] | None = None,
     ) -> tuple[list[dict[str, Any]], set[str]]:
         """Detect OPC-UA Light objects via Object TypeDefinition (LightType).
 
@@ -834,6 +899,8 @@ class OpcUaOptionsFlow(OptionsFlow):
                 CONF_NODE_NAME: str(item.get("name") or state_node.get("name") or state_node_id),
                 CONF_NODE_ID: state_node_id,
             }
+            if device_contexts and node_id in device_contexts:
+                cfg.update(device_contexts[node_id])
 
             def _pick(*names: str) -> str | None:
                 for n in names:
@@ -946,6 +1013,7 @@ class OpcUaOptionsFlow(OptionsFlow):
         item: dict[str, Any],
         *,
         include_readonly: bool,
+        device_contexts: dict[str, dict[str, str]] | None = None,
     ) -> dict[str, Any] | None:
         if item.get("node_class") != "Variable":
             return None
@@ -953,6 +1021,11 @@ class OpcUaOptionsFlow(OptionsFlow):
         node_id = str(item.get("node_id", ""))
         if not node_id:
             return None
+
+        def _with_device(cfg: dict[str, Any]) -> dict[str, Any]:
+            if device_contexts and node_id in device_contexts:
+                cfg.update(device_contexts[node_id])
+            return cfg
 
         name = str(item.get("name") or node_id)
         path = str(item.get("path") or name)
@@ -964,17 +1037,21 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         if sample_type in ("bool", "boolean"):
             if writable:
-                return {
-                    CONF_NODE_KIND: NODE_KIND_SWITCH,
+                return _with_device(
+                    {
+                        CONF_NODE_KIND: NODE_KIND_SWITCH,
+                        CONF_NODE_NAME: name,
+                        CONF_NODE_ID: node_id,
+                    }
+                )
+
+            return _with_device(
+                {
+                    CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR,
                     CONF_NODE_NAME: name,
                     CONF_NODE_ID: node_id,
                 }
-
-            return {
-                CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR,
-                CONF_NODE_NAME: name,
-                CONF_NODE_ID: node_id,
-            }
+            )
 
         if sample_type in ("int", "float", "int32", "int64", "uint16", "uint32", "uint64", "double"):
             cfg = {
@@ -985,23 +1062,27 @@ class OpcUaOptionsFlow(OptionsFlow):
             unit = self._guess_unit(name, path, item.get("engineering_units"))
             if unit:
                 cfg[CONF_NODE_UNIT] = unit
-            return cfg
+            return _with_device(cfg)
 
         if sample_type in ("str", "string"):
-            return {
-                CONF_NODE_KIND: NODE_KIND_SENSOR,
-                CONF_NODE_NAME: name,
-                CONF_NODE_ID: node_id,
-                CONF_NODE_ICON: "mdi:form-textbox",
-            }
+            return _with_device(
+                {
+                    CONF_NODE_KIND: NODE_KIND_SENSOR,
+                    CONF_NODE_NAME: name,
+                    CONF_NODE_ID: node_id,
+                    CONF_NODE_ICON: "mdi:form-textbox",
+                }
+            )
 
         # Fallback for unknown but readable variables
         if sample_type:
-            return {
-                CONF_NODE_KIND: NODE_KIND_SENSOR,
-                CONF_NODE_NAME: name,
-                CONF_NODE_ID: node_id,
-            }
+            return _with_device(
+                {
+                    CONF_NODE_KIND: NODE_KIND_SENSOR,
+                    CONF_NODE_NAME: name,
+                    CONF_NODE_ID: node_id,
+                }
+            )
 
         return None
 
@@ -1418,9 +1499,12 @@ class OpcUaOptionsFlow(OptionsFlow):
                 await manager.disconnect()
 
             if not errors:
+                device_contexts = self._extract_device_contexts(browsed)
+
                 light_candidates, consumed_node_ids = self._discover_light_object_nodes(
                     browsed,
                     include_readonly=include_readonly,
+                    device_contexts=device_contexts,
                 )
 
                 candidates: list[dict[str, Any]] = list(light_candidates)
@@ -1434,6 +1518,7 @@ class OpcUaOptionsFlow(OptionsFlow):
                     cfg = self._map_discovered_item(
                         item,
                         include_readonly=include_readonly,
+                        device_contexts=device_contexts,
                     )
                     if cfg:
                         candidates.append(cfg)

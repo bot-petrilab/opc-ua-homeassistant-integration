@@ -6,7 +6,16 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .coordinator import OpcUaCoordinator
-from .const import CONF_NODE_ID, CONF_NODE_NAME, DOMAIN
+from .const import (
+    CONF_NODE_DEVICE_ID,
+    CONF_NODE_DEVICE_MANUFACTURER,
+    CONF_NODE_DEVICE_MODEL,
+    CONF_NODE_DEVICE_NAME,
+    CONF_NODE_DEVICE_SERIAL,
+    CONF_NODE_ID,
+    CONF_NODE_NAME,
+    DOMAIN,
+)
 
 
 class OpcUaBaseEntity(CoordinatorEntity[OpcUaCoordinator]):
@@ -38,12 +47,25 @@ class OpcUaBaseEntity(CoordinatorEntity[OpcUaCoordinator]):
 
     @property
     def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._endpoint)},
-            name=f"OPC UA {self._endpoint}",
-            manufacturer="OPC Foundation / PLC Vendor",
-            model="OPC UA Endpoint",
+        device_id = str(self._node_cfg.get(CONF_NODE_DEVICE_ID) or self._endpoint)
+        device_name = str(self._node_cfg.get(CONF_NODE_DEVICE_NAME) or f"OPC UA {self._endpoint}")
+        manufacturer = str(
+            self._node_cfg.get(CONF_NODE_DEVICE_MANUFACTURER) or "OPC Foundation / PLC Vendor"
         )
+        model = str(self._node_cfg.get(CONF_NODE_DEVICE_MODEL) or "OPC UA Endpoint")
+
+        info = DeviceInfo(
+            identifiers={(DOMAIN, f"{self._endpoint}|{device_id}")},
+            name=device_name,
+            manufacturer=manufacturer,
+            model=model,
+        )
+
+        serial = self._node_cfg.get(CONF_NODE_DEVICE_SERIAL)
+        if serial:
+            info["serial_number"] = str(serial)
+
+        return info
 
     def _raw_value(self) -> Any:
         return self.coordinator.data.get(self._node_id)

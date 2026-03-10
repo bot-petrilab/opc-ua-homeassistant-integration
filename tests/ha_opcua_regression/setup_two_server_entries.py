@@ -72,7 +72,9 @@ async def main() -> None:
 
             entries = await call_api("GET", "config/config_entries/entry")
             for row in entries:
-                if row.get("domain") == "opcua" and ((row.get("data") or {}).get("endpoint") == endpoint):
+                if row.get("domain") != "opcua":
+                    continue
+                if ((row.get("data") or {}).get("endpoint") == endpoint) or row.get("title") == title:
                     return row["entry_id"]
             raise RuntimeError(f"Entry not found after create for {endpoint}")
 
@@ -84,8 +86,8 @@ async def main() -> None:
             await page.keyboard.press("Enter")
             await page.wait_for_timeout(3500)
 
-        entry1 = await ensure_opc_entry(OPC_ENDPOINT_1, "OPC UA Core Simulator")
-        entry2 = await ensure_opc_entry(OPC_ENDPOINT_2, "OPC UA Entity Matrix")
+        entry1 = await ensure_opc_entry(OPC_ENDPOINT_1, "OPC UA All Entities Simulator")
+        entry2 = await ensure_opc_entry(OPC_ENDPOINT_2, "OPC UA Device Split Simulator")
 
         print(f"BOUND_ENDPOINT_1={OPC_ENDPOINT_1} ENTRY_ID={entry1}")
         print(f"BOUND_ENDPOINT_2={OPC_ENDPOINT_2} ENTRY_ID={entry2}")

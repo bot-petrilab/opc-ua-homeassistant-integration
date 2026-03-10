@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.38
+- Testbed consolidated to exactly two committed OPC-UA servers:
+  - `server_all_entities.py` (4840): all datatypes + all supported integration entity kinds
+  - `server_device_split.py` (4842): typed devices (`DeviceType`) + typed lights (`LightType`) split across multiple HA devices
+- Removed legacy server files from repository (`server.py`, `server_entity_matrix.py`).
+- Added `testbed/opcua-sim/README.md` with startup and HA binding instructions.
+- Updated docs/tests to reference the new two-server layout.
+
+## 1.0.37
+- Cleanup pass: removed remaining `EntityDomain` test nodes/usages from the active matrix simulator path.
+- Documentation wording aligned to strict `HasTypeDefinition`-based LightType discovery.
+- No functional fallback markers remain in runtime discovery logic.
+
+## 1.0.36
+- Enforced strict type-based discovery for light/device classification via `HasTypeDefinition` only:
+  - Light discovery continues to require `LightType` TypeDefinition
+  - Device grouping now requires `DeviceType` TypeDefinition (removed heuristic fallback by name/metadata)
+- Updated entity-matrix simulator to model devices with explicit `DeviceType` so automatic HA device grouping works with strict type detection.
+
+## 1.0.35
+- Implemented OPC-UA device auto-grouping for discovered entities:
+  - auto-discovery now detects nearest device-like parent object (manufacturer/model/serial/type/name heuristics)
+  - persists per-node device metadata into node config
+  - entities now expose `device_info` from OPC-UA device metadata, creating separate devices in Home Assistant automatically
+- Updated matrix simulator to model real device hierarchy under `Home.Devices/*` with identity metadata and lights assigned to different devices.
+- Updated LightType discovery regression expectation to include `Rainbow Pro`.
+
 ## 1.0.34
 - Fixed advanced auto-discovered lights being dropped by Home Assistant due invalid color-mode combinations.
 - Light entities now normalize discovered color capabilities to a HA-safe single strongest color mode priority:
