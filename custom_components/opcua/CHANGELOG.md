@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.0.45
+- Fixed secure connection validation/connect robustness for Basic256Sha256 flows by adding retry fallback without optional `server_cert_path` tail when primary secure connect fails.
+- Improves `validate_on_save=true` behavior for secure user/password test server combinations.
+
+## 1.0.44
+- Config flow UX fix: removed hard field-level `required` errors for client certificate/key paths.
+- Secure setup now validates connectivity and reports connection issues without forcing immediate red-field errors, preventing false required markers when `Security=None` is selected.
+
+## 1.0.43
+- Fixed zeroconf add flow: discovered servers no longer create entries immediately with `Security=None`.
+- After pressing "Add", flow now opens a dedicated setup step to configure security policy and optional authentication/cert paths before entry creation.
+- This enables proper credential/security configuration for discovered secure servers (e.g. Basic256Sha256 variants).
+
+## 1.0.42
+- Added secure OPC-UA test server requiring both
+  - `Basic256Sha256_SignAndEncrypt` and
+  - Username/Password authentication (`server_basic256_userpass.py`, port `4851`).
+- Updated testbed documentation with startup and credential details for the new secure userpass server.
+
+## 1.0.41
+- Added dedicated OPC-UA security test server for `Basic256Sha256_SignAndEncrypt`:
+  - `testbed/opcua-sim/server_basic256.py` (port `4850`)
+  - committed server cert/key under `testbed/opcua-sim/certs/`
+- Added testbed documentation for secure server startup and endpoint usage.
+
+## 1.0.40
+- Changed HA device assignment behavior: entities are only attached to a Home Assistant device when an explicit OPC-UA `device_id` mapping exists in node config.
+- If no explicit device mapping is present, entity is created without a device (standalone entity in HA).
+
 ## 1.0.39
 - Polling intervals now support decimal seconds (0.1s granularity) across setup and options flows.
 - You can now configure values like `0.5` seconds (500 ms) for base interval and poll groups.

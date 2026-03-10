@@ -15,10 +15,12 @@ Custom Home Assistant integration (domain: `opcua`) with display name **OPC-UA**
 
 ## Development testbed
 
-Es gibt **genau zwei** Test-Server:
+Es gibt zwei Standard-Test-Server plus einen Security-Testserver:
 
 - `testbed/opcua-sim/server_all_entities.py` (Port `4840`): alle Datentypen + alle von der Integration unterstützten Entity-Typen
 - `testbed/opcua-sim/server_device_split.py` (Port `4842`): Datentypen + Lichtobjekte über mehrere Geräte (`DeviceType` / `LightType` via HasTypeDefinition)
+- `testbed/opcua-sim/server_basic256.py` (Port `4850`): Security-Testserver (`Basic256Sha256_SignAndEncrypt`)
+- `testbed/opcua-sim/server_basic256_userpass.py` (Port `4851`): Security + Username/Password Pflicht
 
 Hilfsskripte:
 - `tests/ha_opcua_regression/setup_entity_matrix_entry.py` bindet den All-Entities-Server in Home Assistant ein und erstellt alle Plattform-Entities

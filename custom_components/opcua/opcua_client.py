@@ -48,6 +48,7 @@ class OpcUaClientManager:
                 return
 
             client = Client(self.endpoint)
+            sec_retry_base: str | None = None
 
             if self.security_policy == SECURITY_POLICY_NONE:
                 pass
@@ -67,15 +68,34 @@ class OpcUaClientManager:
                     else "SignAndEncrypt"
                 )
 
-                sec = (
-                    f"Basic256Sha256,{mode},{self.client_cert_path},{self.client_key_path}"
-                )
-                if self.server_cert_path:
-                    sec += f",{self.server_cert_path}"
-                if self.client_key_password:
-                    sec += f",{self.client_key_password}"
+                sec_base = f"Basic256Sha256,{mode},{self.client_cert_path},{self.client_key_path}"
+                sec_retry_base = sec_base
 
-                await client.set_security_string(sec)
+                # Primary attempt with optional server cert / key password.
+                sec_candidates: list[str] = []
+                sec_full = sec_base
+                if self.server_cert_path:
+                    sec_full += f",{self.server_cert_path}"
+                if self.client_key_password:
+                    sec_full += f",{self.client_key_password}"
+                sec_candidates.append(sec_full)
+
+                # Fallback: some asyncua/server combos reject/parse optional tail parameters differently.
+                if sec_full != sec_base:
+                    sec_candidates.append(sec_base)
+
+                last_err: Exception | None = None
+                for sec in sec_candidates:
+                    try:
+                        await client.set_security_string(sec)
+                        last_err = None
+                        break
+                    except Exception as err:
+                        last_err = err
+                        _LOGGER.debug("set_security_string failed for candidate '%s': %s", sec, err)
+
+                if last_err is not None:
+                    raise last_err
             else:
                 raise ValueError(f"Unsupported security policy: {self.security_policy}")
 
@@ -84,7 +104,32 @@ class OpcUaClientManager:
             if self.password:
                 client.set_password(self.password)
 
-            await client.connect()
+            try:
+                await client.connect()
+            except Exception as err:
+                # Fallback for secure endpoints when optional server-cert tail caused compatibility issues.
+                if sec_retry_base and self.server_cert_path:
+                    _LOGGER.warning(
+                        "Primary secure connect failed for %s, retrying without server_cert_path tail: %s",
+                        self.endpoint,
+                        err,
+                    )
+                    try:
+                        await client.disconnect()
+                    except Exception:
+                        pass
+
+                    retry_client = Client(self.endpoint)
+                    await retry_client.set_security_string(sec_retry_base)
+                    if self.username:
+                        retry_client.set_user(self.username)
+                    if self.password:
+                        retry_client.set_password(self.password)
+                    await retry_client.connect()
+                    client = retry_client
+                else:
+                    raise
+
             self._client = client
             _LOGGER.info("Connected to OPC UA endpoint %s", self.endpoint)
 

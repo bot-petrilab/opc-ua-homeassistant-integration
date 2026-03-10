@@ -46,9 +46,13 @@ class OpcUaBaseEntity(CoordinatorEntity[OpcUaCoordinator]):
         return self.coordinator.last_update_success and self._node_id in self.coordinator.data
 
     @property
-    def device_info(self) -> DeviceInfo:
-        device_id = str(self._node_cfg.get(CONF_NODE_DEVICE_ID) or self._endpoint)
-        device_name = str(self._node_cfg.get(CONF_NODE_DEVICE_NAME) or f"OPC UA {self._endpoint}")
+    def device_info(self) -> DeviceInfo | None:
+        raw_device_id = self._node_cfg.get(CONF_NODE_DEVICE_ID)
+        if not raw_device_id:
+            return None
+
+        device_id = str(raw_device_id)
+        device_name = str(self._node_cfg.get(CONF_NODE_DEVICE_NAME) or device_id)
         manufacturer = str(
             self._node_cfg.get(CONF_NODE_DEVICE_MANUFACTURER) or "OPC Foundation / PLC Vendor"
         )

@@ -213,29 +213,132 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="cannot_connect")
 
         if user_input is not None:
-            title = self._discovered_name or endpoint
-            return self.async_create_entry(
-                title=title,
-                data={
-                    CONF_ENDPOINT: endpoint,
-                    CONF_SECURITY_POLICY: DEFAULT_SECURITY_POLICY,
-                    CONF_USERNAME: None,
-                    CONF_PASSWORD: None,
-                    CONF_CLIENT_CERT_PATH: None,
-                    CONF_CLIENT_KEY_PATH: None,
-                    CONF_SERVER_CERT_PATH: None,
-                    CONF_CLIENT_KEY_PASSWORD: None,
-                    CONF_NOTIFY_ENABLED: DEFAULT_NOTIFY_ENABLED,
-                    CONF_NOTIFY_SERVICE: DEFAULT_NOTIFY_SERVICE,
-                    CONF_NOTIFY_TITLE_PREFIX: DEFAULT_NOTIFY_TITLE_PREFIX,
-                    CONF_NOTIFY_KEYWORDS: list(DEFAULT_NOTIFY_KEYWORDS),
-                    CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_SECONDS,
-                    CONF_NODES: [],
-                },
-            )
-
+            return await self.async_step_zeroconf_setup()
         return self.async_show_form(
             step_id="zeroconf_confirm",
+            description_placeholders={
+                "name": self._discovered_name or "OPC UA Server",
+                "endpoint": endpoint,
+            },
+        )
+
+    async def async_step_zeroconf_setup(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Configure security/auth for a discovered OPC-UA server before creating entry."""
+        endpoint = self._discovered_endpoint
+        if not endpoint:
+            return self.async_abort(reason="cannot_connect")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
+            username = user_input.get(CONF_USERNAME) or None
+            password = user_input.get(CONF_PASSWORD) or None
+            client_cert_path = (user_input.get(CONF_CLIENT_CERT_PATH) or "").strip() or None
+            client_key_path = (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None
+            server_cert_path = (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None
+            client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
+            notify_enabled = bool(user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED))
+            notify_service = str(user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE).strip()
+            notify_title_prefix = str(user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX).strip()
+            notify_keywords_raw = str(user_input.get(CONF_NOTIFY_KEYWORDS) or "").strip()
+            if notify_keywords_raw:
+                notify_keywords = [k.strip().lower() for k in notify_keywords_raw.split(",") if k.strip()]
+            else:
+                notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
+
+            validate_on_save = bool(user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE))
+            scan_interval = float(user_input[CONF_SCAN_INTERVAL])
+
+            secure_policy = security_policy != SECURITY_POLICY_NONE
+
+            if not errors and validate_on_save:
+                try:
+                    manager = OpcUaClientManager(
+                        endpoint=endpoint,
+                        security_policy=security_policy,
+                        username=username,
+                        password=password,
+                        client_cert_path=client_cert_path,
+                        client_key_path=client_key_path,
+                        server_cert_path=server_cert_path,
+                        client_key_password=client_key_password,
+                    )
+                    await manager.ensure_connected()
+                    await manager.disconnect()
+                except Exception as err:
+                    _LOGGER.warning("OPC UA zeroconf setup validation failed for %s: %s", endpoint, err)
+                    errors["base"] = "cannot_connect"
+
+            if not errors:
+                title = self._discovered_name or endpoint
+                return self.async_create_entry(
+                    title=title,
+                    data={
+                        CONF_ENDPOINT: endpoint,
+                        CONF_SECURITY_POLICY: security_policy,
+                        CONF_USERNAME: username,
+                        CONF_PASSWORD: password,
+                        CONF_CLIENT_CERT_PATH: client_cert_path,
+                        CONF_CLIENT_KEY_PATH: client_key_path,
+                        CONF_SERVER_CERT_PATH: server_cert_path,
+                        CONF_CLIENT_KEY_PASSWORD: client_key_password,
+                        CONF_NOTIFY_ENABLED: notify_enabled,
+                        CONF_NOTIFY_SERVICE: notify_service,
+                        CONF_NOTIFY_TITLE_PREFIX: notify_title_prefix,
+                        CONF_NOTIFY_KEYWORDS: notify_keywords,
+                        CONF_SCAN_INTERVAL: scan_interval,
+                        CONF_NODES: [],
+                    },
+                )
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(CONF_SECURITY_POLICY, default=DEFAULT_SECURITY_POLICY): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(SECURITY_POLICIES),
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+                vol.Optional(CONF_USERNAME): TextSelector(TextSelectorConfig(type="text")),
+                vol.Optional(CONF_PASSWORD): TextSelector(TextSelectorConfig(type="password")),
+                vol.Optional(CONF_CLIENT_CERT_PATH): TextSelector(
+                    TextSelectorConfig(type="text", autocomplete="off")
+                ),
+                vol.Optional(CONF_CLIENT_KEY_PATH): TextSelector(
+                    TextSelectorConfig(type="text", autocomplete="off")
+                ),
+                vol.Optional(CONF_SERVER_CERT_PATH): TextSelector(
+                    TextSelectorConfig(type="text", autocomplete="off")
+                ),
+                vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
+                    TextSelectorConfig(type="password")
+                ),
+                vol.Optional(CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED): BooleanSelector(),
+                vol.Optional(
+                    CONF_NOTIFY_SERVICE,
+                    default=DEFAULT_NOTIFY_SERVICE,
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_NOTIFY_TITLE_PREFIX,
+                    default=DEFAULT_NOTIFY_TITLE_PREFIX,
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_NOTIFY_KEYWORDS,
+                    default=",".join(DEFAULT_NOTIFY_KEYWORDS),
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS): NumberSelector(
+                    NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
+                ),
+                vol.Required(CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE): BooleanSelector(),
+            }
+        )
+
+        return self.async_show_form(
+            step_id="zeroconf_setup",
+            data_schema=data_schema,
+            errors=errors,
             description_placeholders={
                 "name": self._discovered_name or "OPC UA Server",
                 "endpoint": endpoint,
@@ -272,11 +375,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors[CONF_ENDPOINT] = "invalid_endpoint"
 
             secure_policy = security_policy != SECURITY_POLICY_NONE
-            if secure_policy:
-                if not client_cert_path:
-                    errors[CONF_CLIENT_CERT_PATH] = "required"
-                if not client_key_path:
-                    errors[CONF_CLIENT_KEY_PATH] = "required"
 
             if not errors:
                 # Avoid false "already_in_progress" collisions with concurrent zeroconf flows.
