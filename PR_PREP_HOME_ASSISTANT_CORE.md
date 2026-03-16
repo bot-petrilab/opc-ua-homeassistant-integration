@@ -1,81 +1,81 @@
 # OPC-UA → Home Assistant Core PR Prep
 
-Stand: 2026-03-06
+Status: 2026-03-10
 
-## Ziel
-Diese Checkliste bereitet die bestehende `opcua`-Integration für einen PR gegen `home-assistant/core` vor.
+## Goal
+Prepare the existing `opcua` integration for a PR against `home-assistant/core`.
 
 ---
 
-## Aktueller Implementierungsstatus (fertig)
+## Current implementation status (done)
 
 - Domain: `opcua`
-- Config Entry + Config Flow + Options Flow vorhanden
-- Runtime über `DataUpdateCoordinator`
-- Plattformen vorhanden:
+- Config entry + config flow + options flow implemented
+- Runtime based on `DataUpdateCoordinator`
+- Platforms implemented:
   - `sensor`, `binary_sensor`, `switch`, `light`
   - `button`, `climate`, `cover`, `date`, `datetime`, `fan`, `notify`, `number`, `scene`, `select`, `text`, `time`, `weather`
-- OPC-UA Discovery/Browse/Auto-Mapping vorhanden
-- Security-Policy Support:
+- OPC-UA discovery/browse/auto-mapping implemented
+- Security policy support:
   - `None`
   - `Basic256Sha256_Sign`
   - `Basic256Sha256_SignAndEncrypt`
-- Notification-Bridge Event: `opcua_notification`
+- Notification bridge event: `opcua_notification`
 
-## Verifizierte Tests (lokal)
+## Verified tests (local)
 
-- `tests/ha_opcua_regression/run_full_e2e_matrix.sh` (Endpoints 4840/4842/4844) → PASS
+- `tests/ha_opcua_regression/run_full_e2e_matrix.sh` (endpoints 4840/4842) → PASS
 - `tests/ha_opcua_regression/setup_entity_matrix_entry.py` → PASS
 - `tests/ha_opcua_regression/entity_matrix_service_actions_check.py` → PASS
   - `number.set_value`, `date.set_value`, `time.set_value`, `fan.turn_on`
-- `pytest tests/components/opcua -q` → PASS (`29 passed`)
+- `pytest tests/components/opcua -q` → PASS
 - `tests/ci_smoke.py` → PASS
 
-## Verifizierte CI (Repo)
+## Verified CI (repo)
 
-- GitHub Actions Run `22545786693` → PASS
+- GitHub Actions run passes (latest main)
 
 ---
 
-## Pflichtarbeiten für echten Core-PR (noch zu erledigen)
+## Required work for actual Core PR (still open)
 
-> Diese Punkte sind für einen Merge in `home-assistant/core` entscheidend.
+> These items are critical for merge readiness in `home-assistant/core`.
 
-1. **Code in Core-Struktur übernehmen**
-   - Von: `custom_components/opcua/*`
-   - Nach: `homeassistant/components/opcua/*`
+1. **Move code into Core structure**
+   - From: `custom_components/opcua/*`
+   - To: `homeassistant/components/opcua/*`
 
-2. **Core-konforme Test-Suite ergänzen**
+2. **Complete Core-style test suite**
    - [x] `tests/components/opcua/test_config_flow.py`
    - [x] `tests/components/opcua/test_init.py`
    - [ ] `tests/components/opcua/test_coordinator.py`
-   - [x] `tests/components/opcua/test_<platform>.py` (alle unterstützten Plattformen vorhanden)
+   - [x] `tests/components/opcua/test_<platform>.py` (all currently supported platforms present)
 
-3. **Core-typische Artefakte/Standards prüfen**
-   - Diagnostics (`diagnostics.py`) erwägen
-   - Repairs/Issue-Handling bei Setup-Fehlern prüfen
-   - Translation-Keys/strings auf Core-Review-Niveau aufräumen
+3. **Core artifacts/standards review**
+   - Add diagnostics (`diagnostics.py`) as needed
+   - Add Repairs/issue handling for setup failures as needed
+   - Polish translation keys/strings to Core review quality
 
-4. **Smoke-Hilfscode entfernen**
-   - [ ] Fallback in `const.py` für `Platform` (nur für Standalone-Smoke) vor Core-PR entfernen.
+4. **Remove smoke-only helper code**
+   - [ ] Remove `Platform` fallback in `const.py` before Core PR.
 
-5. **Minimalen, reviewbaren Scope festlegen**
-   - Empfehlung: initialer Core-PR mit kleinerem Plattform-Umfang (z. B. `sensor`, `binary_sensor`, `switch`, `light`) und Folge-PRs für weitere Typen.
-
----
-
-## Empfohlene PR-Strategie
-
-### Option A (empfohlen): gestuft
-1. PR 1: Grundintegration + Kernplattformen + solide Core-Tests
-2. PR 2+: zusätzliche Plattformen (`climate`, `cover`, `fan`, ...)
-
-### Option B: Full Scope
-- alles in einem PR, aber deutlich höheres Review-Risiko.
+5. **Define a minimal reviewable scope**
+   - Recommendation: initial Core PR with smaller platform scope (`sensor`, `binary_sensor`, `switch`, `light`) and follow-up PRs for additional platform types.
 
 ---
 
-## PR-Text (Draft)
+## Recommended PR strategy
+
+### Option A (recommended): staged
+1. PR 1: base integration + core platforms + strong Core tests
+2. PR 2+: additional platforms (`climate`, `cover`, `fan`, ...)
+
+### Option B: full scope
+- everything in one PR, with significantly higher review risk.
+
+---
+
+## PR text (draft)
 
 **Title**
 `Add OPC-UA integration (config entry based) with coordinator runtime`
@@ -84,11 +84,11 @@ Diese Checkliste bereitet die bestehende `opcua`-Integration für einen PR gegen
 - Adds new `opcua` integration with config entries.
 - Uses `asyncua` client manager + `DataUpdateCoordinator`.
 - Supports secure connection policies (`Basic256Sha256_Sign`, `Basic256Sha256_SignAndEncrypt`).
-- Includes discovery/browse based entity onboarding.
+- Includes discovery/browse-based entity onboarding.
 - Adds initial platform support + tests.
 
 **Why**
-- Enables native OPC-UA based industrial/PLC telemetry and control in Home Assistant.
+- Enables native OPC-UA-based industrial/PLC telemetry and control in Home Assistant.
 
 ---
 

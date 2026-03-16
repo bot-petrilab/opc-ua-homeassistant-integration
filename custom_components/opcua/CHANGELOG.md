@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.47
+- Translated PR preparation files and remaining integration/readme guidance to English.
+- Updated core draft/checklist language consistency for PR submission artifacts.
+
+## 1.0.46
+- Translated README/guidance text to English in main project docs and regression/testbed instructions.
+- Standardized newly added comments/instructions to English-only wording.
+
 ## 1.0.45
 - Fixed secure connection validation/connect robustness for Basic256Sha256 flows by adding retry fallback without optional `server_cert_path` tail when primary secure connect fails.
 - Improves `validate_on_save=true` behavior for secure user/password test server combinations.

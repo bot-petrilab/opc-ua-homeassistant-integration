@@ -1,6 +1,6 @@
 # Home Assistant Core PR Checklist – OPC-UA
 
-Basis: 
+References:
 - Core architecture: https://developers.home-assistant.io/docs/architecture/core/
 - Config entries: https://developers.home-assistant.io/docs/config_entries_index/
 - Config flow: https://developers.home-assistant.io/docs/config_entries_config_flow_handler/
@@ -8,39 +8,39 @@ Basis:
 - Quality scale: https://developers.home-assistant.io/docs/core/integration-quality-scale/
 - Checklist: https://developers.home-assistant.io/docs/core/integration-quality-scale/checklist/
 
-## Bronze (PR-MVP)
+## Bronze (PR MVP)
 
-- [x] `config_flow` – UI setup vorhanden
-- [x] `unique_config_entry` – Duplikate werden abgefangen
-- [x] `runtime_data` – `ConfigEntry.runtime_data` wird genutzt
-- [x] `test_before_setup` – Setup prüft Verbindung (ConfigEntryNotReady)
-- [x] `appropriate_polling` – Coordinator-Intervall konfigurierbar
-- [x] `entity_unique_id` – eindeutige IDs pro Entity
-- [x] `config_entry_unloading` – Unload implementiert
-- [x] `discovery` – Zeroconf + Discovery-Flows vorhanden
-- [x] `config-flow-test-coverage` – pytest-Tests in `tests/components/opcua` vorhanden (`test_config_flow.py` + split platform tests)
-- [ ] `brands` – Brand assets im Core/brands prüfen (separater PR/Asset-Pfad)
-- [ ] `has_entity_name` – pro Plattform validieren und ggf. nachziehen
-- [ ] `docs-*` – Endnutzer-Doku im core-docs Stil finalisieren
+- [x] `config_flow` – UI setup is implemented
+- [x] `unique_config_entry` – duplicate entries are prevented
+- [x] `runtime_data` – uses `ConfigEntry.runtime_data`
+- [x] `test_before_setup` – setup validates connection (`ConfigEntryNotReady`)
+- [x] `appropriate_polling` – coordinator interval is configurable
+- [x] `entity_unique_id` – unique IDs per entity
+- [x] `config_entry_unloading` – unload is implemented
+- [x] `discovery` – zeroconf + discovery flows are implemented
+- [x] `config-flow-test-coverage` – pytest coverage exists in `tests/components/opcua` (`test_config_flow.py` + split platform tests)
+- [ ] `brands` – verify brand assets in `core/brands` (separate PR/asset path)
+- [ ] `has_entity_name` – validate per platform and align where needed
+- [ ] `docs-*` – finalize end-user docs in core-docs style
 
-## Silver/Gold vorbereiten
+## Silver/Gold preparation
 
-- [ ] Reauth-Flow (falls Auth relevant)
+- [ ] Reauth flow (if auth is relevant)
 - [ ] Diagnostics (`diagnostics.py`)
-- [ ] Repair-Issues bei Benutzerintervention
-- [ ] Höhere Unit-Test-Abdeckung (>95% im Integrationsteil)
+- [ ] Repairs issues for user intervention
+- [ ] Higher unit test coverage (>95% in integration module)
 
-## Technische PR-Vorbereitung
+## Technical PR preparation
 
-- [ ] Zielpfad auf Core-Struktur umsetzen: `homeassistant/components/opcua`
-- [ ] Standalone-Smoke-Hilfen entfernen (z. B. `Platform`-Fallback in `const.py`)
-- [ ] Core-lint/typing lokal laufen lassen (im Core-Repo)
-- [ ] Core-pytest für `tests/components/opcua/*`
-- [ ] PR mit Bronze-Checkliste + Links auf Tests/Code einreichen
+- [ ] Move code to Core structure: `homeassistant/components/opcua`
+- [ ] Remove standalone smoke helpers (e.g. `Platform` fallback in `const.py`)
+- [ ] Run core lint/typing locally (inside core repo)
+- [ ] Run core pytest for `tests/components/opcua/*`
+- [ ] Submit PR with Bronze checklist + links to tests/code
 
-## Empfohlene Einreichungsstrategie
+## Recommended submission strategy
 
-1. **PR 1 (MVP/Bronze):** config flow + coordinator + Kernplattformen + Core-Tests
-2. **PR 2+:** erweiterte Plattformen (`climate`, `cover`, `weather`, ...)
+1. **PR 1 (MVP/Bronze):** config flow + coordinator + core platforms + core tests
+2. **PR 2+:** extended platforms (`climate`, `cover`, `weather`, ...)
 
-So sinkt das Review-Risiko deutlich.
+This significantly reduces review risk.

@@ -31,7 +31,7 @@ OPC-UA is a common industrial protocol (PLC, SCADA, machine telemetry/control). 
 
 ## Validation
 
-- Local full 3-endpoint E2E matrix passing (`run_full_e2e_matrix.sh`)
+- Local full 2-endpoint E2E matrix passing (`run_full_e2e_matrix.sh`)
 - Matrix service-action checks passing (`number.set_value`, `date.set_value`, `time.set_value`, `fan.turn_on`)
 - Home Assistant-style split component tests passing (`pytest tests/components/opcua -q` → `29 passed`)
 - CI smoke passing (`tests/ci_smoke.py`)

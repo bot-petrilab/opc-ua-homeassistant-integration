@@ -1,14 +1,14 @@
-# OPC-UA Test Server
+# OPC-UA Test Servers
 
-Dieses Verzeichnis enthält zwei Standard-Testserver plus Security-Testserver.
+This directory contains two standard test servers plus security-focused test servers.
 
 ## 1) All Entities Server (Port 4840)
 
-Datei: `server_all_entities.py`
+File: `server_all_entities.py`
 
-Zweck:
-- alle Datentypen, die in der Integration relevant sind
-- alle unterstützten Entity-Typen (sensor, binary_sensor, switch, light, button, climate, cover, date, datetime, fan, notify, number, scene, select, text, time, weather)
+Purpose:
+- all data types relevant to the integration
+- all supported entity types (sensor, binary_sensor, switch, light, button, climate, cover, date, datetime, fan, notify, number, scene, select, text, time, weather)
 
 Start:
 
@@ -22,12 +22,12 @@ Endpoint:
 
 ## 2) Device Split Server (Port 4842)
 
-Datei: `server_device_split.py`
+File: `server_device_split.py`
 
-Zweck:
-- modelliert Gerätehierarchie mit `DeviceType` (HasTypeDefinition)
-- Lichtobjekte als `LightType` (HasTypeDefinition)
-- Tests für automatische Geräteaufteilung in Home Assistant
+Purpose:
+- models device hierarchy with `DeviceType` (HasTypeDefinition)
+- models light objects with `LightType` (HasTypeDefinition)
+- tests automatic device grouping in Home Assistant
 
 Start:
 
@@ -41,11 +41,11 @@ Endpoint:
 
 ## 3) Basic256Sha256 Security Server (Port 4850)
 
-Datei: `server_basic256.py`
+File: `server_basic256.py`
 
-Zweck:
-- Security-Testserver für `Basic256Sha256_SignAndEncrypt`
-- Integration muss mit Security Policy `Basic256Sha256_SignAndEncrypt` angebunden werden
+Purpose:
+- security test server for `Basic256Sha256_SignAndEncrypt`
+- integration must be configured with security policy `Basic256Sha256_SignAndEncrypt`
 
 Start:
 
@@ -57,15 +57,15 @@ python3 testbed/opcua-sim/server_basic256.py
 Endpoint:
 - `opc.tcp://127.0.0.1:4850`
 
-Server-Zertifikat:
+Server certificate:
 - `testbed/opcua-sim/certs/server_basic256_cert.pem`
 
 ## 4) Basic256Sha256 + Username/Password Server (Port 4851)
 
-Datei: `server_basic256_userpass.py`
+File: `server_basic256_userpass.py`
 
-Zweck:
-- Security-Testserver mit verschlüsseltem Kanal **und** verpflichtender Benutzer-Authentifizierung
+Purpose:
+- security test server with encrypted channel **and** mandatory user authentication
 - Security Policy: `Basic256Sha256_SignAndEncrypt`
 - Identity Token: `Username`
 
@@ -85,7 +85,7 @@ Credentials (Test):
 
 ## Home Assistant Bindings
 
-Beide Server automatisch als Config Entries anlegen:
+Create both standard servers as Home Assistant config entries automatically:
 
 ```bash
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/setup_two_server_entries.py

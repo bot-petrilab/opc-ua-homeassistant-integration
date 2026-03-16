@@ -54,21 +54,21 @@ Optional notification event bridge test:
 
 ## LightType Discovery Test (HasTypeDefinition)
 
-Starte den Device-Split-Server (LightType/DeviceType) (Terminal 1):
+Start the device-split server (LightType/DeviceType) (Terminal 1):
 
 ```bash
 cd /home/user/.openclaw/workspace/opc-ua-homeassistant-integration
 python3 testbed/opcua-sim/server_device_split.py
 ```
 
-Binde die Integration in Home Assistant ein und führe Auto-Discovery aus (Terminal 2):
+Bind the integration in Home Assistant and run auto-discovery (Terminal 2):
 
 ```bash
 cd /home/user/.openclaw/workspace/opc-ua-homeassistant-integration
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/setup_lighttype_autodiscovery_entry.py
 ```
 
-Optional mit explizitem Endpoint:
+Optional with explicit endpoint:
 
 ```bash
 OPC_ENDPOINT=opc.tcp://127.0.0.1:4842 \

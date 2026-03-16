@@ -15,16 +15,16 @@ Custom Home Assistant integration (domain: `opcua`) with display name **OPC-UA**
 
 ## Development testbed
 
-Es gibt zwei Standard-Test-Server plus einen Security-Testserver:
+There are two standard test servers plus security-focused test servers:
 
-- `testbed/opcua-sim/server_all_entities.py` (Port `4840`): alle Datentypen + alle von der Integration unterstützten Entity-Typen
-- `testbed/opcua-sim/server_device_split.py` (Port `4842`): Datentypen + Lichtobjekte über mehrere Geräte (`DeviceType` / `LightType` via HasTypeDefinition)
-- `testbed/opcua-sim/server_basic256.py` (Port `4850`): Security-Testserver (`Basic256Sha256_SignAndEncrypt`)
-- `testbed/opcua-sim/server_basic256_userpass.py` (Port `4851`): Security + Username/Password Pflicht
+- `testbed/opcua-sim/server_all_entities.py` (port `4840`): all data types + all entity types supported by the integration
+- `testbed/opcua-sim/server_device_split.py` (port `4842`): data types + light objects split across multiple devices (`DeviceType` / `LightType` via HasTypeDefinition)
+- `testbed/opcua-sim/server_basic256.py` (port `4850`): security test server (`Basic256Sha256_SignAndEncrypt`)
+- `testbed/opcua-sim/server_basic256_userpass.py` (port `4851`): security + required username/password
 
-Hilfsskripte:
-- `tests/ha_opcua_regression/setup_entity_matrix_entry.py` bindet den All-Entities-Server in Home Assistant ein und erstellt alle Plattform-Entities
-- `tests/ha_opcua_regression/setup_two_server_entries.py` bindet beide Standard-Server (`4840`, `4842`) in Home Assistant an
+Helper scripts:
+- `tests/ha_opcua_regression/setup_entity_matrix_entry.py` binds the all-entities server in Home Assistant and creates all platform entities
+- `tests/ha_opcua_regression/setup_two_server_entries.py` binds both standard servers (`4840`, `4842`) in Home Assistant
 
 ## Tests
 

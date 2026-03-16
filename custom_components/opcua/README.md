@@ -1,10 +1,10 @@
 # OPC-UA (Custom Integration for Home Assistant)
 
-Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assistant-Pattern mit:
+This integration uses **opcua-asyncio** (`asyncua`) and follows Home Assistant integration patterns with:
 
 - `manifest.json` + `config_flow`
-- Config Entry Runtime + `DataUpdateCoordinator`
-- Standard-Entitäten:
+- Config entry runtime + `DataUpdateCoordinator`
+- Supported entity platforms:
   - `sensor`
   - `binary_sensor`
   - `switch`
@@ -23,18 +23,18 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
   - `time`
   - `weather`
 
-## Aktueller Stand
+## Current status
 
-✅ UI-konfigurierbar über **Einstellungen → Geräte & Dienste → Integration hinzufügen**  
-✅ Mehrere Nodes je Endpoint über **Optionen**  
-✅ Polling + Auto-Reconnect bei Verbindungsabbruch  
-✅ HA Discovery-Popup via Zeroconf (`_opcua-tcp._tcp.local.`): gefundene Server können direkt bestätigt und hinzugefügt werden  
-✅ OPC-UA Server Discovery im Options-Flow (FindServers/GetEndpoints + Endpoint-Auswahl)  
-✅ OPC-UA Browser im Options-Flow (Root/Depth/Max + Import als Entität)  
-✅ Auto-Discovery (native OPC-UA + Companion-Heuristiken)  
-✅ Stack-Light-Profil-Assistent (R/Y/G + optional Buzzer)  
+✅ UI-configurable via **Settings → Devices & Services → Add Integration**  
+✅ Multiple nodes per endpoint via **Options**  
+✅ Polling + auto-reconnect on disconnect  
+✅ HA discovery popup via Zeroconf (`_opcua-tcp._tcp.local.`): discovered servers can be confirmed and added directly  
+✅ OPC-UA server discovery in options flow (FindServers/GetEndpoints + endpoint selection)  
+✅ OPC-UA browser in options flow (root/depth/max + import as entities)  
+✅ Auto-discovery (native OPC-UA + companion heuristics)  
+✅ Stack light profile assistant (R/Y/G + optional buzzer)  
 ✅ Built-in notifications (`opcua_notification` event + optional HA notify service call)  
-✅ Light-Entity mit optionalen Features (alle optional):
+✅ Light entity with optional features (all optional):
 - on/off
 - brightness
 - color_temp (kelvin)
@@ -48,29 +48,29 @@ Diese Integration nutzt **opcua-asyncio** (`asyncua`) und folgt dem Home-Assista
 - transition
 - flash
 
-## Einschränkung
+## Limitations
 
-- Unterstützt jetzt:
+- Supported security policies:
   - `None`
   - `Basic256Sha256_Sign`
   - `Basic256Sha256_SignAndEncrypt`
-- Für Basic256Sha256 müssen Zertifikat/Key-Pfade im Config-Flow gesetzt sein
-- Polling statt OPC-UA-Subscription
+- For Basic256Sha256, certificate/key paths must be set in the config flow
+- Polling is used instead of OPC-UA subscriptions
 
-## Bedienung
+## Usage
 
-1. Home Assistant neu starten.
-2. Integration „**OPC-UA**“ hinzufügen.
-3. Endpoint eintragen (z. B. `opc.tcp://192.168.0.50:4840`).
-4. In den Integrations-Optionen Nodes hinzufügen oder Auto-Discovery nutzen.
+1. Restart Home Assistant.
+2. Add the **OPC-UA** integration.
+3. Enter endpoint (for example `opc.tcp://192.168.0.50:4840`).
+4. Add nodes or use auto-discovery in integration options.
 
-## Vollständiges Beispiel (alle Entity-Typen + Varianten)
+## Full example (all entity types + variants)
 
-Ein vollständiges Beispiel mit **allen unterstützten Entity-Typen** und einer **Light-Konfiguration mit allen optionalen Varianten** liegt hier:
+A full example with **all supported entity types** and a **light configuration with all optional variants** is available here:
 
 - `examples/opcua_all_entities_example.json`
 
-Enthalten sind:
+Included:
 - sensor
 - binary_sensor
 - switch
@@ -89,20 +89,20 @@ Enthalten sind:
 - time
 - weather
 
-Hinweis:
-- Das JSON ist als **Referenz-/Vorlagen-Datei** gedacht (Node-IDs auf deine Maschine anpassen).
-- Einfachster Weg: Integration per UI anlegen und die Werte/Node-IDs aus dem Beispiel übernehmen.
+Note:
+- The JSON is intended as a **reference/template** file (adapt node IDs to your server).
+- Easiest path: configure integration via UI and copy node IDs/values from the example.
 
-## Auto-Discovery + Companion-Mapping
+## Auto-discovery + companion mapping
 
-Im Options-Menü:
+In the options menu:
 - **Auto discovery (native + companion)**
-  - scannt den OPC-UA-Adressraum
-  - ordnet Variablen automatisch Kern-Entitätstypen zu (sensor/binary_sensor/switch/light)
-  - weitere Entitätstypen können manuell im Options-Flow ergänzt werden
-  - nutzt optional Companion-/Industrie-Heuristiken (z. B. Alarme, Stacklight, PackML-ähnliche States)
-  - Standard-Namespace (`i=...`) kann optional ausgeblendet werden (default: ausblenden)
+  - scans OPC-UA address space
+  - maps variables automatically to core entity types (sensor/binary_sensor/switch/light)
+  - additional entity types can be added manually in options flow
+  - optionally applies companion/industrial heuristics (for example alarms, stack light, PackML-like states)
+  - standard namespace nodes (`i=...`) can be hidden (default: hidden)
 - **Browse OPC UA nodes**
-  - baumartige Navigation über Zweige (Unterzweig öffnen / eine Ebene hoch)
-  - einzelne Variablen im aktuellen Zweig markieren und importieren
-  - Metadaten je Node (NodeClass, SampleType, RO/RW)
+  - tree-style branch navigation (open child branch / go up one level)
+  - select/import individual variables from current branch
+  - per-node metadata (NodeClass, SampleType, RO/RW)
