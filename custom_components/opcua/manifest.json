@@ -4,7 +4,7 @@
   "version": "1.0.51",
   "config_flow": true,
   "documentation": "https://github.com/bot-petrilab/opc-ua-homeassistant-integration",
-  "requirements": ["asyncua @ git+https://github.com/FreeOpcUa/opcua-asyncio.git@c08c1bfd7f58b3a21e66d3c94333386b7bca0585"],
+  "requirements": ["asyncua==1.2b2"],
   "codeowners": ["@fabianpetri"],
   "integration_type": "hub",
   "zeroconf": [
