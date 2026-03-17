@@ -1,0 +1,72 @@
+rules:
+  action_setup:
+    status: exempt
+    comment: Integration does not register custom domain services; it relies on Home Assistant entity platform services.
+  appropriate_polling: done
+  brands: done
+  common_modules: done
+  config_flow: done
+  config_flow_test_coverage: done
+  dependency_transparency: done
+  docs_actions: done
+  docs_high_level_description: done
+  docs_installation_instructions: done
+  docs_removal_instructions: done
+  entity_event_setup:
+    status: exempt
+    comment: Runtime model is coordinator polling; no explicit event subscription lifecycle is used.
+  entity_unique_id: done
+  has_entity_name: done
+  runtime_data: done
+  test_before_configure: done
+  test_before_setup: done
+  unique_config_entry: done
+
+  action_exceptions:
+    status: exempt
+    comment: No custom integration services/actions are defined.
+  config_entry_unloading: done
+  docs_configuration_parameters: done
+  docs_installation_parameters: done
+  entity_unavailable: done
+  integration_owner: done
+  log_when_unavailable: done
+  parallel_updates: done
+  reauthentication_flow: done
+  test_coverage:
+    status: in_progress
+    comment: Current measured local coverage is below target; additional functional integration tests are required to reach >=95%.
+
+  devices: done
+  diagnostics: done
+  discovery_update_info: done
+  discovery: done
+  docs_data_update: done
+  docs_examples: done
+  docs_known_limitations: done
+  docs_supported_devices: done
+  docs_supported_functions: done
+  docs_troubleshooting: done
+  docs_use_cases: done
+  dynamic_devices: done
+  entity_category:
+    status: exempt
+    comment: Integration currently exposes operational entities; no additional diagnostic/config-only helper entities are generated.
+  entity_device_class: done
+  entity_disabled_by_default:
+    status: exempt
+    comment: Integration does not create noisy helper entities by default.
+  entity_translations: done
+  exception_translations: done
+  icon_translations: done
+  reconfiguration_flow: done
+  repair_issues:
+    status: in_progress
+    comment: Authentication/security problems currently trigger reauth flow only; dedicated Home Assistant repair issues are not implemented yet.
+  stale_devices: done
+
+  async_dependency: done
+  inject_websession:
+    status: exempt
+    comment: asyncua dependency is OPC-UA socket based and does not use HTTP client sessions.
+  strict_typing: done

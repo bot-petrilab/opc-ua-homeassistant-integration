@@ -1,11 +1,11 @@
 {
   "domain": "opcua",
   "name": "OPC-UA",
-  "version": "1.0.47",
+  "version": "1.0.51",
   "config_flow": true,
-  "documentation": "https://github.com/FreeOpcUa/opcua-asyncio",
+  "documentation": "https://github.com/bot-petrilab/opc-ua-homeassistant-integration",
   "requirements": ["asyncua @ git+https://github.com/FreeOpcUa/opcua-asyncio.git@c08c1bfd7f58b3a21e66d3c94333386b7bca0585"],
-  "codeowners": ["@local"],
+  "codeowners": ["@fabianpetri"],
   "integration_type": "hub",
   "zeroconf": [
     {
