@@ -107,7 +107,8 @@ def _install_homeassistant_stubs() -> None:
     uc_mod = _ensure_module("homeassistant.helpers.update_coordinator")
 
     class DataUpdateCoordinator:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, hass=None, *args, **kwargs):
+            self.hass = hass
             self.data = {}
             self.last_update_success = True
 
