@@ -7,6 +7,9 @@ import pytest
 from custom_components.opcua.config_flow import OpcUaConfigFlow, OpcUaOptionsFlow
 from custom_components.opcua.const import (
     CONF_BUTTON_PAYLOAD,
+    CONF_CLIENT_CERT_PATH,
+    CONF_CLIENT_KEY_PASSWORD,
+    CONF_CLIENT_KEY_PATH,
     CONF_ENDPOINT,
     CONF_LIGHT_BRIGHTNESS_NODE_ID,
     CONF_LIGHT_BRIGHTNESS_SCALE,
@@ -19,10 +22,13 @@ from custom_components.opcua.const import (
     CONF_NODES,
     CONF_NOTIFY_ENABLED,
     CONF_NOTIFY_KEYWORDS,
+    CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_SCENE_ACTIVATE_VALUE,
     CONF_SECURITY_POLICY,
     CONF_SELECT_OPTIONS,
+    CONF_SERVER_CERT_PATH,
+    CONF_USERNAME,
     CONF_VALIDATE_ON_SAVE,
     DEFAULT_BRIGHTNESS_SCALE,
     DEFAULT_NOTIFY_KEYWORDS,
@@ -394,3 +400,127 @@ def test_map_discovered_item_classifies_basic_types(mock_config_entry) -> None:
     )
     assert sensor[CONF_NODE_KIND] == NODE_KIND_SENSOR
     assert sensor["unit_of_measurement"] == "°C"
+
+
+@pytest.mark.asyncio
+async def test_zeroconf_aborts_without_host_or_port() -> None:
+    flow = OpcUaConfigFlow()
+    result = await flow.async_step_zeroconf(SimpleNamespace(host="", port=0, name="X"))
+    assert result == {"type": "abort", "reason": "cannot_connect"}
+
+
+@pytest.mark.asyncio
+async def test_zeroconf_confirm_without_endpoint_aborts() -> None:
+    flow = OpcUaConfigFlow()
+    result = await flow.async_step_zeroconf_confirm()
+    assert result == {"type": "abort", "reason": "cannot_connect"}
+
+
+@pytest.mark.asyncio
+async def test_reauth_confirm_returns_form_when_entry_present() -> None:
+    flow = OpcUaConfigFlow()
+    flow._reauth_entry = SimpleNamespace(
+        data={CONF_ENDPOINT: "opc.tcp://host:4840", CONF_SECURITY_POLICY: "None"}
+    )
+
+    result = await flow.async_step_reauth_confirm()
+    assert result["type"] == "form"
+    assert result["step_id"] == "reauth_confirm"
+
+
+@pytest.mark.asyncio
+async def test_reauth_confirm_success_updates_entry(monkeypatch) -> None:
+    class _Manager:
+        async def ensure_connected(self):
+            return None
+
+        async def disconnect(self):
+            return None
+
+    monkeypatch.setattr("custom_components.opcua.config_flow.OpcUaClientManager", lambda **kwargs: _Manager())
+
+    entry = SimpleNamespace(data={CONF_ENDPOINT: "opc.tcp://host:4840"})
+    flow = OpcUaConfigFlow()
+    flow._reauth_entry = entry
+
+    result = await flow.async_step_reauth_confirm(
+        {
+            CONF_SECURITY_POLICY: "None",
+            CONF_USERNAME: "user",
+            CONF_PASSWORD: "pw",
+            CONF_CLIENT_CERT_PATH: "",
+            CONF_CLIENT_KEY_PATH: "",
+            CONF_SERVER_CERT_PATH: "",
+            CONF_CLIENT_KEY_PASSWORD: "",
+        }
+    )
+    assert result["type"] == "abort"
+    assert result["reason"] == "reauth_successful"
+    assert result["data_updates"][CONF_USERNAME] == "user"
+
+
+@pytest.mark.asyncio
+async def test_reauth_confirm_failure_sets_error(monkeypatch) -> None:
+    class _Manager:
+        async def ensure_connected(self):
+            raise RuntimeError("boom")
+
+        async def disconnect(self):
+            return None
+
+    monkeypatch.setattr("custom_components.opcua.config_flow.OpcUaClientManager", lambda **kwargs: _Manager())
+
+    flow = OpcUaConfigFlow()
+    flow._reauth_entry = SimpleNamespace(data={CONF_ENDPOINT: "opc.tcp://host:4840", CONF_SECURITY_POLICY: "None"})
+    result = await flow.async_step_reauth_confirm({CONF_SECURITY_POLICY: "None"})
+    assert result["type"] == "form"
+    assert result["errors"]["base"] == "cannot_connect"
+
+
+@pytest.mark.asyncio
+async def test_reconfigure_success_updates_entry(monkeypatch) -> None:
+    class _Manager:
+        async def ensure_connected(self):
+            return None
+
+        async def disconnect(self):
+            return None
+
+    monkeypatch.setattr("custom_components.opcua.config_flow.OpcUaClientManager", lambda **kwargs: _Manager())
+
+    entry = SimpleNamespace(data={CONF_ENDPOINT: "opc.tcp://old:4840", CONF_SECURITY_POLICY: "None"})
+    flow = OpcUaConfigFlow()
+    flow._reconfigure_entry = entry
+
+    result = await flow.async_step_reconfigure(
+        {
+            CONF_ENDPOINT: "opc.tcp://new:4840",
+            CONF_SECURITY_POLICY: "None",
+            CONF_USERNAME: "u",
+            CONF_PASSWORD: "p",
+            CONF_CLIENT_CERT_PATH: "",
+            CONF_CLIENT_KEY_PATH: "",
+            CONF_SERVER_CERT_PATH: "",
+            CONF_CLIENT_KEY_PASSWORD: "",
+        }
+    )
+    assert result["type"] == "abort"
+    assert result["data_updates"][CONF_ENDPOINT] == "opc.tcp://new:4840"
+
+
+@pytest.mark.asyncio
+async def test_reconfigure_failure_sets_error(monkeypatch) -> None:
+    class _Manager:
+        async def ensure_connected(self):
+            raise RuntimeError("boom")
+
+        async def disconnect(self):
+            return None
+
+    monkeypatch.setattr("custom_components.opcua.config_flow.OpcUaClientManager", lambda **kwargs: _Manager())
+
+    flow = OpcUaConfigFlow()
+    flow._reconfigure_entry = SimpleNamespace(data={CONF_ENDPOINT: "opc.tcp://old:4840", CONF_SECURITY_POLICY: "None"})
+    result = await flow.async_step_reconfigure({CONF_ENDPOINT: "opc.tcp://new:4840", CONF_SECURITY_POLICY: "None"})
+    assert result["type"] == "form"
+    assert result["errors"]["base"] == "cannot_connect"
