@@ -6,6 +6,7 @@ import pytest
 
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
+from custom_components.opcua.const import EVENT_NOTIFICATION
 from custom_components.opcua.coordinator import OpcUaCoordinator
 
 
@@ -64,3 +65,86 @@ async def test_coordinator_raises_update_failed_when_endpoint_unavailable() -> N
 
     with pytest.raises(UpdateFailed, match="unavailable"):
         await coordinator._async_update_data()
+
+
+@pytest.mark.asyncio
+async def test_process_notifications_emits_event_and_service_call() -> None:
+    fired: list[tuple[str, dict]] = []
+    service_calls: list[tuple[str, str, dict, bool]] = []
+
+    class _Services:
+        async def async_call(self, domain, service, payload, blocking=False):
+            service_calls.append((domain, service, payload, blocking))
+
+    hass = SimpleNamespace(
+        loop=SimpleNamespace(time=lambda: 0.0),
+        bus=SimpleNamespace(async_fire=lambda event, data: fired.append((event, data))),
+        services=_Services(),
+    )
+    manager = SimpleNamespace()
+
+    coordinator = OpcUaCoordinator(
+        hass=hass,
+        manager=manager,
+        nodes=[{"node_id": "ns=2;s=Alarm", "name": "Alarm Active"}],
+        scan_interval_seconds=1.0,
+        poll_intervals={"normal": 1.0},
+        entry_id="entry-1",
+        endpoint="opc.tcp://127.0.0.1:4840",
+        notify_enabled=True,
+        notify_service="persistent_notification.create",
+        notify_title_prefix="OPC-UA",
+        notify_keywords=["alarm"],
+    )
+
+    coordinator._notification_primed = True
+    coordinator._last_values = {"ns=2;s=Alarm": False}
+
+    await coordinator._process_notifications({"ns=2;s=Alarm": True})
+
+    assert fired[0][0] == EVENT_NOTIFICATION
+    assert fired[0][1]["node_id"] == "ns=2;s=Alarm"
+    assert service_calls[0][0] == "persistent_notification"
+    assert service_calls[0][1] == "create"
+    assert "Alarm Active" in service_calls[0][2]["title"]
+
+
+@pytest.mark.asyncio
+async def test_process_notifications_skips_when_not_triggered_or_not_candidate() -> None:
+    fired: list[tuple[str, dict]] = []
+
+    hass = SimpleNamespace(
+        loop=SimpleNamespace(time=lambda: 0.0),
+        bus=SimpleNamespace(async_fire=lambda event, data: fired.append((event, data))),
+        services=SimpleNamespace(async_call=lambda *args, **kwargs: None),
+    )
+
+    coordinator = OpcUaCoordinator(
+        hass=hass,
+        manager=SimpleNamespace(),
+        nodes=[{"node_id": "ns=2;s=State", "name": "Status"}],
+        scan_interval_seconds=1.0,
+        poll_intervals={"normal": 1.0},
+        entry_id="entry-1",
+        endpoint="opc.tcp://127.0.0.1:4840",
+        notify_enabled=True,
+        notify_service="persistent_notification.create",
+        notify_title_prefix="OPC-UA",
+        notify_keywords=["alarm"],
+    )
+
+    coordinator._notification_primed = True
+    coordinator._last_values = {"ns=2;s=State": False}
+
+    await coordinator._process_notifications({"ns=2;s=State": True})
+    assert fired == []
+
+
+def test_is_triggered_handles_bool_numeric_and_text() -> None:
+    assert OpcUaCoordinator._is_triggered(False, True) is True
+    assert OpcUaCoordinator._is_triggered(True, True) is False
+    assert OpcUaCoordinator._is_triggered(0, 2) is True
+    assert OpcUaCoordinator._is_triggered(1, 2) is False
+    assert OpcUaCoordinator._is_triggered("ok", "fault") is True
+    assert OpcUaCoordinator._is_triggered("fault", "fault") is False
+    assert OpcUaCoordinator._is_triggered("ok", "normal") is False
