@@ -327,7 +327,20 @@ def _install_homeassistant_stubs() -> None:
         FLASH = 2
         TRANSITION = 4
 
-    light_mod.LightEntity = object
+    class LightEntity:
+        @property
+        def supported_color_modes(self):
+            return getattr(self, "_attr_supported_color_modes", None)
+
+        @property
+        def min_color_temp_kelvin(self):
+            return getattr(self, "_attr_min_color_temp_kelvin", None)
+
+        @property
+        def max_color_temp_kelvin(self):
+            return getattr(self, "_attr_max_color_temp_kelvin", None)
+
+    light_mod.LightEntity = LightEntity
     light_mod.ColorMode = ColorMode
     light_mod.LightEntityFeature = LightEntityFeature
     for attr in [
