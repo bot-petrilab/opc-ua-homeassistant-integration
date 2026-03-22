@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install asyncua==1.1.6 zeroconf==0.132.2
+          pip install asyncua==1.2b2 zeroconf==0.132.2
 
       - name: Validate JSON files
         run: |
@@ -43,7 +43,10 @@ jobs:
         run: |
           python -m py_compile \
             custom_components/opcua/*.py \
-            testbed/opcua-sim/server.py \
+            testbed/opcua-sim/server_all_entities.py \
+            testbed/opcua-sim/server_basic256.py \
+            testbed/opcua-sim/server_basic256_userpass.py \
+            testbed/opcua-sim/server_device_split.py \
             tests/ci_smoke.py
 
       - name: Run smoke test
