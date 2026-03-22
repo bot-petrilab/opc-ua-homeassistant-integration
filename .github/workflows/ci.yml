@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install asyncua==1.2b2 zeroconf==0.132.2
+          pip install asyncua==1.2b2 zeroconf==0.132.2 pytest pytest-asyncio coverage ruff
 
       - name: Validate JSON files
         run: |
@@ -48,6 +48,19 @@ jobs:
             testbed/opcua-sim/server_basic256_userpass.py \
             testbed/opcua-sim/server_device_split.py \
             tests/ci_smoke.py
+
+      - name: Run component tests
+        run: |
+          PYTHONPATH=. pytest tests/components/opcua -q
+
+      - name: Run coverage report
+        run: |
+          PYTHONPATH=. coverage run -m pytest tests/components/opcua -q
+          PYTHONPATH=. coverage report -m
+
+      - name: Run Ruff
+        run: |
+          ruff check custom_components/opcua tests/components/opcua tests/ci_smoke.py
 
       - name: Run smoke test
         run: |
