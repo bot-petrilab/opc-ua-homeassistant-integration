@@ -195,7 +195,9 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             await manager.disconnect()
         except Exception as err:
             _LOGGER.debug(
-                "Zeroconf-discovered OPC-UA endpoint probe failed (%s): %s", endpoint, err
+                "Zeroconf-discovered OPC-UA endpoint probe failed (%s): %s",
+                endpoint,
+                err,
             )
 
         self._discovered_endpoint = endpoint
@@ -235,23 +237,41 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
             username = user_input.get(CONF_USERNAME) or None
             password = user_input.get(CONF_PASSWORD) or None
-            client_cert_path = (user_input.get(CONF_CLIENT_CERT_PATH) or "").strip() or None
-            client_key_path = (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None
-            server_cert_path = (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None
+            client_cert_path = (
+                user_input.get(CONF_CLIENT_CERT_PATH) or ""
+            ).strip() or None
+            client_key_path = (
+                user_input.get(CONF_CLIENT_KEY_PATH) or ""
+            ).strip() or None
+            server_cert_path = (
+                user_input.get(CONF_SERVER_CERT_PATH) or ""
+            ).strip() or None
             client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
-            notify_enabled = bool(user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED))
-            notify_service = str(user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE).strip()
-            notify_title_prefix = str(user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX).strip()
-            notify_keywords_raw = str(user_input.get(CONF_NOTIFY_KEYWORDS) or "").strip()
+            notify_enabled = bool(
+                user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)
+            )
+            notify_service = str(
+                user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE
+            ).strip()
+            notify_title_prefix = str(
+                user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX
+            ).strip()
+            notify_keywords_raw = str(
+                user_input.get(CONF_NOTIFY_KEYWORDS) or ""
+            ).strip()
             if notify_keywords_raw:
-                notify_keywords = [k.strip().lower() for k in notify_keywords_raw.split(",") if k.strip()]
+                notify_keywords = [
+                    k.strip().lower()
+                    for k in notify_keywords_raw.split(",")
+                    if k.strip()
+                ]
             else:
                 notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
 
-            validate_on_save = bool(user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE))
+            validate_on_save = bool(
+                user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE)
+            )
             scan_interval = float(user_input[CONF_SCAN_INTERVAL])
-
-            secure_policy = security_policy != SECURITY_POLICY_NONE
 
             if not errors and validate_on_save:
                 try:
@@ -268,7 +288,11 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     await manager.ensure_connected()
                     await manager.disconnect()
                 except Exception as err:
-                    _LOGGER.warning("OPC UA zeroconf setup validation failed for %s: %s", endpoint, err)
+                    _LOGGER.warning(
+                        "OPC UA zeroconf setup validation failed for %s: %s",
+                        endpoint,
+                        err,
+                    )
                     errors["base"] = "cannot_connect"
 
             if not errors:
@@ -295,14 +319,20 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_SECURITY_POLICY, default=DEFAULT_SECURITY_POLICY): SelectSelector(
+                vol.Required(
+                    CONF_SECURITY_POLICY, default=DEFAULT_SECURITY_POLICY
+                ): SelectSelector(
                     SelectSelectorConfig(
                         options=list(SECURITY_POLICIES),
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 ),
-                vol.Optional(CONF_USERNAME): TextSelector(TextSelectorConfig(type="text")),
-                vol.Optional(CONF_PASSWORD): TextSelector(TextSelectorConfig(type="password")),
+                vol.Optional(CONF_USERNAME): TextSelector(
+                    TextSelectorConfig(type="text")
+                ),
+                vol.Optional(CONF_PASSWORD): TextSelector(
+                    TextSelectorConfig(type="password")
+                ),
                 vol.Optional(CONF_CLIENT_CERT_PATH): TextSelector(
                     TextSelectorConfig(type="text", autocomplete="off")
                 ),
@@ -315,7 +345,9 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
                     TextSelectorConfig(type="password")
                 ),
-                vol.Optional(CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED): BooleanSelector(),
+                vol.Optional(
+                    CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED
+                ): BooleanSelector(),
                 vol.Optional(
                     CONF_NOTIFY_SERVICE,
                     default=DEFAULT_NOTIFY_SERVICE,
@@ -328,10 +360,14 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_NOTIFY_KEYWORDS,
                     default=",".join(DEFAULT_NOTIFY_KEYWORDS),
                 ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS): NumberSelector(
+                vol.Required(
+                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS
+                ): NumberSelector(
                     NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
                 ),
-                vol.Required(CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE): BooleanSelector(),
+                vol.Required(
+                    CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE
+                ): BooleanSelector(),
             }
         )
 
@@ -345,7 +381,9 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             },
         )
 
-    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -353,20 +391,40 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
             username = user_input.get(CONF_USERNAME) or None
             password = user_input.get(CONF_PASSWORD) or None
-            client_cert_path = (user_input.get(CONF_CLIENT_CERT_PATH) or "").strip() or None
-            client_key_path = (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None
-            server_cert_path = (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None
+            client_cert_path = (
+                user_input.get(CONF_CLIENT_CERT_PATH) or ""
+            ).strip() or None
+            client_key_path = (
+                user_input.get(CONF_CLIENT_KEY_PATH) or ""
+            ).strip() or None
+            server_cert_path = (
+                user_input.get(CONF_SERVER_CERT_PATH) or ""
+            ).strip() or None
             client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
-            notify_enabled = bool(user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED))
-            notify_service = str(user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE).strip()
-            notify_title_prefix = str(user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX).strip()
-            notify_keywords_raw = str(user_input.get(CONF_NOTIFY_KEYWORDS) or "").strip()
+            notify_enabled = bool(
+                user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)
+            )
+            notify_service = str(
+                user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE
+            ).strip()
+            notify_title_prefix = str(
+                user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX
+            ).strip()
+            notify_keywords_raw = str(
+                user_input.get(CONF_NOTIFY_KEYWORDS) or ""
+            ).strip()
             if notify_keywords_raw:
-                notify_keywords = [k.strip().lower() for k in notify_keywords_raw.split(",") if k.strip()]
+                notify_keywords = [
+                    k.strip().lower()
+                    for k in notify_keywords_raw.split(",")
+                    if k.strip()
+                ]
             else:
                 notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
 
-            validate_on_save = bool(user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE))
+            validate_on_save = bool(
+                user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE)
+            )
             scan_interval = float(user_input[CONF_SCAN_INTERVAL])
 
             if not endpoint:
@@ -374,12 +432,13 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             elif not endpoint.lower().startswith("opc.tcp://"):
                 errors[CONF_ENDPOINT] = "invalid_endpoint"
 
-            secure_policy = security_policy != SECURITY_POLICY_NONE
-
             if not errors:
                 # Avoid false "already_in_progress" collisions with concurrent zeroconf flows.
                 for entry in self._async_current_entries():
-                    if str((entry.data or {}).get(CONF_ENDPOINT, "")).strip() == endpoint:
+                    if (
+                        str((entry.data or {}).get(CONF_ENDPOINT, "")).strip()
+                        == endpoint
+                    ):
                         return self.async_abort(reason="already_configured")
 
                 if validate_on_save:
@@ -397,7 +456,9 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                         await manager.ensure_connected()
                         await manager.disconnect()
                     except Exception as err:
-                        _LOGGER.warning("OPC UA validation failed for %s: %s", endpoint, err)
+                        _LOGGER.warning(
+                            "OPC UA validation failed for %s: %s", endpoint, err
+                        )
                         errors["base"] = "cannot_connect"
 
             if not errors:
@@ -428,14 +489,20 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_ENDPOINT): TextSelector(
                     TextSelectorConfig(type="text", autocomplete="off")
                 ),
-                vol.Required(CONF_SECURITY_POLICY, default=DEFAULT_SECURITY_POLICY): SelectSelector(
+                vol.Required(
+                    CONF_SECURITY_POLICY, default=DEFAULT_SECURITY_POLICY
+                ): SelectSelector(
                     SelectSelectorConfig(
                         options=list(SECURITY_POLICIES),
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 ),
-                vol.Optional(CONF_USERNAME): TextSelector(TextSelectorConfig(type="text")),
-                vol.Optional(CONF_PASSWORD): TextSelector(TextSelectorConfig(type="password")),
+                vol.Optional(CONF_USERNAME): TextSelector(
+                    TextSelectorConfig(type="text")
+                ),
+                vol.Optional(CONF_PASSWORD): TextSelector(
+                    TextSelectorConfig(type="password")
+                ),
                 vol.Optional(CONF_CLIENT_CERT_PATH): TextSelector(
                     TextSelectorConfig(type="text", autocomplete="off")
                 ),
@@ -448,7 +515,9 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
                     TextSelectorConfig(type="password")
                 ),
-                vol.Optional(CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED): BooleanSelector(),
+                vol.Optional(
+                    CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED
+                ): BooleanSelector(),
                 vol.Optional(
                     CONF_NOTIFY_SERVICE,
                     default=DEFAULT_NOTIFY_SERVICE,
@@ -461,14 +530,225 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_NOTIFY_KEYWORDS,
                     default=",".join(DEFAULT_NOTIFY_KEYWORDS),
                 ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS): NumberSelector(
+                vol.Required(
+                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS
+                ): NumberSelector(
                     NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
                 ),
-                vol.Required(CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE): BooleanSelector(),
+                vol.Required(
+                    CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE
+                ): BooleanSelector(),
             }
         )
 
-        return self.async_show_form(step_id="user", data_schema=data_schema, errors=errors)
+        return self.async_show_form(
+            step_id="user", data_schema=data_schema, errors=errors
+        )
+
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
+        """Handle re-authentication flow when credentials/security changed."""
+        self._reauth_entry = self._get_reauth_entry()
+        self._discovered_endpoint = str(
+            (self._reauth_entry.data or {}).get(CONF_ENDPOINT, "")
+        )
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        entry = getattr(self, "_reauth_entry", None)
+        if entry is None:
+            return self.async_abort(reason="cannot_connect")
+
+        endpoint = str((entry.data or {}).get(CONF_ENDPOINT, ""))
+        if not endpoint:
+            return self.async_abort(reason="cannot_connect")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
+            username = user_input.get(CONF_USERNAME) or None
+            password = user_input.get(CONF_PASSWORD) or None
+            client_cert_path = (
+                user_input.get(CONF_CLIENT_CERT_PATH) or ""
+            ).strip() or None
+            client_key_path = (
+                user_input.get(CONF_CLIENT_KEY_PATH) or ""
+            ).strip() or None
+            server_cert_path = (
+                user_input.get(CONF_SERVER_CERT_PATH) or ""
+            ).strip() or None
+            client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
+
+            try:
+                manager = OpcUaClientManager(
+                    endpoint=endpoint,
+                    security_policy=security_policy,
+                    username=username,
+                    password=password,
+                    client_cert_path=client_cert_path,
+                    client_key_path=client_key_path,
+                    server_cert_path=server_cert_path,
+                    client_key_password=client_key_password,
+                )
+                await manager.ensure_connected()
+                await manager.disconnect()
+            except Exception:
+                errors["base"] = "cannot_connect"
+
+            if not errors:
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data_updates={
+                        CONF_SECURITY_POLICY: security_policy,
+                        CONF_USERNAME: username,
+                        CONF_PASSWORD: password,
+                        CONF_CLIENT_CERT_PATH: client_cert_path,
+                        CONF_CLIENT_KEY_PATH: client_key_path,
+                        CONF_SERVER_CERT_PATH: server_cert_path,
+                        CONF_CLIENT_KEY_PASSWORD: client_key_password,
+                    },
+                )
+
+        defaults = entry.data or {}
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_SECURITY_POLICY,
+                    default=str(
+                        defaults.get(CONF_SECURITY_POLICY, DEFAULT_SECURITY_POLICY)
+                    ),
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(SECURITY_POLICIES),
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+                vol.Optional(
+                    CONF_USERNAME, default=defaults.get(CONF_USERNAME) or ""
+                ): TextSelector(TextSelectorConfig(type="text")),
+                vol.Optional(
+                    CONF_PASSWORD, default=defaults.get(CONF_PASSWORD) or ""
+                ): TextSelector(TextSelectorConfig(type="password")),
+                vol.Optional(
+                    CONF_CLIENT_CERT_PATH,
+                    default=defaults.get(CONF_CLIENT_CERT_PATH) or "",
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_CLIENT_KEY_PATH,
+                    default=defaults.get(CONF_CLIENT_KEY_PATH) or "",
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_SERVER_CERT_PATH,
+                    default=defaults.get(CONF_SERVER_CERT_PATH) or "",
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_CLIENT_KEY_PASSWORD,
+                    default=defaults.get(CONF_CLIENT_KEY_PASSWORD) or "",
+                ): TextSelector(TextSelectorConfig(type="password")),
+            }
+        )
+        return self.async_show_form(
+            step_id="reauth_confirm", data_schema=schema, errors=errors
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Allow editing endpoint/security fields from the UI reconfigure action."""
+        entry = self._get_reconfigure_entry()
+        defaults = entry.data or {}
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            endpoint = str(user_input[CONF_ENDPOINT]).strip()
+            security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
+            username = user_input.get(CONF_USERNAME) or None
+            password = user_input.get(CONF_PASSWORD) or None
+            client_cert_path = (
+                user_input.get(CONF_CLIENT_CERT_PATH) or ""
+            ).strip() or None
+            client_key_path = (
+                user_input.get(CONF_CLIENT_KEY_PATH) or ""
+            ).strip() or None
+            server_cert_path = (
+                user_input.get(CONF_SERVER_CERT_PATH) or ""
+            ).strip() or None
+            client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
+            try:
+                manager = OpcUaClientManager(
+                    endpoint=endpoint,
+                    security_policy=security_policy,
+                    username=username,
+                    password=password,
+                    client_cert_path=client_cert_path,
+                    client_key_path=client_key_path,
+                    server_cert_path=server_cert_path,
+                    client_key_password=client_key_password,
+                )
+                await manager.ensure_connected()
+                await manager.disconnect()
+            except Exception:
+                errors["base"] = "cannot_connect"
+
+            if not errors:
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data_updates={
+                        CONF_ENDPOINT: endpoint,
+                        CONF_SECURITY_POLICY: security_policy,
+                        CONF_USERNAME: username,
+                        CONF_PASSWORD: password,
+                        CONF_CLIENT_CERT_PATH: client_cert_path,
+                        CONF_CLIENT_KEY_PATH: client_key_path,
+                        CONF_SERVER_CERT_PATH: server_cert_path,
+                        CONF_CLIENT_KEY_PASSWORD: client_key_password,
+                    },
+                )
+
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_ENDPOINT, default=str(defaults.get(CONF_ENDPOINT, ""))
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Required(
+                    CONF_SECURITY_POLICY,
+                    default=str(
+                        defaults.get(CONF_SECURITY_POLICY, DEFAULT_SECURITY_POLICY)
+                    ),
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(SECURITY_POLICIES),
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+                vol.Optional(
+                    CONF_USERNAME, default=defaults.get(CONF_USERNAME) or ""
+                ): TextSelector(TextSelectorConfig(type="text")),
+                vol.Optional(
+                    CONF_PASSWORD, default=defaults.get(CONF_PASSWORD) or ""
+                ): TextSelector(TextSelectorConfig(type="password")),
+                vol.Optional(
+                    CONF_CLIENT_CERT_PATH,
+                    default=defaults.get(CONF_CLIENT_CERT_PATH) or "",
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_CLIENT_KEY_PATH,
+                    default=defaults.get(CONF_CLIENT_KEY_PATH) or "",
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_SERVER_CERT_PATH,
+                    default=defaults.get(CONF_SERVER_CERT_PATH) or "",
+                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+                vol.Optional(
+                    CONF_CLIENT_KEY_PASSWORD,
+                    default=defaults.get(CONF_CLIENT_KEY_PASSWORD) or "",
+                ): TextSelector(TextSelectorConfig(type="password")),
+            }
+        )
+        return self.async_show_form(
+            step_id="reconfigure", data_schema=schema, errors=errors
+        )
 
     @staticmethod
     def async_get_options_flow(config_entry):
@@ -483,12 +763,22 @@ class OpcUaOptionsFlow(OptionsFlow):
         self._options: dict[str, Any] = dict(config_entry.options)
         self._options.setdefault(
             CONF_SCAN_INTERVAL,
-            float(config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)),
+            float(
+                config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)
+            ),
         )
-        self._options.setdefault(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)
-        self._options.setdefault(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)
-        self._options.setdefault(CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS)
-        self._options.setdefault(CONF_NODES, list(config_entry.data.get(CONF_NODES, [])))
+        self._options.setdefault(
+            CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS
+        )
+        self._options.setdefault(
+            CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS
+        )
+        self._options.setdefault(
+            CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS
+        )
+        self._options.setdefault(
+            CONF_NODES, list(config_entry.data.get(CONF_NODES, []))
+        )
         self._browse_cache: list[dict[str, Any]] = []
         self._browse_root_node_id: str = "i=85"
         self._browse_current_parent: str = "i=85"
@@ -530,7 +820,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             if node_id not in wanted_node_ids:
                 registry.async_remove(entry.entity_id)
 
-    async def async_step_init(self, user_input: Mapping[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_init(
+        self, user_input: Mapping[str, Any] | None = None
+    ) -> ConfigFlowResult:
         return self.async_show_menu(
             step_id="init",
             menu_options=[
@@ -605,7 +897,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             ],
         )
 
-    async def async_step_add_sensor(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_sensor(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
@@ -613,8 +907,10 @@ class OpcUaOptionsFlow(OptionsFlow):
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
                     CONF_NODE_UNIT: user_input.get(CONF_NODE_UNIT) or None,
-                    CONF_NODE_DEVICE_CLASS: user_input.get(CONF_NODE_DEVICE_CLASS) or None,
-                    CONF_NODE_STATE_CLASS: user_input.get(CONF_NODE_STATE_CLASS) or None,
+                    CONF_NODE_DEVICE_CLASS: user_input.get(CONF_NODE_DEVICE_CLASS)
+                    or None,
+                    CONF_NODE_STATE_CLASS: user_input.get(CONF_NODE_STATE_CLASS)
+                    or None,
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
             )
@@ -633,14 +929,17 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_sensor", data_schema=schema)
 
-    async def async_step_add_binary_sensor(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_binary_sensor(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_NODE_DEVICE_CLASS: user_input.get(CONF_NODE_DEVICE_CLASS) or None,
+                    CONF_NODE_DEVICE_CLASS: user_input.get(CONF_NODE_DEVICE_CLASS)
+                    or None,
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                     CONF_NODE_INVERT: bool(user_input.get(CONF_NODE_INVERT, False)),
                 }
@@ -659,7 +958,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_binary_sensor", data_schema=schema)
 
-    async def async_step_add_switch(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_switch(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
@@ -683,7 +984,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_switch", data_schema=schema)
 
-    async def async_step_add_light(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_light(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             light_cfg: dict[str, Any] = {
                 CONF_NODE_KIND: NODE_KIND_LIGHT,
@@ -725,14 +1028,20 @@ class OpcUaOptionsFlow(OptionsFlow):
             # Optional scales / ranges (only persist when relevant node mapping exists)
             if light_cfg.get(CONF_LIGHT_BRIGHTNESS_NODE_ID):
                 light_cfg[CONF_LIGHT_BRIGHTNESS_SCALE] = float(
-                    user_input.get(CONF_LIGHT_BRIGHTNESS_SCALE, DEFAULT_BRIGHTNESS_SCALE)
+                    user_input.get(
+                        CONF_LIGHT_BRIGHTNESS_SCALE, DEFAULT_BRIGHTNESS_SCALE
+                    )
                 )
             if light_cfg.get(CONF_LIGHT_COLOR_TEMP_NODE_ID):
                 light_cfg[CONF_LIGHT_COLOR_TEMP_MIN_KELVIN] = int(
-                    user_input.get(CONF_LIGHT_COLOR_TEMP_MIN_KELVIN, DEFAULT_COLOR_TEMP_MIN_KELVIN)
+                    user_input.get(
+                        CONF_LIGHT_COLOR_TEMP_MIN_KELVIN, DEFAULT_COLOR_TEMP_MIN_KELVIN
+                    )
                 )
                 light_cfg[CONF_LIGHT_COLOR_TEMP_MAX_KELVIN] = int(
-                    user_input.get(CONF_LIGHT_COLOR_TEMP_MAX_KELVIN, DEFAULT_COLOR_TEMP_MAX_KELVIN)
+                    user_input.get(
+                        CONF_LIGHT_COLOR_TEMP_MAX_KELVIN, DEFAULT_COLOR_TEMP_MAX_KELVIN
+                    )
                 )
             if light_cfg.get(CONF_LIGHT_HS_HUE_NODE_ID):
                 light_cfg[CONF_LIGHT_HS_HUE_SCALE] = float(
@@ -749,17 +1058,25 @@ class OpcUaOptionsFlow(OptionsFlow):
                 or light_cfg.get(CONF_LIGHT_RGBW_R_NODE_ID)
                 or light_cfg.get(CONF_LIGHT_RGBWW_R_NODE_ID)
             ):
-                light_cfg[CONF_LIGHT_RGB_SCALE] = float(user_input.get(CONF_LIGHT_RGB_SCALE, DEFAULT_RGB_SCALE))
+                light_cfg[CONF_LIGHT_RGB_SCALE] = float(
+                    user_input.get(CONF_LIGHT_RGB_SCALE, DEFAULT_RGB_SCALE)
+                )
             if light_cfg.get(CONF_LIGHT_WHITE_NODE_ID):
                 light_cfg[CONF_LIGHT_WHITE_SCALE] = float(
                     user_input.get(CONF_LIGHT_WHITE_SCALE, DEFAULT_WHITE_SCALE)
                 )
-            if light_cfg.get(CONF_LIGHT_XY_X_NODE_ID) or light_cfg.get(CONF_LIGHT_XY_Y_NODE_ID):
-                light_cfg[CONF_LIGHT_XY_SCALE] = float(user_input.get(CONF_LIGHT_XY_SCALE, DEFAULT_XY_SCALE))
+            if light_cfg.get(CONF_LIGHT_XY_X_NODE_ID) or light_cfg.get(
+                CONF_LIGHT_XY_Y_NODE_ID
+            ):
+                light_cfg[CONF_LIGHT_XY_SCALE] = float(
+                    user_input.get(CONF_LIGHT_XY_SCALE, DEFAULT_XY_SCALE)
+                )
 
             effect_list = user_input.get(CONF_LIGHT_EFFECT_LIST)
             if effect_list:
-                parsed = [item.strip() for item in str(effect_list).split(",") if item.strip()]
+                parsed = [
+                    item.strip() for item in str(effect_list).split(",") if item.strip()
+                ]
                 if parsed:
                     light_cfg[CONF_LIGHT_EFFECT_LIST] = parsed
 
@@ -773,34 +1090,40 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Required(CONF_NODE_ID): TextSelector(),
                 vol.Optional(CONF_NODE_ICON): TextSelector(),
                 vol.Required(CONF_NODE_INVERT, default=False): BooleanSelector(),
-
                 vol.Optional(CONF_LIGHT_BRIGHTNESS_NODE_ID): TextSelector(),
                 vol.Optional(
                     CONF_LIGHT_BRIGHTNESS_SCALE,
                     default=DEFAULT_BRIGHTNESS_SCALE,
-                ): NumberSelector(NumberSelectorConfig(min=1, max=65535, step=1, mode="box")),
-
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1, max=65535, step=1, mode="box")
+                ),
                 vol.Optional(CONF_LIGHT_COLOR_TEMP_NODE_ID): TextSelector(),
                 vol.Optional(
                     CONF_LIGHT_COLOR_TEMP_MIN_KELVIN,
                     default=DEFAULT_COLOR_TEMP_MIN_KELVIN,
-                ): NumberSelector(NumberSelectorConfig(min=1000, max=10000, step=1, mode="box")),
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1000, max=10000, step=1, mode="box")
+                ),
                 vol.Optional(
                     CONF_LIGHT_COLOR_TEMP_MAX_KELVIN,
                     default=DEFAULT_COLOR_TEMP_MAX_KELVIN,
-                ): NumberSelector(NumberSelectorConfig(min=1000, max=20000, step=1, mode="box")),
-
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1000, max=20000, step=1, mode="box")
+                ),
                 vol.Optional(CONF_LIGHT_HS_HUE_NODE_ID): TextSelector(),
                 vol.Optional(
                     CONF_LIGHT_HS_HUE_SCALE,
                     default=DEFAULT_HS_HUE_SCALE,
-                ): NumberSelector(NumberSelectorConfig(min=1, max=10000, step=1, mode="box")),
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1, max=10000, step=1, mode="box")
+                ),
                 vol.Optional(CONF_LIGHT_HS_SAT_NODE_ID): TextSelector(),
                 vol.Optional(
                     CONF_LIGHT_HS_SAT_SCALE,
                     default=DEFAULT_HS_SAT_SCALE,
-                ): NumberSelector(NumberSelectorConfig(min=1, max=1000, step=1, mode="box")),
-
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1, max=1000, step=1, mode="box")
+                ),
                 vol.Optional(CONF_LIGHT_RGB_R_NODE_ID): TextSelector(),
                 vol.Optional(CONF_LIGHT_RGB_G_NODE_ID): TextSelector(),
                 vol.Optional(CONF_LIGHT_RGB_B_NODE_ID): TextSelector(),
@@ -816,21 +1139,22 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Optional(
                     CONF_LIGHT_RGB_SCALE,
                     default=DEFAULT_RGB_SCALE,
-                ): NumberSelector(NumberSelectorConfig(min=1, max=65535, step=1, mode="box")),
-
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1, max=65535, step=1, mode="box")
+                ),
                 vol.Optional(CONF_LIGHT_WHITE_NODE_ID): TextSelector(),
                 vol.Optional(
                     CONF_LIGHT_WHITE_SCALE,
                     default=DEFAULT_WHITE_SCALE,
-                ): NumberSelector(NumberSelectorConfig(min=1, max=65535, step=1, mode="box")),
-
+                ): NumberSelector(
+                    NumberSelectorConfig(min=1, max=65535, step=1, mode="box")
+                ),
                 vol.Optional(CONF_LIGHT_XY_X_NODE_ID): TextSelector(),
                 vol.Optional(CONF_LIGHT_XY_Y_NODE_ID): TextSelector(),
                 vol.Optional(
                     CONF_LIGHT_XY_SCALE,
                     default=str(DEFAULT_XY_SCALE),
                 ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-
                 vol.Optional(CONF_LIGHT_EFFECT_NODE_ID): TextSelector(),
                 vol.Optional(CONF_LIGHT_EFFECT_LIST): TextSelector(
                     TextSelectorConfig(type="text", autocomplete="off")
@@ -841,7 +1165,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_light", data_schema=schema)
 
-    def _guess_unit(self, name: str, path: str, engineering_units: str | None) -> str | None:
+    def _guess_unit(
+        self, name: str, path: str, engineering_units: str | None
+    ) -> str | None:
         if engineering_units:
             eu = engineering_units.lower()
             if "°c" in eu or "degc" in eu or "celsius" in eu:
@@ -872,9 +1198,13 @@ class OpcUaOptionsFlow(OptionsFlow):
 
     @staticmethod
     def _normalize_discovery_name(name: str) -> str:
-        return "".join(ch for ch in str(name).strip().lower() if ch.isalnum() or ch == "_")
+        return "".join(
+            ch for ch in str(name).strip().lower() if ch.isalnum() or ch == "_"
+        )
 
-    def _extract_device_contexts(self, browsed: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
+    def _extract_device_contexts(
+        self, browsed: list[dict[str, Any]]
+    ) -> dict[str, dict[str, str]]:
         """Build per-node device metadata by finding nearest device-like parent object."""
         by_id: dict[str, dict[str, Any]] = {
             str(item.get("node_id")): item for item in browsed if item.get("node_id")
@@ -886,7 +1216,9 @@ class OpcUaOptionsFlow(OptionsFlow):
                 continue
             children_by_parent.setdefault(parent, []).append(item)
 
-        def _read_child_value(children: list[dict[str, Any]], *names: str) -> str | None:
+        def _read_child_value(
+            children: list[dict[str, Any]], *names: str
+        ) -> str | None:
             wanted = set(names)
             for child in children:
                 if str(child.get("node_class")) != "Variable":
@@ -907,7 +1239,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             manufacturer = _read_child_value(children, "manufacturer", "vendorname")
             model = _read_child_value(children, "model", "modelname")
             serial = _read_child_value(children, "serialnumber", "serial", "serialno")
-            device_name = _read_child_value(children, "devicename", "name") or str(item.get("name") or "")
+            device_name = _read_child_value(children, "devicename", "name") or str(
+                item.get("name") or ""
+            )
 
             type_def = str(item.get("type_definition") or "").lower()
             # Device classification strictly via HasTypeDefinition marker.
@@ -917,7 +1251,8 @@ class OpcUaOptionsFlow(OptionsFlow):
             device_nodes[node_id] = {
                 CONF_NODE_DEVICE_ID: node_id,
                 CONF_NODE_DEVICE_NAME: device_name or node_id,
-                CONF_NODE_DEVICE_MANUFACTURER: manufacturer or "OPC Foundation / PLC Vendor",
+                CONF_NODE_DEVICE_MANUFACTURER: manufacturer
+                or "OPC Foundation / PLC Vendor",
                 CONF_NODE_DEVICE_MODEL: model or "OPC UA Device",
                 CONF_NODE_DEVICE_SERIAL: serial or "",
             }
@@ -969,7 +1304,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             children = children_by_parent.get(node_id, [])
             child_by_name: dict[str, dict[str, Any]] = {}
             for child in children:
-                normalized = self._normalize_discovery_name(str(child.get("name") or ""))
+                normalized = self._normalize_discovery_name(
+                    str(child.get("name") or "")
+                )
                 if normalized and normalized not in child_by_name:
                     child_by_name[normalized] = child
 
@@ -994,7 +1331,9 @@ class OpcUaOptionsFlow(OptionsFlow):
 
             cfg: dict[str, Any] = {
                 CONF_NODE_KIND: NODE_KIND_LIGHT,
-                CONF_NODE_NAME: str(item.get("name") or state_node.get("name") or state_node_id),
+                CONF_NODE_NAME: str(
+                    item.get("name") or state_node.get("name") or state_node_id
+                ),
                 CONF_NODE_ID: state_node_id,
             }
             if device_contexts and node_id in device_contexts:
@@ -1151,7 +1490,16 @@ class OpcUaOptionsFlow(OptionsFlow):
                 }
             )
 
-        if sample_type in ("int", "float", "int32", "int64", "uint16", "uint32", "uint64", "double"):
+        if sample_type in (
+            "int",
+            "float",
+            "int32",
+            "int64",
+            "uint16",
+            "uint32",
+            "uint64",
+            "double",
+        ):
             cfg = {
                 CONF_NODE_KIND: NODE_KIND_SENSOR,
                 CONF_NODE_NAME: name,
@@ -1203,7 +1551,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         except ValueError:
             return s
 
-    async def async_step_add_button(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_button(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             payload = self._parse_scalar_value(user_input.get(CONF_BUTTON_PAYLOAD))
             self._options[CONF_NODES].append(
@@ -1223,23 +1573,39 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Required(CONF_NODE_NAME): TextSelector(),
                 vol.Required(CONF_NODE_ID): TextSelector(),
                 vol.Optional(CONF_BUTTON_PAYLOAD, default="true"): TextSelector(),
-                vol.Optional(CONF_NODE_ICON, default="mdi:gesture-tap-button"): TextSelector(),
+                vol.Optional(
+                    CONF_NODE_ICON, default="mdi:gesture-tap-button"
+                ): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_button", data_schema=schema)
 
-    async def async_step_add_climate(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_climate(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_CLIMATE,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID) or None,
-                    CONF_CLIMATE_HVAC_MODE_NODE_ID: user_input.get(CONF_CLIMATE_HVAC_MODE_NODE_ID) or None,
-                    CONF_CLIMATE_MIN_TEMP: float(user_input.get(CONF_CLIMATE_MIN_TEMP, DEFAULT_CLIMATE_MIN_TEMP)),
-                    CONF_CLIMATE_MAX_TEMP: float(user_input.get(CONF_CLIMATE_MAX_TEMP, DEFAULT_CLIMATE_MAX_TEMP)),
-                    CONF_CLIMATE_TEMP_STEP: float(user_input.get(CONF_CLIMATE_TEMP_STEP, DEFAULT_CLIMATE_TEMP_STEP)),
+                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID)
+                    or None,
+                    CONF_CLIMATE_HVAC_MODE_NODE_ID: user_input.get(
+                        CONF_CLIMATE_HVAC_MODE_NODE_ID
+                    )
+                    or None,
+                    CONF_CLIMATE_MIN_TEMP: float(
+                        user_input.get(CONF_CLIMATE_MIN_TEMP, DEFAULT_CLIMATE_MIN_TEMP)
+                    ),
+                    CONF_CLIMATE_MAX_TEMP: float(
+                        user_input.get(CONF_CLIMATE_MAX_TEMP, DEFAULT_CLIMATE_MAX_TEMP)
+                    ),
+                    CONF_CLIMATE_TEMP_STEP: float(
+                        user_input.get(
+                            CONF_CLIMATE_TEMP_STEP, DEFAULT_CLIMATE_TEMP_STEP
+                        )
+                    ),
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
             )
@@ -1252,13 +1618,19 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Required(CONF_NODE_ID): TextSelector(),
                 vol.Required(CONF_NODE_TARGET_NODE_ID): TextSelector(),
                 vol.Optional(CONF_CLIMATE_HVAC_MODE_NODE_ID): TextSelector(),
-                vol.Required(CONF_CLIMATE_MIN_TEMP, default=DEFAULT_CLIMATE_MIN_TEMP): NumberSelector(
+                vol.Required(
+                    CONF_CLIMATE_MIN_TEMP, default=DEFAULT_CLIMATE_MIN_TEMP
+                ): NumberSelector(
                     NumberSelectorConfig(min=-50, max=100, step=0.1, mode="box")
                 ),
-                vol.Required(CONF_CLIMATE_MAX_TEMP, default=DEFAULT_CLIMATE_MAX_TEMP): NumberSelector(
+                vol.Required(
+                    CONF_CLIMATE_MAX_TEMP, default=DEFAULT_CLIMATE_MAX_TEMP
+                ): NumberSelector(
                     NumberSelectorConfig(min=-50, max=100, step=0.1, mode="box")
                 ),
-                vol.Required(CONF_CLIMATE_TEMP_STEP, default=DEFAULT_CLIMATE_TEMP_STEP): NumberSelector(
+                vol.Required(
+                    CONF_CLIMATE_TEMP_STEP, default=DEFAULT_CLIMATE_TEMP_STEP
+                ): NumberSelector(
                     NumberSelectorConfig(min=0.1, max=5, step=0.1, mode="box")
                 ),
                 vol.Optional(CONF_NODE_ICON, default="mdi:thermostat"): TextSelector(),
@@ -1266,19 +1638,30 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_climate", data_schema=schema)
 
-    async def async_step_add_cover(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_cover(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_COVER,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID) or None,
-                    CONF_COVER_SET_POSITION_NODE_ID: user_input.get(CONF_COVER_SET_POSITION_NODE_ID) or None,
-                    CONF_COVER_OPEN_NODE_ID: user_input.get(CONF_COVER_OPEN_NODE_ID) or None,
-                    CONF_COVER_CLOSE_NODE_ID: user_input.get(CONF_COVER_CLOSE_NODE_ID) or None,
-                    CONF_COVER_STOP_NODE_ID: user_input.get(CONF_COVER_STOP_NODE_ID) or None,
-                    CONF_COVER_INVERT_POSITION: bool(user_input.get(CONF_COVER_INVERT_POSITION, False)),
+                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID)
+                    or None,
+                    CONF_COVER_SET_POSITION_NODE_ID: user_input.get(
+                        CONF_COVER_SET_POSITION_NODE_ID
+                    )
+                    or None,
+                    CONF_COVER_OPEN_NODE_ID: user_input.get(CONF_COVER_OPEN_NODE_ID)
+                    or None,
+                    CONF_COVER_CLOSE_NODE_ID: user_input.get(CONF_COVER_CLOSE_NODE_ID)
+                    or None,
+                    CONF_COVER_STOP_NODE_ID: user_input.get(CONF_COVER_STOP_NODE_ID)
+                    or None,
+                    CONF_COVER_INVERT_POSITION: bool(
+                        user_input.get(CONF_COVER_INVERT_POSITION, False)
+                    ),
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
             )
@@ -1294,13 +1677,17 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Optional(CONF_COVER_OPEN_NODE_ID): TextSelector(),
                 vol.Optional(CONF_COVER_CLOSE_NODE_ID): TextSelector(),
                 vol.Optional(CONF_COVER_STOP_NODE_ID): TextSelector(),
-                vol.Required(CONF_COVER_INVERT_POSITION, default=False): BooleanSelector(),
+                vol.Required(
+                    CONF_COVER_INVERT_POSITION, default=False
+                ): BooleanSelector(),
                 vol.Optional(CONF_NODE_ICON, default="mdi:blinds"): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_cover", data_schema=schema)
 
-    async def async_step_add_date(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_date(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
@@ -1322,7 +1709,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_date", data_schema=schema)
 
-    async def async_step_add_datetime(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_datetime(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
@@ -1339,19 +1728,24 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(CONF_NODE_NAME): TextSelector(),
                 vol.Required(CONF_NODE_ID): TextSelector(),
-                vol.Optional(CONF_NODE_ICON, default="mdi:calendar-clock"): TextSelector(),
+                vol.Optional(
+                    CONF_NODE_ICON, default="mdi:calendar-clock"
+                ): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_datetime", data_schema=schema)
 
-    async def async_step_add_fan(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_fan(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_FAN,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_FAN_SPEED_NODE_ID: user_input.get(CONF_FAN_SPEED_NODE_ID) or None,
+                    CONF_FAN_SPEED_NODE_ID: user_input.get(CONF_FAN_SPEED_NODE_ID)
+                    or None,
                     CONF_NODE_INVERT: bool(user_input.get(CONF_NODE_INVERT, False)),
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
@@ -1370,15 +1764,21 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_fan", data_schema=schema)
 
-    async def async_step_add_notify(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_notify(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_NOTIFY,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_NOTIFY_MESSAGE_NODE_ID: user_input.get(CONF_NOTIFY_MESSAGE_NODE_ID) or None,
-                    CONF_NOTIFY_TITLE_NODE_ID: user_input.get(CONF_NOTIFY_TITLE_NODE_ID) or None,
+                    CONF_NOTIFY_MESSAGE_NODE_ID: user_input.get(
+                        CONF_NOTIFY_MESSAGE_NODE_ID
+                    )
+                    or None,
+                    CONF_NOTIFY_TITLE_NODE_ID: user_input.get(CONF_NOTIFY_TITLE_NODE_ID)
+                    or None,
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
             )
@@ -1391,21 +1791,31 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Required(CONF_NODE_ID): TextSelector(),
                 vol.Optional(CONF_NOTIFY_MESSAGE_NODE_ID): TextSelector(),
                 vol.Optional(CONF_NOTIFY_TITLE_NODE_ID): TextSelector(),
-                vol.Optional(CONF_NODE_ICON, default="mdi:message-alert"): TextSelector(),
+                vol.Optional(
+                    CONF_NODE_ICON, default="mdi:message-alert"
+                ): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_notify", data_schema=schema)
 
-    async def async_step_add_number(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_number(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_NUMBER,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_NUMBER_MIN: float(user_input.get(CONF_NUMBER_MIN, DEFAULT_NUMBER_MIN)),
-                    CONF_NUMBER_MAX: float(user_input.get(CONF_NUMBER_MAX, DEFAULT_NUMBER_MAX)),
-                    CONF_NUMBER_STEP: float(user_input.get(CONF_NUMBER_STEP, DEFAULT_NUMBER_STEP)),
+                    CONF_NUMBER_MIN: float(
+                        user_input.get(CONF_NUMBER_MIN, DEFAULT_NUMBER_MIN)
+                    ),
+                    CONF_NUMBER_MAX: float(
+                        user_input.get(CONF_NUMBER_MAX, DEFAULT_NUMBER_MAX)
+                    ),
+                    CONF_NUMBER_STEP: float(
+                        user_input.get(CONF_NUMBER_STEP, DEFAULT_NUMBER_STEP)
+                    ),
                     CONF_NODE_UNIT: user_input.get(CONF_NODE_UNIT) or None,
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
@@ -1417,13 +1827,19 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(CONF_NODE_NAME): TextSelector(),
                 vol.Required(CONF_NODE_ID): TextSelector(),
-                vol.Required(CONF_NUMBER_MIN, default=DEFAULT_NUMBER_MIN): NumberSelector(
+                vol.Required(
+                    CONF_NUMBER_MIN, default=DEFAULT_NUMBER_MIN
+                ): NumberSelector(
                     NumberSelectorConfig(min=-100000, max=100000, step=0.1, mode="box")
                 ),
-                vol.Required(CONF_NUMBER_MAX, default=DEFAULT_NUMBER_MAX): NumberSelector(
+                vol.Required(
+                    CONF_NUMBER_MAX, default=DEFAULT_NUMBER_MAX
+                ): NumberSelector(
                     NumberSelectorConfig(min=-100000, max=100000, step=0.1, mode="box")
                 ),
-                vol.Required(CONF_NUMBER_STEP, default=DEFAULT_NUMBER_STEP): NumberSelector(
+                vol.Required(
+                    CONF_NUMBER_STEP, default=DEFAULT_NUMBER_STEP
+                ): NumberSelector(
                     NumberSelectorConfig(min=0.001, max=10000, step=0.001, mode="box")
                 ),
                 vol.Optional(CONF_NODE_UNIT): TextSelector(),
@@ -1432,15 +1848,21 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_number", data_schema=schema)
 
-    async def async_step_add_scene(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_scene(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
-            activate_value = self._parse_scalar_value(user_input.get(CONF_SCENE_ACTIVATE_VALUE))
+            activate_value = self._parse_scalar_value(
+                user_input.get(CONF_SCENE_ACTIVATE_VALUE)
+            )
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_SCENE,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_SCENE_ACTIVATE_VALUE: True if activate_value is None else activate_value,
+                    CONF_SCENE_ACTIVATE_VALUE: True
+                    if activate_value is None
+                    else activate_value,
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
             )
@@ -1457,7 +1879,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_scene", data_schema=schema)
 
-    async def async_step_add_select(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             options_raw = str(user_input.get(CONF_SELECT_OPTIONS) or "").strip()
             options = [x.strip() for x in options_raw.split(",") if x.strip()]
@@ -1483,7 +1907,9 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="add_select", data_schema=schema)
 
-    async def async_step_add_text(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_text(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
@@ -1504,12 +1930,16 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Required(CONF_TEXT_MAX, default=255): NumberSelector(
                     NumberSelectorConfig(min=1, max=2048, step=1, mode="box")
                 ),
-                vol.Optional(CONF_NODE_ICON, default="mdi:form-textbox"): TextSelector(),
+                vol.Optional(
+                    CONF_NODE_ICON, default="mdi:form-textbox"
+                ): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_text", data_schema=schema)
 
-    async def async_step_add_time(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_time(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
@@ -1526,22 +1956,38 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(CONF_NODE_NAME): TextSelector(),
                 vol.Required(CONF_NODE_ID): TextSelector(),
-                vol.Optional(CONF_NODE_ICON, default="mdi:clock-outline"): TextSelector(),
+                vol.Optional(
+                    CONF_NODE_ICON, default="mdi:clock-outline"
+                ): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_time", data_schema=schema)
 
-    async def async_step_add_weather(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_add_weather(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         if user_input is not None:
             self._options[CONF_NODES].append(
                 {
                     CONF_NODE_KIND: NODE_KIND_WEATHER,
                     CONF_NODE_NAME: user_input[CONF_NODE_NAME],
                     CONF_NODE_ID: user_input[CONF_NODE_ID],
-                    CONF_WEATHER_HUMIDITY_NODE_ID: user_input.get(CONF_WEATHER_HUMIDITY_NODE_ID) or None,
-                    CONF_WEATHER_PRESSURE_NODE_ID: user_input.get(CONF_WEATHER_PRESSURE_NODE_ID) or None,
-                    CONF_WEATHER_WIND_SPEED_NODE_ID: user_input.get(CONF_WEATHER_WIND_SPEED_NODE_ID) or None,
-                    CONF_WEATHER_CONDITION_NODE_ID: user_input.get(CONF_WEATHER_CONDITION_NODE_ID) or None,
+                    CONF_WEATHER_HUMIDITY_NODE_ID: user_input.get(
+                        CONF_WEATHER_HUMIDITY_NODE_ID
+                    )
+                    or None,
+                    CONF_WEATHER_PRESSURE_NODE_ID: user_input.get(
+                        CONF_WEATHER_PRESSURE_NODE_ID
+                    )
+                    or None,
+                    CONF_WEATHER_WIND_SPEED_NODE_ID: user_input.get(
+                        CONF_WEATHER_WIND_SPEED_NODE_ID
+                    )
+                    or None,
+                    CONF_WEATHER_CONDITION_NODE_ID: user_input.get(
+                        CONF_WEATHER_CONDITION_NODE_ID
+                    )
+                    or None,
                     CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
                 }
             )
@@ -1556,12 +2002,16 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Optional(CONF_WEATHER_PRESSURE_NODE_ID): TextSelector(),
                 vol.Optional(CONF_WEATHER_WIND_SPEED_NODE_ID): TextSelector(),
                 vol.Optional(CONF_WEATHER_CONDITION_NODE_ID): TextSelector(),
-                vol.Optional(CONF_NODE_ICON, default="mdi:weather-partly-cloudy"): TextSelector(),
+                vol.Optional(
+                    CONF_NODE_ICON, default="mdi:weather-partly-cloudy"
+                ): TextSelector(),
             }
         )
         return self.async_show_form(step_id="add_weather", data_schema=schema)
 
-    async def async_step_auto_discovery(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_auto_discovery(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -1571,7 +2021,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             max_nodes = None
             import_limit = None
             include_readonly = bool(user_input.get("include_readonly", True))
-            include_standard_nodes = bool(user_input.get("include_standard_nodes", False))
+            include_standard_nodes = bool(
+                user_input.get("include_standard_nodes", False)
+            )
 
             manager = OpcUaClientManager(
                 endpoint=self._entry.data[CONF_ENDPOINT],
@@ -1590,7 +2042,11 @@ class OpcUaOptionsFlow(OptionsFlow):
                     max_nodes=max_nodes,
                 )
             except Exception as err:
-                _LOGGER.warning("Auto discovery browse failed on %s: %s", self._entry.data[CONF_ENDPOINT], err)
+                _LOGGER.warning(
+                    "Auto discovery browse failed on %s: %s",
+                    self._entry.data[CONF_ENDPOINT],
+                    err,
+                )
                 errors["base"] = "cannot_connect"
                 browsed = []
             finally:
@@ -1631,17 +2087,23 @@ class OpcUaOptionsFlow(OptionsFlow):
                     seen.add(node_id)
                     deduped.append(cfg)
 
-                self._discovery_cache = deduped if import_limit is None else deduped[:import_limit]
+                self._discovery_cache = (
+                    deduped if import_limit is None else deduped[:import_limit]
+                )
                 return await self.async_step_auto_discovery_review()
 
         schema = vol.Schema(
             {
                 vol.Optional("root_node_id", default="i=85"): TextSelector(),
                 vol.Optional("include_readonly", default=True): BooleanSelector(),
-                vol.Optional("include_standard_nodes", default=False): BooleanSelector(),
+                vol.Optional(
+                    "include_standard_nodes", default=False
+                ): BooleanSelector(),
             }
         )
-        return self.async_show_form(step_id="auto_discovery", data_schema=schema, errors=errors)
+        return self.async_show_form(
+            step_id="auto_discovery", data_schema=schema, errors=errors
+        )
 
     async def async_step_auto_discovery_review(
         self,
@@ -1654,12 +2116,41 @@ class OpcUaOptionsFlow(OptionsFlow):
             return await self.async_step_init()
 
         total = len(self._discovery_cache)
-        sensors = len([n for n in self._discovery_cache if n.get(CONF_NODE_KIND) == NODE_KIND_SENSOR])
-        binary = len([n for n in self._discovery_cache if n.get(CONF_NODE_KIND) == NODE_KIND_BINARY_SENSOR])
-        switches = len([n for n in self._discovery_cache if n.get(CONF_NODE_KIND) == NODE_KIND_SWITCH])
-        lights = len([n for n in self._discovery_cache if n.get(CONF_NODE_KIND) == NODE_KIND_LIGHT])
+        sensors = len(
+            [
+                n
+                for n in self._discovery_cache
+                if n.get(CONF_NODE_KIND) == NODE_KIND_SENSOR
+            ]
+        )
+        binary = len(
+            [
+                n
+                for n in self._discovery_cache
+                if n.get(CONF_NODE_KIND) == NODE_KIND_BINARY_SENSOR
+            ]
+        )
+        switches = len(
+            [
+                n
+                for n in self._discovery_cache
+                if n.get(CONF_NODE_KIND) == NODE_KIND_SWITCH
+            ]
+        )
+        lights = len(
+            [
+                n
+                for n in self._discovery_cache
+                if n.get(CONF_NODE_KIND) == NODE_KIND_LIGHT
+            ]
+        )
 
-        sample = ", ".join([str(n.get(CONF_NODE_NAME, "")) for n in self._discovery_cache[:5]]) or "-"
+        sample = (
+            ", ".join(
+                [str(n.get(CONF_NODE_NAME, "")) for n in self._discovery_cache[:5]]
+            )
+            or "-"
+        )
 
         schema = vol.Schema({vol.Required("apply", default=True): BooleanSelector()})
         return self.async_show_form(
@@ -1708,12 +2199,16 @@ class OpcUaOptionsFlow(OptionsFlow):
 
             if not errors:
                 try:
-                    self._server_discovery_cache = await OpcUaClientManager.discover_servers(
-                        discovery_url,
-                        include_network=include_network,
+                    self._server_discovery_cache = (
+                        await OpcUaClientManager.discover_servers(
+                            discovery_url,
+                            include_network=include_network,
+                        )
                     )
                 except Exception as err:
-                    _LOGGER.warning("Server discovery failed for %s: %s", discovery_url, err)
+                    _LOGGER.warning(
+                        "Server discovery failed for %s: %s", discovery_url, err
+                    )
                     errors["base"] = "cannot_connect"
 
                 if not errors and not self._server_discovery_cache:
@@ -1726,12 +2221,16 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(
                     "discovery_url",
-                    default=str(self._entry.data.get(CONF_ENDPOINT, "opc.tcp://127.0.0.1:4840")),
+                    default=str(
+                        self._entry.data.get(CONF_ENDPOINT, "opc.tcp://127.0.0.1:4840")
+                    ),
                 ): TextSelector(),
                 vol.Required("include_network", default=False): BooleanSelector(),
             }
         )
-        return self.async_show_form(step_id="discover_servers", data_schema=schema, errors=errors)
+        return self.async_show_form(
+            step_id="discover_servers", data_schema=schema, errors=errors
+        )
 
     async def async_step_discover_servers_select(
         self, user_input: dict[str, Any] | None = None
@@ -1768,22 +2267,29 @@ class OpcUaOptionsFlow(OptionsFlow):
             policy_map = {
                 ("None", "None"): SECURITY_POLICY_NONE,
                 ("Basic256Sha256", "Sign"): SECURITY_POLICY_BASIC256SHA256_SIGN,
-                ("Basic256Sha256", "SignAndEncrypt"): SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+                (
+                    "Basic256Sha256",
+                    "SignAndEncrypt",
+                ): SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
             }
             mapped_policy = policy_map.get((policy_short, mode))
 
             if mapped_policy is None:
                 return self.async_show_form(
                     step_id="discover_servers_select",
-                    data_schema=vol.Schema({
-                        vol.Required("selected", default=selected_key): SelectSelector(
-                            SelectSelectorConfig(
-                                options=options,
-                                multiple=False,
-                                mode=SelectSelectorMode.DROPDOWN,
+                    data_schema=vol.Schema(
+                        {
+                            vol.Required(
+                                "selected", default=selected_key
+                            ): SelectSelector(
+                                SelectSelectorConfig(
+                                    options=options,
+                                    multiple=False,
+                                    mode=SelectSelectorMode.DROPDOWN,
+                                )
                             )
-                        )
-                    }),
+                        }
+                    ),
                     errors={"base": "unsupported_security_policy"},
                 )
 
@@ -1805,9 +2311,13 @@ class OpcUaOptionsFlow(OptionsFlow):
                 )
             }
         )
-        return self.async_show_form(step_id="discover_servers_select", data_schema=schema)
+        return self.async_show_form(
+            step_id="discover_servers_select", data_schema=schema
+        )
 
-    async def async_step_browse_nodes(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_browse_nodes(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -1835,7 +2345,9 @@ class OpcUaOptionsFlow(OptionsFlow):
                 self._browse_root_node_id = root_node_id
                 self._browse_current_parent = root_node_id
             except Exception as err:
-                _LOGGER.warning("Browse failed on %s: %s", self._entry.data[CONF_ENDPOINT], err)
+                _LOGGER.warning(
+                    "Browse failed on %s: %s", self._entry.data[CONF_ENDPOINT], err
+                )
                 errors["base"] = "cannot_connect"
             finally:
                 await manager.disconnect()
@@ -1848,7 +2360,9 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Optional("root_node_id", default="i=85"): TextSelector(),
             }
         )
-        return self.async_show_form(step_id="browse_nodes", data_schema=schema, errors=errors)
+        return self.async_show_form(
+            step_id="browse_nodes", data_schema=schema, errors=errors
+        )
 
     async def async_step_browse_pick_kind(
         self, user_input: dict[str, Any] | None = None
@@ -1918,7 +2432,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             options.append({"value": node_id, "label": label[:180]})
         return options
 
-    def _browse_indexes(self) -> tuple[dict[str, list[dict[str, Any]]], dict[str, dict[str, Any]]]:
+    def _browse_indexes(
+        self,
+    ) -> tuple[dict[str, list[dict[str, Any]]], dict[str, dict[str, Any]]]:
         by_parent: dict[str, list[dict[str, Any]]] = {}
         by_id: dict[str, dict[str, Any]] = {}
 
@@ -2014,9 +2530,13 @@ class OpcUaOptionsFlow(OptionsFlow):
             elif go_up and self._browse_current_parent != self._browse_root_node_id:
                 parent_item = by_id.get(self._browse_current_parent)
                 parent_of_parent = (
-                    str(parent_item.get("parent_node_id", "")) if parent_item else self._browse_root_node_id
+                    str(parent_item.get("parent_node_id", ""))
+                    if parent_item
+                    else self._browse_root_node_id
                 )
-                self._browse_current_parent = parent_of_parent or self._browse_root_node_id
+                self._browse_current_parent = (
+                    parent_of_parent or self._browse_root_node_id
+                )
 
             return await self._browse_add_nodes_by_kind(step_id, kind, None)
 
@@ -2033,10 +2553,20 @@ class OpcUaOptionsFlow(OptionsFlow):
 
             has_children = child_id in by_parent
             if has_children and node_class != "Variable":
-                branch_options.append({"value": child_id, "label": f"📁 {self._label_for_browse_item(item)}"})
+                branch_options.append(
+                    {
+                        "value": child_id,
+                        "label": f"📁 {self._label_for_browse_item(item)}",
+                    }
+                )
 
             if node_class == "Variable":
-                import_options.append({"value": child_id, "label": f"🧩 {self._label_for_browse_item(item)}"})
+                import_options.append(
+                    {
+                        "value": child_id,
+                        "label": f"🧩 {self._label_for_browse_item(item)}",
+                    }
+                )
 
         schema_dict: dict[Any, Any] = {}
         if import_options:
@@ -2059,7 +2589,9 @@ class OpcUaOptionsFlow(OptionsFlow):
             schema_dict[vol.Optional("go_up", default=False)] = BooleanSelector()
 
         current_item = by_id.get(self._browse_current_parent)
-        current_path = current_item.get("path") if current_item else self._browse_root_node_id
+        current_path = (
+            current_item.get("path") if current_item else self._browse_root_node_id
+        )
 
         return self.async_show_form(
             step_id=step_id,
@@ -2073,7 +2605,9 @@ class OpcUaOptionsFlow(OptionsFlow):
     async def async_step_browse_add_sensor(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_sensor", NODE_KIND_SENSOR, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_sensor", NODE_KIND_SENSOR, user_input
+        )
 
     async def async_step_browse_add_binary_sensor(
         self, user_input: dict[str, Any] | None = None
@@ -2085,79 +2619,111 @@ class OpcUaOptionsFlow(OptionsFlow):
     async def async_step_browse_add_switch(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_switch", NODE_KIND_SWITCH, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_switch", NODE_KIND_SWITCH, user_input
+        )
 
     async def async_step_browse_add_light(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_light", NODE_KIND_LIGHT, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_light", NODE_KIND_LIGHT, user_input
+        )
 
     async def async_step_browse_add_button(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_button", NODE_KIND_BUTTON, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_button", NODE_KIND_BUTTON, user_input
+        )
 
     async def async_step_browse_add_climate(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_climate", NODE_KIND_CLIMATE, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_climate", NODE_KIND_CLIMATE, user_input
+        )
 
     async def async_step_browse_add_cover(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_cover", NODE_KIND_COVER, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_cover", NODE_KIND_COVER, user_input
+        )
 
     async def async_step_browse_add_date(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_date", NODE_KIND_DATE, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_date", NODE_KIND_DATE, user_input
+        )
 
     async def async_step_browse_add_datetime(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_datetime", NODE_KIND_DATETIME, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_datetime", NODE_KIND_DATETIME, user_input
+        )
 
     async def async_step_browse_add_fan(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_fan", NODE_KIND_FAN, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_fan", NODE_KIND_FAN, user_input
+        )
 
     async def async_step_browse_add_notify(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_notify", NODE_KIND_NOTIFY, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_notify", NODE_KIND_NOTIFY, user_input
+        )
 
     async def async_step_browse_add_number(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_number", NODE_KIND_NUMBER, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_number", NODE_KIND_NUMBER, user_input
+        )
 
     async def async_step_browse_add_scene(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_scene", NODE_KIND_SCENE, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_scene", NODE_KIND_SCENE, user_input
+        )
 
     async def async_step_browse_add_select(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_select", NODE_KIND_SELECT, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_select", NODE_KIND_SELECT, user_input
+        )
 
     async def async_step_browse_add_text(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_text", NODE_KIND_TEXT, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_text", NODE_KIND_TEXT, user_input
+        )
 
     async def async_step_browse_add_time(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_time", NODE_KIND_TIME, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_time", NODE_KIND_TIME, user_input
+        )
 
     async def async_step_browse_add_weather(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return await self._browse_add_nodes_by_kind("browse_add_weather", NODE_KIND_WEATHER, user_input)
+        return await self._browse_add_nodes_by_kind(
+            "browse_add_weather", NODE_KIND_WEATHER, user_input
+        )
 
-    async def async_step_remove_node(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+    async def async_step_remove_node(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         nodes = self._options.get(CONF_NODES, [])
         if not nodes:
             return await self.async_step_init()
@@ -2176,14 +2742,19 @@ class OpcUaOptionsFlow(OptionsFlow):
             return await self.async_step_init()
 
         options = {
-            str(idx): f"{node.get(CONF_NODE_NAME)} ({node.get(CONF_NODE_KIND)} | {node.get(CONF_NODE_ID)})"
+            str(
+                idx
+            ): f"{node.get(CONF_NODE_NAME)} ({node.get(CONF_NODE_KIND)} | {node.get(CONF_NODE_ID)})"
             for idx, node in enumerate(nodes)
         }
         schema = vol.Schema(
             {
                 vol.Required("remove"): SelectSelector(
                     SelectSelectorConfig(
-                        options=[{"value": key, "label": label} for key, label in options.items()],
+                        options=[
+                            {"value": key, "label": label}
+                            for key, label in options.items()
+                        ],
                         multiple=True,
                         mode=SelectSelectorMode.DROPDOWN,
                     )
@@ -2204,11 +2775,18 @@ class OpcUaOptionsFlow(OptionsFlow):
             node_id = str(node.get(CONF_NODE_ID, ""))
             node_name = str(node.get(CONF_NODE_NAME, node_id))
             current = str(node.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE))
-            options.append({"value": str(idx), "label": f"{node_name} ({current} | {node_id})"[:220]})
+            options.append(
+                {
+                    "value": str(idx),
+                    "label": f"{node_name} ({current} | {node_id})"[:220],
+                }
+            )
 
         if user_input is not None:
             idx = int(str(user_input.get("node_index", "0")))
-            profile = str(user_input.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)).lower()
+            profile = str(
+                user_input.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)
+            ).lower()
             if 0 <= idx < len(nodes):
                 nodes[idx][CONF_POLL_PROFILE] = profile
                 await self._persist_options()
@@ -2217,10 +2795,20 @@ class OpcUaOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Required("node_index"): SelectSelector(
-                    SelectSelectorConfig(options=options, multiple=False, mode=SelectSelectorMode.DROPDOWN)
+                    SelectSelectorConfig(
+                        options=options,
+                        multiple=False,
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
                 ),
-                vol.Required(CONF_POLL_PROFILE, default=DEFAULT_POLL_PROFILE): SelectSelector(
-                    SelectSelectorConfig(options=list(POLL_PROFILES), multiple=False, mode=SelectSelectorMode.DROPDOWN)
+                vol.Required(
+                    CONF_POLL_PROFILE, default=DEFAULT_POLL_PROFILE
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(POLL_PROFILES),
+                        multiple=False,
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
                 ),
             }
         )
@@ -2230,9 +2818,15 @@ class OpcUaOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
-            self._options[CONF_POLL_FAST_INTERVAL] = float(user_input[CONF_POLL_FAST_INTERVAL])
-            self._options[CONF_POLL_NORMAL_INTERVAL] = float(user_input[CONF_POLL_NORMAL_INTERVAL])
-            self._options[CONF_POLL_SLOW_INTERVAL] = float(user_input[CONF_POLL_SLOW_INTERVAL])
+            self._options[CONF_POLL_FAST_INTERVAL] = float(
+                user_input[CONF_POLL_FAST_INTERVAL]
+            )
+            self._options[CONF_POLL_NORMAL_INTERVAL] = float(
+                user_input[CONF_POLL_NORMAL_INTERVAL]
+            )
+            self._options[CONF_POLL_SLOW_INTERVAL] = float(
+                user_input[CONF_POLL_SLOW_INTERVAL]
+            )
             await self._persist_options()
             return await self.async_step_menu_settings()
 
@@ -2240,16 +2834,35 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(
                     CONF_POLL_FAST_INTERVAL,
-                    default=float(self._options.get(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=0.1, max=120, step=0.1, mode="box")),
+                    default=float(
+                        self._options.get(
+                            CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS
+                        )
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(min=0.1, max=120, step=0.1, mode="box")
+                ),
                 vol.Required(
                     CONF_POLL_NORMAL_INTERVAL,
-                    default=float(self._options.get(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=0.1, max=300, step=0.1, mode="box")),
+                    default=float(
+                        self._options.get(
+                            CONF_POLL_NORMAL_INTERVAL,
+                            DEFAULT_POLL_NORMAL_INTERVAL_SECONDS,
+                        )
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(min=0.1, max=300, step=0.1, mode="box")
+                ),
                 vol.Required(
                     CONF_POLL_SLOW_INTERVAL,
-                    default=float(self._options.get(CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=0.1, max=1200, step=0.1, mode="box")),
+                    default=float(
+                        self._options.get(
+                            CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS
+                        )
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(min=0.1, max=1200, step=0.1, mode="box")
+                ),
             }
         )
         return self.async_show_form(step_id="set_poll_groups", data_schema=schema)
@@ -2266,9 +2879,14 @@ class OpcUaOptionsFlow(OptionsFlow):
             {
                 vol.Required(
                     CONF_SCAN_INTERVAL,
-                    default=float(self._options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)),
-                ): NumberSelector(NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box"))
+                    default=float(
+                        self._options.get(
+                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS
+                        )
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
+                )
             }
         )
         return self.async_show_form(step_id="set_poll_interval", data_schema=schema)
-

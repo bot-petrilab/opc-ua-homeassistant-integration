@@ -78,8 +78,13 @@ async def main() -> None:
 
         entries_after_add = await api("GET", "config/config_entries/entry")
         created = [
-            x for x in entries_after_add
-            if x.get("domain") == "opcua" and ((x.get("title") == TITLE) or ((x.get("data") or {}).get("endpoint") == ENDPOINT))
+            x
+            for x in entries_after_add
+            if x.get("domain") == "opcua"
+            and (
+                (x.get("title") == TITLE)
+                or ((x.get("data") or {}).get("endpoint") == ENDPOINT)
+            )
         ]
         if not created:
             raise RuntimeError("OPC UA entry was not created")

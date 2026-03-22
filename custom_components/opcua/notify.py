@@ -16,6 +16,9 @@ from .const import (
 from .entity import OpcUaBaseEntity
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -35,11 +38,15 @@ async def async_setup_entry(
 class OpcUaNotifyEntity(OpcUaBaseEntity, NotifyEntity):
     """OPC-UA notify entity (writes title/message to configured nodes)."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_NOTIFY)
         self._cfg = node_cfg
 
-    async def async_send_message(self, message: str = "", title: str | None = None, **kwargs: Any) -> None:
+    async def async_send_message(
+        self, message: str = "", title: str | None = None, **kwargs: Any
+    ) -> None:
         message_node_id = self._cfg.get(CONF_NOTIFY_MESSAGE_NODE_ID) or self._node_id
         title_node_id = self._cfg.get(CONF_NOTIFY_TITLE_NODE_ID)
 

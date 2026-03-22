@@ -35,9 +35,7 @@ class _StrictUserManager:
 
 async def main() -> None:
     if not CERT_PATH.exists() or not KEY_PATH.exists():
-        raise RuntimeError(
-            f"Missing cert/key. Expected: {CERT_PATH} and {KEY_PATH}"
-        )
+        raise RuntimeError(f"Missing cert/key. Expected: {CERT_PATH} and {KEY_PATH}")
 
     server = Server()
     await server.init()
@@ -54,8 +52,12 @@ async def main() -> None:
     uri = "urn:machine-assistant:opcua-basic256-userpass"
     idx = await server.register_namespace(uri)
 
-    root = await server.nodes.objects.add_object(f"ns={idx};s=SecureBasic256UserPass", "SecureBasic256UserPass")
-    await root.add_variable(f"ns={idx};s=SecureBasic256UserPass.Connected", "Connected", True)
+    root = await server.nodes.objects.add_object(
+        f"ns={idx};s=SecureBasic256UserPass", "SecureBasic256UserPass"
+    )
+    await root.add_variable(
+        f"ns={idx};s=SecureBasic256UserPass.Connected", "Connected", True
+    )
     secure_switch = await root.add_variable(
         f"ns={idx};s=SecureBasic256UserPass.SecureSwitch", "SecureSwitch", False
     )
@@ -90,7 +92,9 @@ async def main() -> None:
 
     try:
         async with server:
-            print(f"OPC UA Basic256+UserPass simulator running at opc.tcp://0.0.0.0:{PORT}")
+            print(
+                f"OPC UA Basic256+UserPass simulator running at opc.tcp://0.0.0.0:{PORT}"
+            )
             print(f"Namespace URI: {uri} (ns={idx})")
             print("Security: Basic256Sha256_SignAndEncrypt")
             print(f"Identity token: Username (user={USERNAME})")

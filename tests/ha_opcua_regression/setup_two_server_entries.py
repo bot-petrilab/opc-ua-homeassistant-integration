@@ -45,12 +45,15 @@ async def main() -> None:
             existing = [
                 x
                 for x in entries
-                if x.get("domain") == "opcua" and ((x.get("data") or {}).get("endpoint") == endpoint)
+                if x.get("domain") == "opcua"
+                and ((x.get("data") or {}).get("endpoint") == endpoint)
             ]
             if existing:
                 return existing[0]["entry_id"]
 
-            init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+            init = await call_api(
+                "POST", "config/config_entries/flow", {"handler": "opcua"}
+            )
             flow_id = init["flow_id"]
             created = await call_api(
                 "POST",
@@ -74,7 +77,9 @@ async def main() -> None:
             for row in entries:
                 if row.get("domain") != "opcua":
                     continue
-                if ((row.get("data") or {}).get("endpoint") == endpoint) or row.get("title") == title:
+                if ((row.get("data") or {}).get("endpoint") == endpoint) or row.get(
+                    "title"
+                ) == title:
                     return row["entry_id"]
             raise RuntimeError(f"Entry not found after create for {endpoint}")
 

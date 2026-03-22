@@ -24,9 +24,7 @@ def _best_ipv4() -> str:
 
 async def main() -> None:
     if not CERT_PATH.exists() or not KEY_PATH.exists():
-        raise RuntimeError(
-            f"Missing cert/key. Expected: {CERT_PATH} and {KEY_PATH}"
-        )
+        raise RuntimeError(f"Missing cert/key. Expected: {CERT_PATH} and {KEY_PATH}")
 
     server = Server()
     await server.init()
@@ -41,9 +39,13 @@ async def main() -> None:
     uri = "urn:machine-assistant:opcua-basic256"
     idx = await server.register_namespace(uri)
 
-    root = await server.nodes.objects.add_object(f"ns={idx};s=SecureBasic256", "SecureBasic256")
+    root = await server.nodes.objects.add_object(
+        f"ns={idx};s=SecureBasic256", "SecureBasic256"
+    )
     await root.add_variable(f"ns={idx};s=SecureBasic256.Connected", "Connected", True)
-    secure_switch = await root.add_variable(f"ns={idx};s=SecureBasic256.SecureSwitch", "SecureSwitch", False)
+    secure_switch = await root.add_variable(
+        f"ns={idx};s=SecureBasic256.SecureSwitch", "SecureSwitch", False
+    )
     await secure_switch.set_writable()
 
     zeroconf: Zeroconf | None = None

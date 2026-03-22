@@ -11,6 +11,9 @@ from .const import CONF_ENDPOINT, CONF_SELECT_OPTIONS, NODE_KIND_SELECT
 from .entity import OpcUaBaseEntity
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -30,7 +33,9 @@ async def async_setup_entry(
 class OpcUaSelect(OpcUaBaseEntity, SelectEntity):
     """OPC-UA select entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_SELECT)
         options_raw = node_cfg.get(CONF_SELECT_OPTIONS, [])
         if not isinstance(options_raw, list):

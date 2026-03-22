@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.0.51
+- Added `custom_components/opcua/quality_scale.yaml` and mapped all quality-scale checklist rules with `done` / `exempt` + rationale comments.
+- Performed full quality-scale pass and synchronized matrix/checklist coverage with current implementation.
+- Validation rerun: `pytest tests/components/opcua tests/ci_smoke.py` (`33 passed`).
+
+## 1.0.50
+- Quality Scale completion update:
+  - Added reconfigure flow (`async_step_reconfigure`)
+  - Added/updated documentation sections: installation, removal, configuration parameters, troubleshooting, data update behavior, examples, supported functions/devices, service-actions note
+  - Added quality matrix document (`QUALITY_SCALE_MATRIX.md`) covering Bronze/Silver/Gold/Platinum checklist mapping
+  - Added `PARALLEL_UPDATES = 0` to all entity platform modules
+  - Added config-flow test coverage for reconfigure method presence
+- Test run:
+  - `pytest tests/components/opcua -q` and related checks now passing (`33 passed`)
+
+## 1.0.49
+- Quality Scale completion pass:
+  - Added reauth flow (`async_step_reauth`, `async_step_reauth_confirm`)
+  - Added auth-aware setup handling (`ConfigEntryAuthFailed` for authentication/security failures)
+  - Added diagnostics test (`test_diagnostics.py`) and coordinator timing test (`test_coordinator.py`)
+  - Expanded config-flow tests (reauth method coverage)
+  - Updated and completed quality checklist tracking in `CORE_PR_CHECKLIST.md`
+- Test status:
+  - `pytest tests/components/opcua -q` → `32 passed`
+  - `tests/ci_smoke.py` → PASS
+
+## 1.0.48
+- Integration quality-scale alignment improvements:
+  - Added `diagnostics.py` with sensitive-field redaction (`username`, `password`, `client_key_password`).
+  - Enabled `has_entity_name` at base entity level.
+  - Added tests:
+    - `tests/components/opcua/test_diagnostics.py`
+    - `tests/components/opcua/test_coordinator.py`
+  - Updated smoke test fixture expectations to current all-entities simulator model (`EntityMatrix`).
+- Updated `CORE_PR_CHECKLIST.md` status for completed diagnostics and entity naming items.
+
 ## 1.0.47
 - Translated PR preparation files and remaining integration/readme guidance to English.
 - Updated core draft/checklist language consistency for PR submission artifacts.

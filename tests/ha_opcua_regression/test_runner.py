@@ -22,7 +22,9 @@ MANUALTEST_NODE_CANDIDATES = [
     "ns=2;s=LineB.Control.StackLight.ManualTest",
 ]
 
-OUT_DIR = Path(os.getenv("OUT_DIR", "/home/user/.openclaw/workspace/tests/ha_opcua_regression/out"))
+OUT_DIR = Path(
+    os.getenv("OUT_DIR", "/home/user/.openclaw/workspace/tests/ha_opcua_regression/out")
+)
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -73,7 +75,10 @@ async def run() -> dict:
                     )
                 except PlaywrightError as pw_err:
                     last_err = str(pw_err)
-                    if attempt < 2 and ("Execution context was destroyed" in last_err or "Target closed" in last_err):
+                    if attempt < 2 and (
+                        "Execution context was destroyed" in last_err
+                        or "Target closed" in last_err
+                    ):
                         await page.wait_for_timeout(1200)
                         continue
                     break
@@ -87,7 +92,11 @@ async def run() -> dict:
                     if last_err.get("error") in {"Request error", None}:
                         await page.wait_for_timeout(1200)
                         continue
-                if isinstance(last_err, str) and "Request error" in last_err and attempt < 2:
+                if (
+                    isinstance(last_err, str)
+                    and "Request error" in last_err
+                    and attempt < 2
+                ):
                     await page.wait_for_timeout(1200)
                     continue
                 break
@@ -121,10 +130,14 @@ async def run() -> dict:
             return None
 
         async def start_options_flow(entry_id: str):
-            return await call_api("POST", "config/config_entries/options/flow", {"handler": entry_id})
+            return await call_api(
+                "POST", "config/config_entries/options/flow", {"handler": entry_id}
+            )
 
         async def opt_step(flow_id: str, user_input: dict):
-            return await call_api("POST", f"config/config_entries/options/flow/{flow_id}", user_input)
+            return await call_api(
+                "POST", f"config/config_entries/options/flow/{flow_id}", user_input
+            )
 
         def schema_field(form: dict, name: str):
             for f in form.get("data_schema", []) or []:
@@ -184,7 +197,9 @@ async def run() -> dict:
         # 2) UI: integration search contains OPC-UA
         await page.goto(HA_URL + "/config/integrations/dashboard")
         await page.wait_for_timeout(2500)
-        await page.wait_for_function("() => !!document.querySelector('home-assistant')?.hass?.user")
+        await page.wait_for_function(
+            "() => !!document.querySelector('home-assistant')?.hass?.user"
+        )
 
         # UI-only smoke check (optional): some HA views/users may not expose the FAB.
         has_brand = False
@@ -212,15 +227,23 @@ async def run() -> dict:
 
             await page.keyboard.press("Escape")
             await page.wait_for_timeout(500)
-            add_check("ui_search_shows_opcua_optional", True, f"brand dialog contains OPC-UA={has_brand}")
+            add_check(
+                "ui_search_shows_opcua_optional",
+                True,
+                f"brand dialog contains OPC-UA={has_brand}",
+            )
         else:
-            add_check("ui_search_shows_opcua_optional", True, "ha-fab not present; skipped ui brand search")
+            add_check(
+                "ui_search_shows_opcua_optional",
+                True,
+                "ha-fab not present; skipped ui brand search",
+            )
 
         await screenshot("02_add_dialog_search_opc")
 
         # 3) Cleanup existing OPC entries
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if str(x.get("domain", "")).startswith("opcua") ]:
+        for e in [x for x in entries if str(x.get("domain", "")).startswith("opcua")]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
@@ -228,24 +251,47 @@ async def run() -> dict:
         add_check("cleanup_old_entries", True)
 
         # 4) Create config entry
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+        init = await call_api(
+            "POST", "config/config_entries/flow", {"handler": "opcua"}
+        )
 
         # Recover from stale in-progress flows left behind by interrupted runs.
-        if init.get("type") == "abort" and init.get("reason") == "already_in_progress" and init.get("flow_id"):
+        if (
+            init.get("type") == "abort"
+            and init.get("reason") == "already_in_progress"
+            and init.get("flow_id")
+        ):
             try:
-                await call_api("DELETE", f"config/config_entries/flow/{init.get('flow_id')}")
+                await call_api(
+                    "DELETE", f"config/config_entries/flow/{init.get('flow_id')}"
+                )
             except Exception:
                 pass
-            init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+            init = await call_api(
+                "POST", "config/config_entries/flow", {"handler": "opcua"}
+            )
 
         flow_id = init.get("flow_id")
         if not flow_id:
             raise TestFailure(f"flow init missing flow_id: {init}")
-        add_check("config_flow_init", init.get("step_id") == "user", f"step={init.get('step_id')}")
+        add_check(
+            "config_flow_init",
+            init.get("step_id") == "user",
+            f"step={init.get('step_id')}",
+        )
 
         init_fields = {f.get("name") for f in (init.get("data_schema") or [])}
-        notify_fields = {"notify_enabled", "notify_service", "notify_title_prefix", "notify_keywords"}
-        add_check("config_flow_has_notification_fields", notify_fields.issubset(init_fields), str(sorted(init_fields)))
+        notify_fields = {
+            "notify_enabled",
+            "notify_service",
+            "notify_title_prefix",
+            "notify_keywords",
+        }
+        add_check(
+            "config_flow_has_notification_fields",
+            notify_fields.issubset(init_fields),
+            str(sorted(init_fields)),
+        )
 
         submit_payload = {
             "title": "OPC UA Regression",
@@ -261,18 +307,27 @@ async def run() -> dict:
 
         submit = None
         for _attempt in range(3):
-            submit = await call_api("POST", f"config/config_entries/flow/{flow_id}", submit_payload)
-            if submit.get("type") != "abort" or submit.get("reason") != "already_in_progress":
+            submit = await call_api(
+                "POST", f"config/config_entries/flow/{flow_id}", submit_payload
+            )
+            if (
+                submit.get("type") != "abort"
+                or submit.get("reason") != "already_in_progress"
+            ):
                 break
 
             stale_flow_id = submit.get("flow_id")
             if stale_flow_id:
                 try:
-                    await call_api("DELETE", f"config/config_entries/flow/{stale_flow_id}")
+                    await call_api(
+                        "DELETE", f"config/config_entries/flow/{stale_flow_id}"
+                    )
                 except Exception:
                     pass
 
-            init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+            init = await call_api(
+                "POST", "config/config_entries/flow", {"handler": "opcua"}
+            )
             flow_id = init.get("flow_id")
             if not flow_id:
                 break
@@ -280,20 +335,32 @@ async def run() -> dict:
         submit = submit or {}
         submit_type = submit.get("type")
         submit_reason = submit.get("reason")
-        add_check("config_flow_submit", submit_type in {"create_entry", "abort"}, f"type={submit_type} reason={submit_reason}")
+        add_check(
+            "config_flow_submit",
+            submit_type in {"create_entry", "abort"},
+            f"type={submit_type} reason={submit_reason}",
+        )
 
         entries2 = await call_api("GET", "config/config_entries/entry")
         target = [
-            x for x in entries2
+            x
+            for x in entries2
             if x.get("domain") == "opcua"
-            and ((x.get("title") == "OPC UA Regression") or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT))
+            and (
+                (x.get("title") == "OPC UA Regression")
+                or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT)
+            )
         ]
         if not target:
             raise TestFailure("No opcua entry found after config flow")
         entry_id = target[0]["entry_id"]
         add_check("config_entry_created", True, entry_id)
 
-        add_check("config_flow_submit_with_notification_fields", submit_type in {"create_entry", "abort"}, f"type={submit_type} reason={submit_reason}")
+        add_check(
+            "config_flow_submit_with_notification_fields",
+            submit_type in {"create_entry", "abort"},
+            f"type={submit_type} reason={submit_reason}",
+        )
 
         # 5) Options menu has expected grouped structure
         opt_init = await start_options_flow(entry_id)
@@ -303,7 +370,9 @@ async def run() -> dict:
             "menu_discovery_tools",
             "menu_settings",
         }
-        add_check("options_menu_expected_items", expected.issubset(menu), str(sorted(menu)))
+        add_check(
+            "options_menu_expected_items", expected.issubset(menu), str(sorted(menu))
+        )
 
         manual_test_node_id = await find_manual_test_node_id()
         stacklight_base_path = None
@@ -325,9 +394,17 @@ async def run() -> dict:
                     "invert": False,
                 },
             )
-            add_check("add_light_manual_node", add_light.get("step_id") == "init", f"step={add_light.get('step_id')}")
+            add_check(
+                "add_light_manual_node",
+                add_light.get("step_id") == "init",
+                f"step={add_light.get('step_id')}",
+            )
         else:
-            add_check("add_light_manual_node_optional", True, "no manual test node on this simulator")
+            add_check(
+                "add_light_manual_node_optional",
+                True,
+                "no manual test node on this simulator",
+            )
 
         # 6b) add dedicated binary_sensor for deterministic notification trigger (if present)
         if manual_test_node_id:
@@ -344,12 +421,24 @@ async def run() -> dict:
                     "invert": False,
                 },
             )
-            add_check("add_notify_trigger_binary_sensor", add_alarm.get("step_id") == "init", f"step={add_alarm.get('step_id')}")
+            add_check(
+                "add_notify_trigger_binary_sensor",
+                add_alarm.get("step_id") == "init",
+                f"step={add_alarm.get('step_id')}",
+            )
         else:
-            add_check("add_notify_trigger_binary_sensor_optional", True, "no manual test node on this simulator")
+            add_check(
+                "add_notify_trigger_binary_sensor_optional",
+                True,
+                "no manual test node on this simulator",
+            )
 
         # 7) server-discovery step intentionally removed from options menu (post-setup)
-        add_check("discover_servers_removed_from_options", True, "menu_discovery_tools no longer exposes discover_servers")
+        add_check(
+            "discover_servers_removed_from_options",
+            True,
+            "menu_discovery_tools no longer exposes discover_servers",
+        )
 
         # 7) browse nodes flow
         opt_b = await start_options_flow(entry_id)
@@ -367,35 +456,63 @@ async def run() -> dict:
         auto_nav = await opt_step(fid_a, {"next_step_id": "auto_discovery"})
 
         if auto_nav.get("step_id") == "auto_discovery":
-            auto = await opt_step(fid_a, {
-                "root_node_id": "ns=2;s=Machine",
-                "include_readonly": True,
-                "include_standard_nodes": False,
-            })
-            add_check("auto_discovery_scan", auto.get("step_id") == "auto_discovery_review", f"step={auto.get('step_id')}")
+            auto = await opt_step(
+                fid_a,
+                {
+                    "root_node_id": "ns=2;s=Machine",
+                    "include_readonly": True,
+                    "include_standard_nodes": False,
+                },
+            )
+            add_check(
+                "auto_discovery_scan",
+                auto.get("step_id") == "auto_discovery_review",
+                f"step={auto.get('step_id')}",
+            )
             if auto.get("step_id") == "auto_discovery_review":
                 auto_apply = await opt_step(fid_a, {"apply": True})
-                add_check("auto_discovery_apply", auto_apply.get("step_id") == "init", f"step={auto_apply.get('step_id')}")
+                add_check(
+                    "auto_discovery_apply",
+                    auto_apply.get("step_id") == "init",
+                    f"step={auto_apply.get('step_id')}",
+                )
             else:
                 add_check("auto_discovery_apply", False, "scan did not reach review")
         else:
-            add_check("auto_discovery_scan", False, f"navigation failed, step={auto_nav.get('step_id')}")
-            add_check("auto_discovery_apply", False, "navigation to auto_discovery failed")
+            add_check(
+                "auto_discovery_scan",
+                False,
+                f"navigation failed, step={auto_nav.get('step_id')}",
+            )
+            add_check(
+                "auto_discovery_apply", False, "navigation to auto_discovery failed"
+            )
 
         # 9) stack light profile step removed from options flow
-        add_check("stack_light_profile_removed", True, "stack light profile no longer part of options flow")
+        add_check(
+            "stack_light_profile_removed",
+            True,
+            "stack light profile no longer part of options flow",
+        )
 
         # 10) polling groups and per-node profile assignment
         opt_pg = await start_options_flow(entry_id)
         fid_pg = opt_pg["flow_id"]
         await opt_step(fid_pg, {"next_step_id": "menu_settings"})
         await opt_step(fid_pg, {"next_step_id": "set_poll_groups"})
-        pg_done = await opt_step(fid_pg, {
-            "poll_fast_interval": 2,
-            "poll_normal_interval": 7,
-            "poll_slow_interval": 25,
-        })
-        add_check("set_poll_groups_apply", pg_done.get("step_id") == "menu_settings", f"step={pg_done.get('step_id')}")
+        pg_done = await opt_step(
+            fid_pg,
+            {
+                "poll_fast_interval": 2,
+                "poll_normal_interval": 7,
+                "poll_slow_interval": 25,
+            },
+        )
+        add_check(
+            "set_poll_groups_apply",
+            pg_done.get("step_id") == "menu_settings",
+            f"step={pg_done.get('step_id')}",
+        )
 
         opt_np = await start_options_flow(entry_id)
         fid_np = opt_np["flow_id"]
@@ -405,17 +522,29 @@ async def run() -> dict:
         selected_node_value = None
         try:
             node_field = schema_field(np_form, "node_index")
-            node_options = (((node_field or {}).get("selector") or {}).get("select") or {}).get("options") or []
+            node_options = (
+                ((node_field or {}).get("selector") or {}).get("select") or {}
+            ).get("options") or []
             if node_options and isinstance(node_options[0], dict):
                 selected_node_value = node_options[0].get("value")
         except Exception:
             selected_node_value = None
 
         if selected_node_value is not None:
-            np_done = await opt_step(fid_np, {"node_index": selected_node_value, "poll_profile": "slow"})
-            add_check("set_node_poll_profile_apply", np_done.get("step_id") == "menu_settings", f"step={np_done.get('step_id')}")
+            np_done = await opt_step(
+                fid_np, {"node_index": selected_node_value, "poll_profile": "slow"}
+            )
+            add_check(
+                "set_node_poll_profile_apply",
+                np_done.get("step_id") == "menu_settings",
+                f"step={np_done.get('step_id')}",
+            )
         else:
-            add_check("set_node_poll_profile_apply_optional", True, "no node options available")
+            add_check(
+                "set_node_poll_profile_apply_optional",
+                True,
+                "no node options available",
+            )
 
         # verify persisted poll-group values by reopening the step and checking defaults
         opt_pg_verify = await start_options_flow(entry_id)
@@ -430,26 +559,60 @@ async def run() -> dict:
         pf = schema_default(pg_verify, "poll_fast_interval")
         pn = schema_default(pg_verify, "poll_normal_interval")
         ps = schema_default(pg_verify, "poll_slow_interval")
-        add_check("poll_group_values_persisted", pf == 2 and pn == 7 and ps == 25, f"fast={pf} normal={pn} slow={ps}")
+        add_check(
+            "poll_group_values_persisted",
+            pf == 2 and pn == 7 and ps == 25,
+            f"fast={pf} normal={pn} slow={ps}",
+        )
 
         # verify per-node profile assignment by checking selector labels include the chosen profile
         opt_np_verify = await start_options_flow(entry_id)
         fid_np_verify = opt_np_verify["flow_id"]
         await opt_step(fid_np_verify, {"next_step_id": "menu_settings"})
-        np_verify = await opt_step(fid_np_verify, {"next_step_id": "set_node_poll_profile"})
+        np_verify = await opt_step(
+            fid_np_verify, {"next_step_id": "set_node_poll_profile"}
+        )
         node_field_verify = schema_field(np_verify, "node_index")
-        node_options_verify = (((node_field_verify or {}).get("selector") or {}).get("select") or {}).get("options") or []
+        node_options_verify = (
+            ((node_field_verify or {}).get("selector") or {}).get("select") or {}
+        ).get("options") or []
         if node_options_verify:
-            has_profile = any("(slow |" in str((opt or {}).get("label", "")) for opt in node_options_verify if isinstance(opt, dict))
-            add_check("node_poll_profile_present", has_profile, f"options={len(node_options_verify)}")
+            has_profile = any(
+                "(slow |" in str((opt or {}).get("label", ""))
+                for opt in node_options_verify
+                if isinstance(opt, dict)
+            )
+            add_check(
+                "node_poll_profile_present",
+                has_profile,
+                f"options={len(node_options_verify)}",
+            )
         else:
-            add_check("node_poll_profile_present_optional", True, "no node options available for this endpoint")
+            add_check(
+                "node_poll_profile_present_optional",
+                True,
+                "no node options available for this endpoint",
+            )
 
         # 11) entity verification
         states = await call_api("GET", "states")
-        endpoint_states = [s for s in states if (s.get("attributes") or {}).get("endpoint") == OPC_ENDPOINT]
-        add_check("entities_for_endpoint_present_optional", True, f"count={len(endpoint_states)}")
-        domains = Counter([s.get("entity_id", "").split(".")[0] for s in endpoint_states if s.get("entity_id")])
+        endpoint_states = [
+            s
+            for s in states
+            if (s.get("attributes") or {}).get("endpoint") == OPC_ENDPOINT
+        ]
+        add_check(
+            "entities_for_endpoint_present_optional",
+            True,
+            f"count={len(endpoint_states)}",
+        )
+        domains = Counter(
+            [
+                s.get("entity_id", "").split(".")[0]
+                for s in endpoint_states
+                if s.get("entity_id")
+            ]
+        )
         add_check("entity_domains_expected_optional", True, f"actual={dict(domains)}")
 
         # 11) runtime notification event trigger (alarm false -> true), only if manual test node exists
@@ -470,8 +633,10 @@ async def run() -> dict:
                     matched_events = [
                         ev
                         for ev in events
-                        if str((ev.get("data") or {}).get("node_id") or "") == manual_test_node_id
-                        and str((ev.get("data") or {}).get("endpoint") or "") == OPC_ENDPOINT
+                        if str((ev.get("data") or {}).get("node_id") or "")
+                        == manual_test_node_id
+                        and str((ev.get("data") or {}).get("endpoint") or "")
+                        == OPC_ENDPOINT
                     ]
                     if matched_events:
                         break
@@ -491,11 +656,16 @@ async def run() -> dict:
             except Exception as err:
                 add_check("notification_trigger_event", False, f"trigger failed: {err}")
         else:
-            add_check("notification_trigger_event_optional", True, "no manual test node on this simulator")
+            add_check(
+                "notification_trigger_event_optional",
+                True,
+                "no manual test node on this simulator",
+            )
 
         # 12) functional light toggle (only if manual-test light is available)
         light_candidates = [
-            s for s in endpoint_states
+            s
+            for s in endpoint_states
             if manual_test_node_id
             and (s.get("attributes") or {}).get("node_id") == manual_test_node_id
             and s.get("entity_id", "").startswith("light.")
@@ -503,21 +673,29 @@ async def run() -> dict:
         if light_candidates:
             light_entity = light_candidates[0]["entity_id"]
             try:
-                await call_api("POST", "services/light/turn_on", {"entity_id": light_entity})
+                await call_api(
+                    "POST", "services/light/turn_on", {"entity_id": light_entity}
+                )
 
                 st_on = None
                 for _ in range(6):
                     await page.wait_for_timeout(700)
-                    st_on = await call_api("GET", f"states/{quote(light_entity, safe='')}")
+                    st_on = await call_api(
+                        "GET", f"states/{quote(light_entity, safe='')}"
+                    )
                     if st_on.get("state") == "on":
                         break
 
-                await call_api("POST", "services/light/turn_off", {"entity_id": light_entity})
+                await call_api(
+                    "POST", "services/light/turn_off", {"entity_id": light_entity}
+                )
 
                 st_off = None
                 for _ in range(8):
                     await page.wait_for_timeout(700)
-                    st_off = await call_api("GET", f"states/{quote(light_entity, safe='')}")
+                    st_off = await call_api(
+                        "GET", f"states/{quote(light_entity, safe='')}"
+                    )
                     if st_off.get("state") == "off":
                         break
 
@@ -529,9 +707,17 @@ async def run() -> dict:
                     f"{light_entity}: on={st_on.get('state') if st_on else None} off={st_off.get('state') if st_off else None}",
                 )
             except Exception as err:
-                add_check("light_toggle_service", False, f"{light_entity}: service call failed: {err}")
+                add_check(
+                    "light_toggle_service",
+                    False,
+                    f"{light_entity}: service call failed: {err}",
+                )
         else:
-            add_check("light_toggle_service_optional", True, "no matching manual-test light entity on this simulator")
+            add_check(
+                "light_toggle_service_optional",
+                True,
+                "no matching manual-test light entity on this simulator",
+            )
 
         await page.goto(HA_URL + "/config/integrations/dashboard")
         await page.wait_for_timeout(2000)

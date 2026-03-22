@@ -11,6 +11,9 @@ from .const import CONF_ENDPOINT, CONF_NODE_INVERT, NODE_KIND_SWITCH
 from .entity import OpcUaBaseEntity
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -30,7 +33,9 @@ async def async_setup_entry(
 class OpcUaSwitch(OpcUaBaseEntity, SwitchEntity):
     """OPC UA Switch entity (read + write bool)."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_SWITCH)
         self._invert = bool(node_cfg.get(CONF_NODE_INVERT, False))
 

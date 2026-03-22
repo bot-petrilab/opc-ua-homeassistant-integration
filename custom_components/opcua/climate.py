@@ -31,6 +31,9 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -52,7 +55,9 @@ class OpcUaClimate(OpcUaBaseEntity, ClimateEntity):
 
     _hvac_modes_supported = [HVACMode.OFF, HVACMode.HEAT, HVACMode.COOL, HVACMode.AUTO]
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_CLIMATE)
         self._cfg = node_cfg
         self._target_node_id = node_cfg.get(CONF_NODE_TARGET_NODE_ID)
@@ -60,9 +65,15 @@ class OpcUaClimate(OpcUaBaseEntity, ClimateEntity):
 
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
         self._attr_hvac_modes = list(self._hvac_modes_supported)
-        self._attr_min_temp = float(node_cfg.get(CONF_CLIMATE_MIN_TEMP, DEFAULT_CLIMATE_MIN_TEMP))
-        self._attr_max_temp = float(node_cfg.get(CONF_CLIMATE_MAX_TEMP, DEFAULT_CLIMATE_MAX_TEMP))
-        self._attr_target_temperature_step = float(node_cfg.get(CONF_CLIMATE_TEMP_STEP, DEFAULT_CLIMATE_TEMP_STEP))
+        self._attr_min_temp = float(
+            node_cfg.get(CONF_CLIMATE_MIN_TEMP, DEFAULT_CLIMATE_MIN_TEMP)
+        )
+        self._attr_max_temp = float(
+            node_cfg.get(CONF_CLIMATE_MAX_TEMP, DEFAULT_CLIMATE_MAX_TEMP)
+        )
+        self._attr_target_temperature_step = float(
+            node_cfg.get(CONF_CLIMATE_TEMP_STEP, DEFAULT_CLIMATE_TEMP_STEP)
+        )
 
     @property
     def current_temperature(self) -> float | None:
@@ -76,7 +87,11 @@ class OpcUaClimate(OpcUaBaseEntity, ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode:
-        raw = self.coordinator.data.get(self._hvac_mode_node_id) if self._hvac_mode_node_id else None
+        raw = (
+            self.coordinator.data.get(self._hvac_mode_node_id)
+            if self._hvac_mode_node_id
+            else None
+        )
         if isinstance(raw, str):
             r = raw.strip().lower()
             for mode in self._hvac_modes_supported:
@@ -98,7 +113,9 @@ class OpcUaClimate(OpcUaBaseEntity, ClimateEntity):
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         if self._hvac_mode_node_id:
-            await self.coordinator.manager.write_node(self._hvac_mode_node_id, hvac_mode.value)
+            await self.coordinator.manager.write_node(
+                self._hvac_mode_node_id, hvac_mode.value
+            )
         await self.coordinator.async_request_refresh()
 
     async def async_set_temperature(self, **kwargs: Any) -> None:

@@ -54,7 +54,9 @@ def load_client_manager():
 async def run_smoke() -> None:
     OpcUaClientManager = load_client_manager()
 
-    rows = await OpcUaClientManager.discover_servers("opc.tcp://127.0.0.1:4840", include_network=False)
+    rows = await OpcUaClientManager.discover_servers(
+        "opc.tcp://127.0.0.1:4840", include_network=False
+    )
     if not rows:
         raise AssertionError("discover_servers returned no endpoints")
 
@@ -69,20 +71,24 @@ async def run_smoke() -> None:
         password=None,
     )
 
-    browse = await manager.browse_nodes(root_node_id="ns=2;s=Machine", depth=3, max_nodes=300)
+    browse = await manager.browse_nodes(
+        root_node_id="ns=2;s=EntityMatrix", depth=3, max_nodes=300
+    )
     if not browse:
         raise AssertionError("browse_nodes returned empty list")
 
     names = {str(item.get("name", "")) for item in browse}
-    expected_groups = {"Operation", "Process", "Assets", "Control", "Diagnostics"}
+    expected_groups = {"Operation", "Process", "Control", "Lighting", "Diagnostics"}
     if not expected_groups.issubset(names):
         raise AssertionError(f"Missing expected group names: {expected_groups - names}")
 
-    values = await manager.read_nodes([
-        "ns=2;s=Machine.Process.Temperature",
-        "ns=2;s=Machine.Operation.Running",
-        "ns=2;s=Machine.Control.StackLight.Green",
-    ])
+    values = await manager.read_nodes(
+        [
+            "ns=2;s=EntityMatrix.Process.Temperature",
+            "ns=2;s=EntityMatrix.Operation.Running",
+            "ns=2;s=EntityMatrix.Lighting.Main.On",
+        ]
+    )
     for nid in values:
         if values[nid] is None:
             raise AssertionError(f"Read returned None for {nid}")

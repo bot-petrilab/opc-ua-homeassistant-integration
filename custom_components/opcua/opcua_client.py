@@ -92,7 +92,11 @@ class OpcUaClientManager:
                         break
                     except Exception as err:
                         last_err = err
-                        _LOGGER.debug("set_security_string failed for candidate '%s': %s", sec, err)
+                        _LOGGER.debug(
+                            "set_security_string failed for candidate '%s': %s",
+                            sec,
+                            err,
+                        )
 
                 if last_err is not None:
                     raise last_err
@@ -275,7 +279,9 @@ class OpcUaClientManager:
                     if str(node_class) == "Variable":
                         # Access / writable
                         try:
-                            attr = await child.read_attribute(ua.AttributeIds.AccessLevel)
+                            attr = await child.read_attribute(
+                                ua.AttributeIds.AccessLevel
+                            )
                             access_level = int(attr.Value.Value)
                             item["access_level"] = access_level
                             item["is_writable"] = bool(access_level & 0x02)
@@ -297,7 +303,10 @@ class OpcUaClientManager:
                         try:
                             sample_value = await child.read_value()
                             item["sample_type"] = type(sample_value).__name__
-                            if isinstance(sample_value, (bool, int, float, str)) or sample_value is None:
+                            if (
+                                isinstance(sample_value, (bool, int, float, str))
+                                or sample_value is None
+                            ):
                                 item["sample_value"] = sample_value
                         except Exception:
                             pass
@@ -314,7 +323,9 @@ class OpcUaClientManager:
                                         item["engineering_units"] = str(eng)
                                     elif prop_name == "EnumStrings":
                                         enum_vals = await prop.read_value()
-                                        item["enum_strings"] = [str(x) for x in list(enum_vals)[:32]]
+                                        item["enum_strings"] = [
+                                            str(x) for x in list(enum_vals)[:32]
+                                        ]
                                 except Exception:
                                     continue
                         except Exception:
@@ -322,13 +333,17 @@ class OpcUaClientManager:
 
                     result.append(item)
 
-                    if (depth is None or level + 1 < depth) and child_node_id not in visited:
+                    if (
+                        depth is None or level + 1 < depth
+                    ) and child_node_id not in visited:
                         queue.append((child_node_id, level + 1, child_path))
 
                     if max_nodes is not None and len(result) >= max_nodes:
                         break
                 except Exception as err:
-                    _LOGGER.debug("Browse child parse failed under %s: %s", current_node_id, err)
+                    _LOGGER.debug(
+                        "Browse child parse failed under %s: %s", current_node_id, err
+                    )
 
         return result
 
@@ -377,7 +392,9 @@ class OpcUaClientManager:
             try:
                 network_rows = await probe_net.connect_and_find_servers_on_network()
             except Exception as err:
-                _LOGGER.debug("FindServersOnNetwork failed on %s: %s", discovery_url, err)
+                _LOGGER.debug(
+                    "FindServersOnNetwork failed on %s: %s", discovery_url, err
+                )
             finally:
                 await _safe_disconnect(probe_net)
 
@@ -430,7 +447,9 @@ class OpcUaClientManager:
             app_uri = str(getattr(app, "ApplicationUri", ""))
             app_meta[app_uri] = {
                 "application_uri": app_uri,
-                "application_name": str(getattr(getattr(app, "ApplicationName", None), "Text", "")),
+                "application_name": str(
+                    getattr(getattr(app, "ApplicationName", None), "Text", "")
+                ),
                 "product_uri": str(getattr(app, "ProductUri", "")),
                 "discovery_urls": list(getattr(app, "DiscoveryUrls", []) or []),
             }
@@ -445,13 +464,17 @@ class OpcUaClientManager:
                 policy_uri = str(getattr(ep, "SecurityPolicyUri", ""))
                 policy_short = OpcUaClientManager._security_policy_short(policy_uri)
                 security_mode_obj = getattr(ep, "SecurityMode", None)
-                security_mode_name = getattr(security_mode_obj, "name", str(security_mode_obj))
+                security_mode_name = getattr(
+                    security_mode_obj, "name", str(security_mode_obj)
+                )
                 security_level = int(getattr(ep, "SecurityLevel", 0) or 0)
                 transport = str(getattr(ep, "TransportProfileUri", ""))
 
                 app_desc = getattr(ep, "Server", None)
                 app_uri = str(getattr(app_desc, "ApplicationUri", ""))
-                app_name = str(getattr(getattr(app_desc, "ApplicationName", None), "Text", ""))
+                app_name = str(
+                    getattr(getattr(app_desc, "ApplicationName", None), "Text", "")
+                )
 
                 if app_uri in app_meta:
                     app_name = app_meta[app_uri].get("application_name") or app_name
@@ -461,12 +484,9 @@ class OpcUaClientManager:
                     continue
                 seen_endpoint_keys.add(key)
 
-                supported_now = (
-                    policy_short == "None"
-                    or (
-                        policy_short == "Basic256Sha256"
-                        and security_mode_name in {"Sign", "SignAndEncrypt"}
-                    )
+                supported_now = policy_short == "None" or (
+                    policy_short == "Basic256Sha256"
+                    and security_mode_name in {"Sign", "SignAndEncrypt"}
                 )
 
                 discovered.append(

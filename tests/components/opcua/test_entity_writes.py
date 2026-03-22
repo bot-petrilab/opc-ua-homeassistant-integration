@@ -10,9 +10,16 @@ from custom_components.opcua.number import OpcUaNumber
 from custom_components.opcua.time import OpcUaTime
 
 
+def test_coordinator_factory_fixture(coordinator_factory) -> None:
+    c = coordinator_factory({"ns=2;s=EntityMatrix.Test.Node": 1})
+    assert c.data["ns=2;s=EntityMatrix.Test.Node"] == 1
+
+
 @pytest.mark.asyncio
 async def test_number_write_preserves_int_type(base_node_cfg, coordinator_int) -> None:
-    entity = OpcUaNumber("entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_int)
+    entity = OpcUaNumber(
+        "entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_int
+    )
 
     await entity.async_set_native_value(1234.8)
 
@@ -20,8 +27,12 @@ async def test_number_write_preserves_int_type(base_node_cfg, coordinator_int) -
 
 
 @pytest.mark.asyncio
-async def test_number_write_preserves_float_type(base_node_cfg, coordinator_float) -> None:
-    entity = OpcUaNumber("entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_float)
+async def test_number_write_preserves_float_type(
+    base_node_cfg, coordinator_float
+) -> None:
+    entity = OpcUaNumber(
+        "entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_float
+    )
 
     await entity.async_set_native_value(1234.8)
 
@@ -32,8 +43,12 @@ async def test_number_write_preserves_float_type(base_node_cfg, coordinator_floa
 
 
 @pytest.mark.asyncio
-async def test_date_write_preserves_datetime_node(base_node_cfg, coordinator_datetime) -> None:
-    entity = OpcUaDate("entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_datetime)
+async def test_date_write_preserves_datetime_node(
+    base_node_cfg, coordinator_datetime
+) -> None:
+    entity = OpcUaDate(
+        "entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_datetime
+    )
 
     await entity.async_set_value(date(2026, 3, 7))
 
@@ -45,8 +60,12 @@ async def test_date_write_preserves_datetime_node(base_node_cfg, coordinator_dat
 
 
 @pytest.mark.asyncio
-async def test_time_write_strips_microseconds_for_datetime_node(base_node_cfg, coordinator_datetime) -> None:
-    entity = OpcUaTime("entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_datetime)
+async def test_time_write_strips_microseconds_for_datetime_node(
+    base_node_cfg, coordinator_datetime
+) -> None:
+    entity = OpcUaTime(
+        "entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_datetime
+    )
 
     await entity.async_set_value(time(13, 54, 22, 538583))
 
@@ -57,8 +76,12 @@ async def test_time_write_strips_microseconds_for_datetime_node(base_node_cfg, c
 
 
 @pytest.mark.asyncio
-async def test_datetime_write_keeps_datetime_type(base_node_cfg, coordinator_datetime) -> None:
-    entity = OpcUaDateTime("entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_datetime)
+async def test_datetime_write_keeps_datetime_type(
+    base_node_cfg, coordinator_datetime
+) -> None:
+    entity = OpcUaDateTime(
+        "entry-1", "opc.tcp://127.0.0.1:4846", base_node_cfg, coordinator_datetime
+    )
 
     await entity.async_set_value(datetime(2026, 3, 8, 9, 30, 0))
 

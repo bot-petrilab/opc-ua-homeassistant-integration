@@ -25,6 +25,9 @@ def _as_date(value: Any) -> date | None:
     return None
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -44,7 +47,9 @@ async def async_setup_entry(
 class OpcUaDate(OpcUaBaseEntity, DateEntity):
     """OPC-UA date entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_DATE)
 
     @property

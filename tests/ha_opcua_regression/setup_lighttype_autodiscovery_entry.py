@@ -41,10 +41,14 @@ async def main() -> None:
             return obj.get("out")
 
         async def start_options_flow(entry_id: str):
-            return await call_api("POST", "config/config_entries/options/flow", {"handler": entry_id})
+            return await call_api(
+                "POST", "config/config_entries/options/flow", {"handler": entry_id}
+            )
 
         async def opt_step(flow_id: str, payload: dict):
-            return await call_api("POST", f"config/config_entries/options/flow/{flow_id}", payload)
+            return await call_api(
+                "POST", f"config/config_entries/options/flow/{flow_id}", payload
+            )
 
         await page.goto(HA_URL)
         await page.wait_for_timeout(1500)
@@ -60,7 +64,10 @@ async def main() -> None:
             x
             for x in entries
             if x.get("domain") == "opcua"
-            and (x.get("title") == TITLE or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT))
+            and (
+                x.get("title") == TITLE
+                or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT)
+            )
         ]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
@@ -68,7 +75,9 @@ async def main() -> None:
                 pass
 
         # Create base integration entry
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+        init = await call_api(
+            "POST", "config/config_entries/flow", {"handler": "opcua"}
+        )
         flow_id = init["flow_id"]
         created = await call_api(
             "POST",
@@ -93,7 +102,10 @@ async def main() -> None:
             x
             for x in entries
             if x.get("domain") == "opcua"
-            and (x.get("title") == TITLE or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT))
+            and (
+                x.get("title") == TITLE
+                or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT)
+            )
         ]
         if not target:
             raise RuntimeError("Failed to find created OPC UA entry")

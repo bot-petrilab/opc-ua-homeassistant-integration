@@ -26,6 +26,9 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -45,7 +48,9 @@ async def async_setup_entry(
 class OpcUaWeather(OpcUaBaseEntity, WeatherEntity):
     """OPC-UA weather entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_WEATHER)
         self._cfg = node_cfg
         self._attr_native_temperature_unit = UnitOfTemperature.CELSIUS

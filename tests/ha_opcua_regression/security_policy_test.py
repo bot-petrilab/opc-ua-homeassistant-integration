@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -11,7 +10,10 @@ from asyncua import Server, ua
 
 # Import integration client manager directly
 import sys
-sys.path.insert(0, "/home/user/.openclaw/workspace/ha-docs-test-env/config/custom_components")
+
+sys.path.insert(
+    0, "/home/user/.openclaw/workspace/ha-docs-test-env/config/custom_components"
+)
 from opcua.opcua_client import OpcUaClientManager  # type: ignore
 
 
@@ -23,13 +25,17 @@ async def run_secure_server(stop_evt: asyncio.Event, cert: str, key: str) -> Non
 
     await server.load_certificate(cert)
     await server.load_private_key(key)
-    server.set_security_policy([
-        ua.SecurityPolicyType.Basic256Sha256_Sign,
-        ua.SecurityPolicyType.Basic256Sha256_SignAndEncrypt,
-    ])
+    server.set_security_policy(
+        [
+            ua.SecurityPolicyType.Basic256Sha256_Sign,
+            ua.SecurityPolicyType.Basic256Sha256_SignAndEncrypt,
+        ]
+    )
 
     idx = await server.register_namespace("urn:opcua:secure-test")
-    obj = await server.nodes.objects.add_object(f"ns={idx};s=SecureMachine", "SecureMachine")
+    obj = await server.nodes.objects.add_object(
+        f"ns={idx};s=SecureMachine", "SecureMachine"
+    )
     await obj.add_variable(f"ns={idx};s=SecureMachine.TestValue", "TestValue", 123.45)
 
     async with server:
@@ -68,7 +74,9 @@ async def main() -> None:
         client_cert, client_key = make_cert_pair(td_path, "opcua-client")
 
         stop_evt = asyncio.Event()
-        server_task = asyncio.create_task(run_secure_server(stop_evt, server_cert, server_key))
+        server_task = asyncio.create_task(
+            run_secure_server(stop_evt, server_cert, server_key)
+        )
         await asyncio.sleep(1.8)
 
         try:
@@ -83,14 +91,18 @@ async def main() -> None:
                 client_key_password=None,
             )
 
-            browse = await m_sign.browse_nodes(root_node_id="i=85", depth=5, max_nodes=500)
+            browse = await m_sign.browse_nodes(
+                root_node_id="i=85", depth=5, max_nodes=500
+            )
             test_nodes = [
                 item.get("node_id")
                 for item in browse
                 if str(item.get("name", "")) == "TestValue"
             ]
             if not test_nodes:
-                raise RuntimeError("Could not locate TestValue node in secure server browse")
+                raise RuntimeError(
+                    "Could not locate TestValue node in secure server browse"
+                )
             test_node_id = str(test_nodes[0])
 
             vals_sign = await m_sign.read_nodes([test_node_id])

@@ -11,6 +11,9 @@ from .const import CONF_BUTTON_PAYLOAD, CONF_ENDPOINT, NODE_KIND_BUTTON
 from .entity import OpcUaBaseEntity
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -30,7 +33,9 @@ async def async_setup_entry(
 class OpcUaButton(OpcUaBaseEntity, ButtonEntity):
     """OPC-UA button entity (writes a configured payload on press)."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_BUTTON)
         self._payload = node_cfg.get(CONF_BUTTON_PAYLOAD, True)
 

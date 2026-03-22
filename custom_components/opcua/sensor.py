@@ -28,6 +28,9 @@ def _to_float_if_possible(value: Any) -> Any:
         return value
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -47,7 +50,9 @@ async def async_setup_entry(
 class OpcUaSensor(OpcUaBaseEntity, SensorEntity):
     """OPC UA Sensor entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_SENSOR)
         self._attr_native_unit_of_measurement = node_cfg.get(CONF_NODE_UNIT)
         self._attr_device_class = node_cfg.get(CONF_NODE_DEVICE_CLASS)

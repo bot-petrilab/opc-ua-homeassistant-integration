@@ -58,8 +58,13 @@ async def main() -> None:
 
         async def start_user_flow() -> dict:
             for _ in range(3):
-                init = await api("POST", "config/config_entries/flow", {"handler": "opcua"})
-                if init.get("type") == "abort" and init.get("reason") == "already_in_progress":
+                init = await api(
+                    "POST", "config/config_entries/flow", {"handler": "opcua"}
+                )
+                if (
+                    init.get("type") == "abort"
+                    and init.get("reason") == "already_in_progress"
+                ):
                     flow_id = init.get("flow_id")
                     if flow_id:
                         try:
@@ -77,7 +82,11 @@ async def main() -> None:
                 raise RuntimeError(f"Unexpected flow init response: {init}")
 
             result = await api("POST", f"config/config_entries/flow/{flow_id}", payload)
-            created_entry_id = ((result.get("result") or {}).get("entry_id")) if isinstance(result, dict) else None
+            created_entry_id = (
+                ((result.get("result") or {}).get("entry_id"))
+                if isinstance(result, dict)
+                else None
+            )
             if created_entry_id:
                 return result, created_entry_id
 
@@ -85,7 +94,8 @@ async def main() -> None:
             created = [
                 x
                 for x in entries
-                if x.get("domain") == "opcua" and ((x.get("data") or {}).get("endpoint") == payload.get("endpoint"))
+                if x.get("domain") == "opcua"
+                and ((x.get("data") or {}).get("endpoint") == payload.get("endpoint"))
             ]
             return result, (created[0]["entry_id"] if created else None)
 
@@ -160,13 +170,20 @@ async def main() -> None:
 
             if expected == "create":
                 if result.get("type") not in {"create_entry", "abort"} or not entry_id:
-                    failures.append(f"{name}: expected create_entry/abort+entry, got result={result} entry_id={entry_id}")
+                    failures.append(
+                        f"{name}: expected create_entry/abort+entry, got result={result} entry_id={entry_id}"
+                    )
                 else:
                     await api("DELETE", f"config/config_entries/entry/{entry_id}")
             elif expected == "errors_required":
                 errs = result.get("errors") or {}
-                if errs.get("client_cert_path") != "required" or errs.get("client_key_path") != "required":
-                    failures.append(f"{name}: expected required cert/key errors, got {result}")
+                if (
+                    errs.get("client_cert_path") != "required"
+                    or errs.get("client_key_path") != "required"
+                ):
+                    failures.append(
+                        f"{name}: expected required cert/key errors, got {result}"
+                    )
 
         if failures:
             for f in failures:

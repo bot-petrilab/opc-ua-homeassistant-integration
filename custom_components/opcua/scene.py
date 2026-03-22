@@ -11,6 +11,9 @@ from .const import CONF_ENDPOINT, CONF_SCENE_ACTIVATE_VALUE, NODE_KIND_SCENE
 from .entity import OpcUaBaseEntity
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -30,7 +33,9 @@ async def async_setup_entry(
 class OpcUaScene(OpcUaBaseEntity, Scene):
     """OPC-UA scene entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_SCENE)
         self._activate_value = node_cfg.get(CONF_SCENE_ACTIVATE_VALUE, True)
 

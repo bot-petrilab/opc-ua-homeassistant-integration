@@ -6,7 +6,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 
 from .const import (
     CONF_CLIENT_CERT_PATH,
@@ -32,13 +32,25 @@ from .const import (
     DEFAULT_POLL_NORMAL_INTERVAL_SECONDS,
     DEFAULT_POLL_SLOW_INTERVAL_SECONDS,
     DEFAULT_SCAN_INTERVAL_SECONDS,
-    DOMAIN,
     PLATFORMS,
 )
 from .coordinator import OpcUaCoordinator
 from .opcua_client import OpcUaClientManager
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _is_auth_error(err: Exception) -> bool:
+    text = str(err).lower()
+    auth_markers = (
+        "badidentitytoken",
+        "baduseraccessdenied",
+        "badsecuritychecksfailed",
+        "user identity",
+        "authentication",
+        "access denied",
+    )
+    return any(marker in text for marker in auth_markers)
 
 
 @dataclass
@@ -67,22 +79,53 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
     client_key_password: str | None = entry.data.get(CONF_CLIENT_KEY_PASSWORD)
 
     scan_interval: float = float(
-        entry.options.get(CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS))
+        entry.options.get(
+            CONF_SCAN_INTERVAL,
+            entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS),
+        )
     )
     nodes: list[dict] = entry.options.get(CONF_NODES, entry.data.get(CONF_NODES, []))
 
     poll_intervals = {
-        "fast": float(entry.options.get(CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS)),
-        "normal": float(entry.options.get(CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS)),
-        "slow": float(entry.options.get(CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS)),
+        "fast": float(
+            entry.options.get(
+                CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS
+            )
+        ),
+        "normal": float(
+            entry.options.get(
+                CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS
+            )
+        ),
+        "slow": float(
+            entry.options.get(
+                CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS
+            )
+        ),
     }
 
-    notify_enabled = bool(entry.options.get(CONF_NOTIFY_ENABLED, entry.data.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)))
-    notify_service = str(entry.options.get(CONF_NOTIFY_SERVICE, entry.data.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE)))
-    notify_title_prefix = str(
-        entry.options.get(CONF_NOTIFY_TITLE_PREFIX, entry.data.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX))
+    notify_enabled = bool(
+        entry.options.get(
+            CONF_NOTIFY_ENABLED,
+            entry.data.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED),
+        )
     )
-    notify_keywords = entry.options.get(CONF_NOTIFY_KEYWORDS, entry.data.get(CONF_NOTIFY_KEYWORDS, list(DEFAULT_NOTIFY_KEYWORDS)))
+    notify_service = str(
+        entry.options.get(
+            CONF_NOTIFY_SERVICE,
+            entry.data.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE),
+        )
+    )
+    notify_title_prefix = str(
+        entry.options.get(
+            CONF_NOTIFY_TITLE_PREFIX,
+            entry.data.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX),
+        )
+    )
+    notify_keywords = entry.options.get(
+        CONF_NOTIFY_KEYWORDS,
+        entry.data.get(CONF_NOTIFY_KEYWORDS, list(DEFAULT_NOTIFY_KEYWORDS)),
+    )
     if not isinstance(notify_keywords, list):
         notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
 
@@ -115,7 +158,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         await coordinator.async_config_entry_first_refresh()
     except Exception as err:
         await manager.disconnect()
-        raise ConfigEntryNotReady(f"Unable to connect to OPC UA endpoint {endpoint}: {err}") from err
+        if _is_auth_error(err):
+            raise ConfigEntryAuthFailed(
+                f"Authentication/security failed for OPC UA endpoint {endpoint}: {err}"
+            ) from err
+        raise ConfigEntryNotReady(
+            f"Unable to connect to OPC UA endpoint {endpoint}: {err}"
+        ) from err
 
     entry.runtime_data = OpcUaRuntimeData(manager=manager, coordinator=coordinator)
 

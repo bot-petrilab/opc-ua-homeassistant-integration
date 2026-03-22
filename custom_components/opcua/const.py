@@ -24,6 +24,7 @@ except Exception:  # pragma: no cover - fallback for standalone smoke/import tes
         TIME = "time"
         WEATHER = "weather"
 
+
 DOMAIN = "opcua"
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,

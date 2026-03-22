@@ -45,10 +45,14 @@ async def main() -> None:
             return obj.get("out")
 
         async def start_options_flow(entry_id: str):
-            return await call_api("POST", "config/config_entries/options/flow", {"handler": entry_id})
+            return await call_api(
+                "POST", "config/config_entries/options/flow", {"handler": entry_id}
+            )
 
         async def opt_step(flow_id: str, payload: dict):
-            return await call_api("POST", f"config/config_entries/options/flow/{flow_id}", payload)
+            return await call_api(
+                "POST", f"config/config_entries/options/flow/{flow_id}", payload
+            )
 
         await page.goto(HA_URL)
         await page.wait_for_timeout(1500)
@@ -60,14 +64,21 @@ async def main() -> None:
 
         # cleanup
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if str(x.get("domain", "")).startswith("opcua") and x.get("title") == "OPC UA Platform Matrix"]:
+        for e in [
+            x
+            for x in entries
+            if str(x.get("domain", "")).startswith("opcua")
+            and x.get("title") == "OPC UA Platform Matrix"
+        ]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
                 pass
 
         # create base entry
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+        init = await call_api(
+            "POST", "config/config_entries/flow", {"handler": "opcua"}
+        )
         flow_id = init["flow_id"]
         created = await call_api(
             "POST",
@@ -84,7 +95,10 @@ async def main() -> None:
                 "notify_keywords": "manualtest,alarm,warning,fault,error",
             },
         )
-        expect(created.get("type") in {"create_entry", "abort"}, f"unexpected create result: {created}")
+        expect(
+            created.get("type") in {"create_entry", "abort"},
+            f"unexpected create result: {created}",
+        )
 
         entries2 = await call_api("GET", "config/config_entries/entry")
         target = [
@@ -222,9 +236,13 @@ async def main() -> None:
             opt = await start_options_flow(entry_id)
             fid = opt["flow_id"]
             nav = await opt_step(fid, {"next_step_id": step_id})
-            expect(nav.get("step_id") == step_id, f"navigation failed for {step_id}: {nav}")
+            expect(
+                nav.get("step_id") == step_id, f"navigation failed for {step_id}: {nav}"
+            )
             done = await opt_step(fid, payload)
-            expect(done.get("step_id") == "init", f"submit failed for {step_id}: {done}")
+            expect(
+                done.get("step_id") == "init", f"submit failed for {step_id}: {done}"
+            )
 
         # wait for reloads/entities
         await page.wait_for_timeout(6000)
@@ -250,7 +268,8 @@ async def main() -> None:
         for domain, friendly in needed.items():
             found = any(
                 str(s.get("entity_id", "")).startswith(f"{domain}.")
-                and str((s.get("attributes") or {}).get("friendly_name", "")) == friendly
+                and str((s.get("attributes") or {}).get("friendly_name", ""))
+                == friendly
                 for s in states
             )
             if not found:

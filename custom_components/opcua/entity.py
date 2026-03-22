@@ -35,6 +35,7 @@ class OpcUaBaseEntity(CoordinatorEntity[OpcUaCoordinator]):
         self._attr_name = node_cfg[CONF_NODE_NAME]
         self._attr_unique_id = f"{entry_id}:{entity_kind}:{self._node_id}"
         self._attr_icon = node_cfg.get("icon")
+        self._attr_has_entity_name = True
         self._endpoint = endpoint
         self._attr_extra_state_attributes = {
             "endpoint": endpoint,
@@ -43,7 +44,10 @@ class OpcUaBaseEntity(CoordinatorEntity[OpcUaCoordinator]):
 
     @property
     def available(self) -> bool:
-        return self.coordinator.last_update_success and self._node_id in self.coordinator.data
+        return (
+            self.coordinator.last_update_success
+            and self._node_id in self.coordinator.data
+        )
 
     @property
     def device_info(self) -> DeviceInfo | None:
@@ -54,7 +58,8 @@ class OpcUaBaseEntity(CoordinatorEntity[OpcUaCoordinator]):
         device_id = str(raw_device_id)
         device_name = str(self._node_cfg.get(CONF_NODE_DEVICE_NAME) or device_id)
         manufacturer = str(
-            self._node_cfg.get(CONF_NODE_DEVICE_MANUFACTURER) or "OPC Foundation / PLC Vendor"
+            self._node_cfg.get(CONF_NODE_DEVICE_MANUFACTURER)
+            or "OPC Foundation / PLC Vendor"
         )
         model = str(self._node_cfg.get(CONF_NODE_DEVICE_MODEL) or "OPC UA Endpoint")
 

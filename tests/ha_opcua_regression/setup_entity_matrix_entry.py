@@ -41,21 +41,31 @@ async def main() -> None:
             return obj.get("out")
 
         async def start_options_flow(entry_id: str):
-            return await call_api("POST", "config/config_entries/options/flow", {"handler": entry_id})
+            return await call_api(
+                "POST", "config/config_entries/options/flow", {"handler": entry_id}
+            )
 
         async def opt_step(flow_id: str, payload: dict):
-            return await call_api("POST", f"config/config_entries/options/flow/{flow_id}", payload)
+            return await call_api(
+                "POST", f"config/config_entries/options/flow/{flow_id}", payload
+            )
 
-        async def add_platform(entry_id: str, step_id: str, payload: dict, *, advanced: bool) -> None:
+        async def add_platform(
+            entry_id: str, step_id: str, payload: dict, *, advanced: bool
+        ) -> None:
             opt = await start_options_flow(entry_id)
             fid = opt["flow_id"]
             menu = await opt_step(fid, {"next_step_id": "menu_add_entities"})
             if menu.get("step_id") != "menu_add_entities":
                 raise RuntimeError(f"menu_add_entities failed for {step_id}: {menu}")
             if advanced:
-                menu = await opt_step(fid, {"next_step_id": "menu_add_entities_advanced"})
+                menu = await opt_step(
+                    fid, {"next_step_id": "menu_add_entities_advanced"}
+                )
                 if menu.get("step_id") != "menu_add_entities_advanced":
-                    raise RuntimeError(f"menu_add_entities_advanced failed for {step_id}: {menu}")
+                    raise RuntimeError(
+                        f"menu_add_entities_advanced failed for {step_id}: {menu}"
+                    )
             nav = await opt_step(fid, {"next_step_id": step_id})
             if nav.get("step_id") != step_id:
                 raise RuntimeError(f"Navigation failed for {step_id}: {nav}")
@@ -77,7 +87,10 @@ async def main() -> None:
             x
             for x in entries
             if x.get("domain") == "opcua"
-            and (x.get("title") == TITLE or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT))
+            and (
+                x.get("title") == TITLE
+                or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT)
+            )
         ]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
@@ -85,7 +98,9 @@ async def main() -> None:
                 pass
 
         # Create config entry
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+        init = await call_api(
+            "POST", "config/config_entries/flow", {"handler": "opcua"}
+        )
         flow_id = init["flow_id"]
         created = await call_api(
             "POST",
@@ -343,7 +358,9 @@ async def main() -> None:
 
         await page.wait_for_timeout(12000)
         states = await call_api("GET", "states")
-        names = {str((s.get("attributes") or {}).get("friendly_name", "")) for s in states}
+        names = {
+            str((s.get("attributes") or {}).get("friendly_name", "")) for s in states
+        }
 
         missing = []
         for _step_id, payload, _ in platforms:
@@ -354,7 +371,8 @@ async def main() -> None:
         matrix_states = [
             s.get("entity_id")
             for s in states
-            if "matrix" in str((s.get("attributes") or {}).get("friendly_name", "")).lower()
+            if "matrix"
+            in str((s.get("attributes") or {}).get("friendly_name", "")).lower()
         ]
 
         print(f"ENTRY_ID={entry_id}")

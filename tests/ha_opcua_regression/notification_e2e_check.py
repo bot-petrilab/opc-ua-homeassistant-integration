@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-from urllib.parse import quote
 
 from asyncua import Client
 from playwright.async_api import async_playwright
@@ -62,14 +61,21 @@ async def main() -> None:
 
         # clean old test entries
         entries = await call_api("GET", "config/config_entries/entry")
-        for e in [x for x in entries if str(x.get("domain", "")).startswith("opcua") and x.get("title") == "OPC-UA Notify Test"]:
+        for e in [
+            x
+            for x in entries
+            if str(x.get("domain", "")).startswith("opcua")
+            and x.get("title") == "OPC-UA Notify Test"
+        ]:
             try:
                 await call_api("DELETE", f"config/config_entries/entry/{e['entry_id']}")
             except Exception:
                 pass
 
         # create new entry with notify enabled
-        init = await call_api("POST", "config/config_entries/flow", {"handler": "opcua"})
+        init = await call_api(
+            "POST", "config/config_entries/flow", {"handler": "opcua"}
+        )
         flow_id = init["flow_id"]
         created = await call_api(
             "POST",
@@ -90,13 +96,23 @@ async def main() -> None:
             raise RuntimeError(f"Unexpected create result: {created}")
 
         entries2 = await call_api("GET", "config/config_entries/entry")
-        entry = next(x for x in entries2 if x.get("domain") == "opcua" and x.get("title") == "OPC-UA Notify Test")
+        entry = next(
+            x
+            for x in entries2
+            if x.get("domain") == "opcua" and x.get("title") == "OPC-UA Notify Test"
+        )
         entry_id = entry["entry_id"]
 
         # add alarm binary sensor node
-        opt_init = await call_api("POST", "config/config_entries/options/flow", {"handler": entry_id})
+        opt_init = await call_api(
+            "POST", "config/config_entries/options/flow", {"handler": entry_id}
+        )
         fid = opt_init["flow_id"]
-        await call_api("POST", f"config/config_entries/options/flow/{fid}", {"next_step_id": "add_binary_sensor"})
+        await call_api(
+            "POST",
+            f"config/config_entries/options/flow/{fid}",
+            {"next_step_id": "add_binary_sensor"},
+        )
         await call_api(
             "POST",
             f"config/config_entries/options/flow/{fid}",
@@ -110,7 +126,11 @@ async def main() -> None:
 
         # baseline states
         states_before = await call_api("GET", "states")
-        notif_before = [s for s in states_before if s.get("entity_id", "").startswith("persistent_notification.")]
+        notif_before = [
+            s
+            for s in states_before
+            if s.get("entity_id", "").startswith("persistent_notification.")
+        ]
 
         # trigger false -> true
         await set_alarm(False)
@@ -119,7 +139,11 @@ async def main() -> None:
         await asyncio.sleep(2.5)
 
         states_after = await call_api("GET", "states")
-        notif_after = [s for s in states_after if s.get("entity_id", "").startswith("persistent_notification.")]
+        notif_after = [
+            s
+            for s in states_after
+            if s.get("entity_id", "").startswith("persistent_notification.")
+        ]
 
         # find a matching notification message
         matched = []

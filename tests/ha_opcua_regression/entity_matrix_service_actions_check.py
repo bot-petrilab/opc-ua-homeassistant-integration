@@ -49,7 +49,9 @@ async def main() -> None:
 
         results: list[tuple[str, bool, str]] = []
 
-        async def service_test(name: str, domain: str, service: str, data: dict) -> None:
+        async def service_test(
+            name: str, domain: str, service: str, data: dict
+        ) -> None:
             try:
                 await call_api("POST", f"services/{domain}/{service}", data)
                 results.append((name, True, "ok"))
@@ -81,7 +83,10 @@ async def main() -> None:
             "time.set_value",
             "time",
             "set_value",
-            {"entity_id": "time.matrix_time", "time": datetime.now().strftime("%H:%M:%S")},
+            {
+                "entity_id": "time.matrix_time",
+                "time": datetime.now().strftime("%H:%M:%S"),
+            },
         )
 
         await page.wait_for_timeout(2000)

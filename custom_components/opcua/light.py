@@ -96,6 +96,9 @@ def _scaled_from_ha_255(brightness_255: float, scale: float) -> float:
     return _clamp(float(brightness_255), 0.0, 255.0) / 255.0 * scale
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -115,23 +118,37 @@ async def async_setup_entry(
 class OpcUaLight(OpcUaBaseEntity, LightEntity):
     """Advanced OPC UA Light entity (all common optional HA light features)."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_LIGHT)
         self._cfg = node_cfg
         self._invert = bool(node_cfg.get(CONF_NODE_INVERT, False))
 
-        self._brightness_scale = float(node_cfg.get(CONF_LIGHT_BRIGHTNESS_SCALE, DEFAULT_BRIGHTNESS_SCALE))
+        self._brightness_scale = float(
+            node_cfg.get(CONF_LIGHT_BRIGHTNESS_SCALE, DEFAULT_BRIGHTNESS_SCALE)
+        )
         self._rgb_scale = float(node_cfg.get(CONF_LIGHT_RGB_SCALE, DEFAULT_RGB_SCALE))
-        self._white_scale = float(node_cfg.get(CONF_LIGHT_WHITE_SCALE, DEFAULT_WHITE_SCALE))
-        self._hs_hue_scale = float(node_cfg.get(CONF_LIGHT_HS_HUE_SCALE, DEFAULT_HS_HUE_SCALE))
-        self._hs_sat_scale = float(node_cfg.get(CONF_LIGHT_HS_SAT_SCALE, DEFAULT_HS_SAT_SCALE))
+        self._white_scale = float(
+            node_cfg.get(CONF_LIGHT_WHITE_SCALE, DEFAULT_WHITE_SCALE)
+        )
+        self._hs_hue_scale = float(
+            node_cfg.get(CONF_LIGHT_HS_HUE_SCALE, DEFAULT_HS_HUE_SCALE)
+        )
+        self._hs_sat_scale = float(
+            node_cfg.get(CONF_LIGHT_HS_SAT_SCALE, DEFAULT_HS_SAT_SCALE)
+        )
         self._xy_scale = float(node_cfg.get(CONF_LIGHT_XY_SCALE, DEFAULT_XY_SCALE))
 
         self._attr_min_color_temp_kelvin = int(
-            node_cfg.get(CONF_LIGHT_COLOR_TEMP_MIN_KELVIN, DEFAULT_COLOR_TEMP_MIN_KELVIN)
+            node_cfg.get(
+                CONF_LIGHT_COLOR_TEMP_MIN_KELVIN, DEFAULT_COLOR_TEMP_MIN_KELVIN
+            )
         )
         self._attr_max_color_temp_kelvin = int(
-            node_cfg.get(CONF_LIGHT_COLOR_TEMP_MAX_KELVIN, DEFAULT_COLOR_TEMP_MAX_KELVIN)
+            node_cfg.get(
+                CONF_LIGHT_COLOR_TEMP_MAX_KELVIN, DEFAULT_COLOR_TEMP_MAX_KELVIN
+            )
         )
 
         self._effect_list: list[str] = list(node_cfg.get(CONF_LIGHT_EFFECT_LIST, []))
@@ -148,15 +165,25 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
         self._attr_supported_features = features
 
         raw_supported: set[ColorMode] = set()
-        if node_cfg.get(CONF_LIGHT_RGBWW_R_NODE_ID) and node_cfg.get(CONF_LIGHT_RGBWW_WW_NODE_ID):
+        if node_cfg.get(CONF_LIGHT_RGBWW_R_NODE_ID) and node_cfg.get(
+            CONF_LIGHT_RGBWW_WW_NODE_ID
+        ):
             raw_supported.add(ColorMode.RGBWW)
-        if node_cfg.get(CONF_LIGHT_RGBW_R_NODE_ID) and node_cfg.get(CONF_LIGHT_RGBW_W_NODE_ID):
+        if node_cfg.get(CONF_LIGHT_RGBW_R_NODE_ID) and node_cfg.get(
+            CONF_LIGHT_RGBW_W_NODE_ID
+        ):
             raw_supported.add(ColorMode.RGBW)
-        if node_cfg.get(CONF_LIGHT_RGB_R_NODE_ID) and node_cfg.get(CONF_LIGHT_RGB_B_NODE_ID):
+        if node_cfg.get(CONF_LIGHT_RGB_R_NODE_ID) and node_cfg.get(
+            CONF_LIGHT_RGB_B_NODE_ID
+        ):
             raw_supported.add(ColorMode.RGB)
-        if node_cfg.get(CONF_LIGHT_HS_HUE_NODE_ID) and node_cfg.get(CONF_LIGHT_HS_SAT_NODE_ID):
+        if node_cfg.get(CONF_LIGHT_HS_HUE_NODE_ID) and node_cfg.get(
+            CONF_LIGHT_HS_SAT_NODE_ID
+        ):
             raw_supported.add(ColorMode.HS)
-        if node_cfg.get(CONF_LIGHT_XY_X_NODE_ID) and node_cfg.get(CONF_LIGHT_XY_Y_NODE_ID):
+        if node_cfg.get(CONF_LIGHT_XY_X_NODE_ID) and node_cfg.get(
+            CONF_LIGHT_XY_Y_NODE_ID
+        ):
             raw_supported.add(ColorMode.XY)
         if node_cfg.get(CONF_LIGHT_COLOR_TEMP_NODE_ID):
             raw_supported.add(ColorMode.COLOR_TEMP)
@@ -194,7 +221,9 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
             return None
         return self.coordinator.data.get(node_id)
 
-    def _scaled_write_value(self, key: str, ha_255_value: float, scale: float) -> float | int:
+    def _scaled_write_value(
+        self, key: str, ha_255_value: float, scale: float
+    ) -> float | int:
         """Scale HA 0..255 value and keep numeric type compatible with server node."""
         scaled = _scaled_from_ha_255(ha_255_value, scale)
         raw_current = self._node_value(key)
@@ -241,9 +270,15 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
     @property
     def rgb_color(self) -> tuple[int, int, int] | None:
         vals = [
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGB_R_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGB_G_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGB_B_NODE_ID), self._rgb_scale),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGB_R_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGB_G_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGB_B_NODE_ID), self._rgb_scale
+            ),
         ]
         if any(v is None for v in vals):
             return None
@@ -252,10 +287,18 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
     @property
     def rgbw_color(self) -> tuple[int, int, int, int] | None:
         vals = [
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBW_R_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBW_G_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBW_B_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBW_W_NODE_ID), self._white_scale),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBW_R_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBW_G_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBW_B_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBW_W_NODE_ID), self._white_scale
+            ),
         ]
         if any(v is None for v in vals):
             return None
@@ -264,11 +307,21 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
     @property
     def rgbww_color(self) -> tuple[int, int, int, int, int] | None:
         vals = [
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBWW_R_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBWW_G_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBWW_B_NODE_ID), self._rgb_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBWW_CW_NODE_ID), self._white_scale),
-            _ha_255_from_scaled(self._node_value(CONF_LIGHT_RGBWW_WW_NODE_ID), self._white_scale),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBWW_R_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBWW_G_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBWW_B_NODE_ID), self._rgb_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBWW_CW_NODE_ID), self._white_scale
+            ),
+            _ha_255_from_scaled(
+                self._node_value(CONF_LIGHT_RGBWW_WW_NODE_ID), self._white_scale
+            ),
         ]
         if any(v is None for v in vals):
             return None
@@ -298,34 +351,52 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         # Meta options
         if ATTR_TRANSITION in kwargs:
-            await self._write_if_configured(CONF_LIGHT_TRANSITION_NODE_ID, float(kwargs[ATTR_TRANSITION]))
+            await self._write_if_configured(
+                CONF_LIGHT_TRANSITION_NODE_ID, float(kwargs[ATTR_TRANSITION])
+            )
         if ATTR_FLASH in kwargs:
-            await self._write_if_configured(CONF_LIGHT_FLASH_NODE_ID, str(kwargs[ATTR_FLASH]))
+            await self._write_if_configured(
+                CONF_LIGHT_FLASH_NODE_ID, str(kwargs[ATTR_FLASH])
+            )
 
         # Brightness family
         target_brightness = kwargs.get(ATTR_BRIGHTNESS)
         if target_brightness is None and ATTR_BRIGHTNESS_PCT in kwargs:
-            target_brightness = int(round(float(kwargs[ATTR_BRIGHTNESS_PCT]) / 100.0 * 255.0))
+            target_brightness = int(
+                round(float(kwargs[ATTR_BRIGHTNESS_PCT]) / 100.0 * 255.0)
+            )
 
         current_brightness = self.brightness if self.brightness is not None else 0
         if ATTR_BRIGHTNESS_STEP in kwargs:
-            target_brightness = int(_clamp(current_brightness + int(kwargs[ATTR_BRIGHTNESS_STEP]), 0, 255))
+            target_brightness = int(
+                _clamp(current_brightness + int(kwargs[ATTR_BRIGHTNESS_STEP]), 0, 255)
+            )
         if ATTR_BRIGHTNESS_STEP_PCT in kwargs:
             step = float(kwargs[ATTR_BRIGHTNESS_STEP_PCT]) / 100.0 * 255.0
             target_brightness = int(_clamp(current_brightness + step, 0, 255))
 
-        if target_brightness is not None and self._cfg.get(CONF_LIGHT_BRIGHTNESS_NODE_ID):
+        if target_brightness is not None and self._cfg.get(
+            CONF_LIGHT_BRIGHTNESS_NODE_ID
+        ):
             await self._write_if_configured(
                 CONF_LIGHT_BRIGHTNESS_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_BRIGHTNESS_NODE_ID, target_brightness, self._brightness_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_BRIGHTNESS_NODE_ID,
+                    target_brightness,
+                    self._brightness_scale,
+                ),
             )
             if ColorMode.BRIGHTNESS in self.supported_color_modes:
                 self._last_color_mode = ColorMode.BRIGHTNESS
 
         # Color temp
-        if ATTR_COLOR_TEMP_KELVIN in kwargs and self._cfg.get(CONF_LIGHT_COLOR_TEMP_NODE_ID):
+        if ATTR_COLOR_TEMP_KELVIN in kwargs and self._cfg.get(
+            CONF_LIGHT_COLOR_TEMP_NODE_ID
+        ):
             temp = int(kwargs[ATTR_COLOR_TEMP_KELVIN])
-            temp = int(_clamp(temp, self.min_color_temp_kelvin, self.max_color_temp_kelvin))
+            temp = int(
+                _clamp(temp, self.min_color_temp_kelvin, self.max_color_temp_kelvin)
+            )
             await self._write_if_configured(CONF_LIGHT_COLOR_TEMP_NODE_ID, temp)
             self._last_color_mode = ColorMode.COLOR_TEMP
 
@@ -353,7 +424,11 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
         # RGB
         if ATTR_RGB_COLOR in kwargs and all(
             self._cfg.get(k)
-            for k in [CONF_LIGHT_RGB_R_NODE_ID, CONF_LIGHT_RGB_G_NODE_ID, CONF_LIGHT_RGB_B_NODE_ID]
+            for k in [
+                CONF_LIGHT_RGB_R_NODE_ID,
+                CONF_LIGHT_RGB_G_NODE_ID,
+                CONF_LIGHT_RGB_B_NODE_ID,
+            ]
         ):
             r, g, b = kwargs[ATTR_RGB_COLOR]
             await self._write_if_configured(
@@ -395,7 +470,9 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
             )
             await self._write_if_configured(
                 CONF_LIGHT_RGBW_W_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_RGBW_W_NODE_ID, w, self._white_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_RGBW_W_NODE_ID, w, self._white_scale
+                ),
             )
             self._last_color_mode = ColorMode.RGBW
 
@@ -413,23 +490,33 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
             r, g, b, cw, ww = kwargs[ATTR_RGBWW_COLOR]
             await self._write_if_configured(
                 CONF_LIGHT_RGBWW_R_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_RGBWW_R_NODE_ID, r, self._rgb_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_RGBWW_R_NODE_ID, r, self._rgb_scale
+                ),
             )
             await self._write_if_configured(
                 CONF_LIGHT_RGBWW_G_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_RGBWW_G_NODE_ID, g, self._rgb_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_RGBWW_G_NODE_ID, g, self._rgb_scale
+                ),
             )
             await self._write_if_configured(
                 CONF_LIGHT_RGBWW_B_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_RGBWW_B_NODE_ID, b, self._rgb_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_RGBWW_B_NODE_ID, b, self._rgb_scale
+                ),
             )
             await self._write_if_configured(
                 CONF_LIGHT_RGBWW_CW_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_RGBWW_CW_NODE_ID, cw, self._white_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_RGBWW_CW_NODE_ID, cw, self._white_scale
+                ),
             )
             await self._write_if_configured(
                 CONF_LIGHT_RGBWW_WW_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_RGBWW_WW_NODE_ID, ww, self._white_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_RGBWW_WW_NODE_ID, ww, self._white_scale
+                ),
             )
             self._last_color_mode = ColorMode.RGBWW
 
@@ -438,21 +525,31 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
             self._cfg.get(k) for k in [CONF_LIGHT_XY_X_NODE_ID, CONF_LIGHT_XY_Y_NODE_ID]
         ):
             x, y = kwargs[ATTR_XY_COLOR]
-            await self._write_if_configured(CONF_LIGHT_XY_X_NODE_ID, _clamp(float(x), 0.0, 1.0) * self._xy_scale)
-            await self._write_if_configured(CONF_LIGHT_XY_Y_NODE_ID, _clamp(float(y), 0.0, 1.0) * self._xy_scale)
+            await self._write_if_configured(
+                CONF_LIGHT_XY_X_NODE_ID, _clamp(float(x), 0.0, 1.0) * self._xy_scale
+            )
+            await self._write_if_configured(
+                CONF_LIGHT_XY_Y_NODE_ID, _clamp(float(y), 0.0, 1.0) * self._xy_scale
+            )
             self._last_color_mode = ColorMode.XY
 
         # White
         if ATTR_WHITE in kwargs and self._cfg.get(CONF_LIGHT_WHITE_NODE_ID):
             await self._write_if_configured(
                 CONF_LIGHT_WHITE_NODE_ID,
-                self._scaled_write_value(CONF_LIGHT_WHITE_NODE_ID, float(kwargs[ATTR_WHITE]), self._white_scale),
+                self._scaled_write_value(
+                    CONF_LIGHT_WHITE_NODE_ID,
+                    float(kwargs[ATTR_WHITE]),
+                    self._white_scale,
+                ),
             )
             self._last_color_mode = ColorMode.WHITE
 
         # Effect
         if ATTR_EFFECT in kwargs and self._cfg.get(CONF_LIGHT_EFFECT_NODE_ID):
-            await self._write_if_configured(CONF_LIGHT_EFFECT_NODE_ID, str(kwargs[ATTR_EFFECT]))
+            await self._write_if_configured(
+                CONF_LIGHT_EFFECT_NODE_ID, str(kwargs[ATTR_EFFECT])
+            )
 
         # Finally switch on
         raw_target = False if self._invert else True
@@ -461,9 +558,13 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         if ATTR_TRANSITION in kwargs:
-            await self._write_if_configured(CONF_LIGHT_TRANSITION_NODE_ID, float(kwargs[ATTR_TRANSITION]))
+            await self._write_if_configured(
+                CONF_LIGHT_TRANSITION_NODE_ID, float(kwargs[ATTR_TRANSITION])
+            )
         if ATTR_FLASH in kwargs:
-            await self._write_if_configured(CONF_LIGHT_FLASH_NODE_ID, str(kwargs[ATTR_FLASH]))
+            await self._write_if_configured(
+                CONF_LIGHT_FLASH_NODE_ID, str(kwargs[ATTR_FLASH])
+            )
 
         raw_target = True if self._invert else False
         await self.coordinator.manager.write_node(self._node_id, raw_target)

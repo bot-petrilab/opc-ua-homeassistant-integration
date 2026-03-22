@@ -31,6 +31,9 @@ def _as_int(value: Any) -> int | None:
         return None
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -50,7 +53,9 @@ async def async_setup_entry(
 class OpcUaCover(OpcUaBaseEntity, CoverEntity):
     """OPC-UA cover entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_COVER)
         self._cfg = node_cfg
         self._target_node_id = node_cfg.get(CONF_NODE_TARGET_NODE_ID)
@@ -92,7 +97,9 @@ class OpcUaCover(OpcUaBaseEntity, CoverEntity):
             await self.coordinator.manager.write_node(self._open_node_id, True)
         elif self._set_position_node_id or self._target_node_id:
             node = self._set_position_node_id or self._target_node_id
-            await self.coordinator.manager.write_node(node, 0 if self._invert_position else 100)
+            await self.coordinator.manager.write_node(
+                node, 0 if self._invert_position else 100
+            )
         await self.coordinator.async_request_refresh()
 
     async def async_close_cover(self, **kwargs: Any) -> None:
@@ -100,7 +107,9 @@ class OpcUaCover(OpcUaBaseEntity, CoverEntity):
             await self.coordinator.manager.write_node(self._close_node_id, True)
         elif self._set_position_node_id or self._target_node_id:
             node = self._set_position_node_id or self._target_node_id
-            await self.coordinator.manager.write_node(node, 100 if self._invert_position else 0)
+            await self.coordinator.manager.write_node(
+                node, 100 if self._invert_position else 0
+            )
         await self.coordinator.async_request_refresh()
 
     async def async_stop_cover(self, **kwargs: Any) -> None:

@@ -29,38 +29,89 @@ async def test_sensor_binary_switch_button_scene_select_text_weather_notify_ligh
 ) -> None:
     endpoint = "opc.tcp://127.0.0.1:4846"
 
-    sensor = OpcUaSensor("e1", endpoint, {"name": "S", "node_id": "ns=2;s=EntityMatrix.Process.Temp"}, coordinator_all)
+    sensor = OpcUaSensor(
+        "e1",
+        endpoint,
+        {"name": "S", "node_id": "ns=2;s=EntityMatrix.Process.Temp"},
+        coordinator_all,
+    )
     assert sensor.native_value == 21.5
 
-    b_sensor = OpcUaBinarySensor("e1", endpoint, {"name": "BS", "node_id": "ns=2;s=EntityMatrix.Test.Node"}, coordinator_all)
+    b_sensor = OpcUaBinarySensor(
+        "e1",
+        endpoint,
+        {"name": "BS", "node_id": "ns=2;s=EntityMatrix.Test.Node"},
+        coordinator_all,
+    )
     assert b_sensor.is_on is True
 
-    switch = OpcUaSwitch("e1", endpoint, {"name": "SW", "node_id": "ns=2;s=EntityMatrix.Test.Node"}, coordinator_all)
+    switch = OpcUaSwitch(
+        "e1",
+        endpoint,
+        {"name": "SW", "node_id": "ns=2;s=EntityMatrix.Test.Node"},
+        coordinator_all,
+    )
     await switch.async_turn_off()
-    assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Test.Node", False)
+    assert coordinator_all.manager.writes[-1] == (
+        "ns=2;s=EntityMatrix.Test.Node",
+        False,
+    )
 
-    button = OpcUaButton("e1", endpoint, {"name": "BTN", "node_id": "ns=2;s=EntityMatrix.Test.Node", "button_payload": True}, coordinator_all)
+    button = OpcUaButton(
+        "e1",
+        endpoint,
+        {
+            "name": "BTN",
+            "node_id": "ns=2;s=EntityMatrix.Test.Node",
+            "button_payload": True,
+        },
+        coordinator_all,
+    )
     await button.async_press()
     assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Test.Node", True)
 
-    scene = OpcUaScene("e1", endpoint, {"name": "SC", "node_id": "ns=2;s=EntityMatrix.Test.Node", "scene_activate_value": "go"}, coordinator_all)
+    scene = OpcUaScene(
+        "e1",
+        endpoint,
+        {
+            "name": "SC",
+            "node_id": "ns=2;s=EntityMatrix.Test.Node",
+            "scene_activate_value": "go",
+        },
+        coordinator_all,
+    )
     await scene.async_activate()
     assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Test.Node", "go")
 
     select = OpcUaSelect(
         "e1",
         endpoint,
-        {"name": "SEL", "node_id": "ns=2;s=EntityMatrix.Select.Mode", "select_options": ["Auto", "Manual"]},
+        {
+            "name": "SEL",
+            "node_id": "ns=2;s=EntityMatrix.Select.Mode",
+            "select_options": ["Auto", "Manual"],
+        },
         coordinator_all,
     )
     assert select.current_option == "Auto"
     await select.async_select_option("Manual")
-    assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Select.Mode", "Manual")
+    assert coordinator_all.manager.writes[-1] == (
+        "ns=2;s=EntityMatrix.Select.Mode",
+        "Manual",
+    )
 
-    text = OpcUaText("e1", endpoint, {"name": "TXT", "node_id": "ns=2;s=EntityMatrix.Text.Value", "text_max": 64}, coordinator_all)
+    text = OpcUaText(
+        "e1",
+        endpoint,
+        {"name": "TXT", "node_id": "ns=2;s=EntityMatrix.Text.Value", "text_max": 64},
+        coordinator_all,
+    )
     assert text.native_value == "Recipe-A"
     await text.async_set_value("Recipe-B")
-    assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Text.Value", "Recipe-B")
+    assert coordinator_all.manager.writes[-1] == (
+        "ns=2;s=EntityMatrix.Text.Value",
+        "Recipe-B",
+    )
 
     weather = OpcUaWeather(
         "e1",
@@ -107,7 +158,10 @@ async def test_sensor_binary_switch_button_scene_select_text_weather_notify_ligh
         coordinator_all,
     )
     await light.async_turn_on(brightness=200, effect="pulse")
-    assert any(w[0] == "ns=2;s=EntityMatrix.Light.On" and w[1] is True for w in coordinator_all.manager.writes)
+    assert any(
+        w[0] == "ns=2;s=EntityMatrix.Light.On" and w[1] is True
+        for w in coordinator_all.manager.writes
+    )
 
     cover = OpcUaCover(
         "e1",
@@ -135,11 +189,16 @@ async def test_sensor_binary_switch_button_scene_select_text_weather_notify_ligh
     )
     assert climate.current_temperature == 21.5
     await climate.async_set_temperature(temperature=24)
-    assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Process.Target", 24.0)
+    assert coordinator_all.manager.writes[-1] == (
+        "ns=2;s=EntityMatrix.Process.Target",
+        24.0,
+    )
 
 
 @pytest.mark.asyncio
-async def test_date_time_datetime_number_and_fan_write_paths(base_node_cfg, coordinator_datetime, coordinator_int) -> None:
+async def test_date_time_datetime_number_and_fan_write_paths(
+    base_node_cfg, coordinator_datetime, coordinator_int
+) -> None:
     endpoint = "opc.tcp://127.0.0.1:4846"
 
     date_entity = OpcUaDate("e1", endpoint, base_node_cfg, coordinator_datetime)
@@ -161,7 +220,11 @@ async def test_date_time_datetime_number_and_fan_write_paths(base_node_cfg, coor
     fan = OpcUaFan(
         "e1",
         endpoint,
-        {"name": "F", "node_id": "ns=2;s=EntityMatrix.Test.Node", "speed_node_id": "ns=2;s=EntityMatrix.Test.Speed"},
+        {
+            "name": "F",
+            "node_id": "ns=2;s=EntityMatrix.Test.Node",
+            "speed_node_id": "ns=2;s=EntityMatrix.Test.Speed",
+        },
         coordinator_int,
     )
     await fan.async_turn_on(percentage=80, preset_mode=None)

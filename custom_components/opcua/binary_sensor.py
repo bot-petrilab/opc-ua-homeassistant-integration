@@ -7,8 +7,16 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_ENDPOINT, CONF_NODE_DEVICE_CLASS, CONF_NODE_INVERT, NODE_KIND_BINARY_SENSOR
+from .const import (
+    CONF_ENDPOINT,
+    CONF_NODE_DEVICE_CLASS,
+    CONF_NODE_INVERT,
+    NODE_KIND_BINARY_SENSOR,
+)
 from .entity import OpcUaBaseEntity
+
+
+PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(
@@ -30,8 +38,12 @@ async def async_setup_entry(
 class OpcUaBinarySensor(OpcUaBaseEntity, BinarySensorEntity):
     """OPC UA Binary Sensor entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
-        super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_BINARY_SENSOR)
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
+        super().__init__(
+            entry_id, endpoint, node_cfg, coordinator, NODE_KIND_BINARY_SENSOR
+        )
         self._attr_device_class = node_cfg.get(CONF_NODE_DEVICE_CLASS)
         self._invert = bool(node_cfg.get(CONF_NODE_INVERT, False))
 

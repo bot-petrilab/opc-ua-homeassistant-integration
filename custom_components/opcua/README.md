@@ -25,15 +25,15 @@ This integration uses **opcua-asyncio** (`asyncua`) and follows Home Assistant i
 
 ## Current status
 
-✅ UI-configurable via **Settings → Devices & Services → Add Integration**  
-✅ Multiple nodes per endpoint via **Options**  
-✅ Polling + auto-reconnect on disconnect  
-✅ HA discovery popup via Zeroconf (`_opcua-tcp._tcp.local.`): discovered servers can be confirmed and added directly  
-✅ OPC-UA server discovery in options flow (FindServers/GetEndpoints + endpoint selection)  
-✅ OPC-UA browser in options flow (root/depth/max + import as entities)  
-✅ Auto-discovery (native OPC-UA + companion heuristics)  
-✅ Stack light profile assistant (R/Y/G + optional buzzer)  
-✅ Built-in notifications (`opcua_notification` event + optional HA notify service call)  
+✅ UI-configurable via **Settings → Devices & Services → Add Integration**
+✅ Multiple nodes per endpoint via **Options**
+✅ Polling + auto-reconnect on disconnect
+✅ HA discovery popup via Zeroconf (`_opcua-tcp._tcp.local.`): discovered servers can be confirmed and added directly
+✅ OPC-UA server discovery in options flow (FindServers/GetEndpoints + endpoint selection)
+✅ OPC-UA browser in options flow (root/depth/max + import as entities)
+✅ Auto-discovery (native OPC-UA + companion heuristics)
+✅ Stack light profile assistant (R/Y/G + optional buzzer)
+✅ Built-in notifications (`opcua_notification` event + optional HA notify service call)
 ✅ Light entity with optional features (all optional):
 - on/off
 - brightness

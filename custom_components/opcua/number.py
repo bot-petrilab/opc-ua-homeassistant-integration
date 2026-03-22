@@ -27,6 +27,9 @@ def _to_float(value: Any) -> float | None:
         return None
 
 
+PARALLEL_UPDATES = 0
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -46,11 +49,19 @@ async def async_setup_entry(
 class OpcUaNumber(OpcUaBaseEntity, NumberEntity):
     """OPC-UA number entity."""
 
-    def __init__(self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator) -> None:
+    def __init__(
+        self, entry_id: str, endpoint: str, node_cfg: dict[str, Any], coordinator
+    ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_NUMBER)
-        self._attr_native_min_value = float(node_cfg.get(CONF_NUMBER_MIN, DEFAULT_NUMBER_MIN))
-        self._attr_native_max_value = float(node_cfg.get(CONF_NUMBER_MAX, DEFAULT_NUMBER_MAX))
-        self._attr_native_step = float(node_cfg.get(CONF_NUMBER_STEP, DEFAULT_NUMBER_STEP))
+        self._attr_native_min_value = float(
+            node_cfg.get(CONF_NUMBER_MIN, DEFAULT_NUMBER_MIN)
+        )
+        self._attr_native_max_value = float(
+            node_cfg.get(CONF_NUMBER_MAX, DEFAULT_NUMBER_MAX)
+        )
+        self._attr_native_step = float(
+            node_cfg.get(CONF_NUMBER_STEP, DEFAULT_NUMBER_STEP)
+        )
 
     @property
     def native_value(self) -> float | None:
