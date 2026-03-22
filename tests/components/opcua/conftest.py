@@ -62,12 +62,102 @@ def _install_homeassistant_stubs() -> None:
     # homeassistant.config_entries
     ce_mod = _ensure_module("homeassistant.config_entries")
 
-    class ConfigEntry:  # minimal generic-like placeholder
+    class ConfigEntry:
         @classmethod
         def __class_getitem__(cls, _item):
             return cls
 
+    class ConfigFlow:
+        def __init_subclass__(cls, **kwargs):
+            return super().__init_subclass__()
+
+        def __init__(self) -> None:
+            self.context: dict[str, Any] = {}
+            self.hass = None
+            self._unique_id = None
+            self._current_entries: list[Any] = []
+            self._reauth_entry = None
+            self._reconfigure_entry = None
+
+        async def async_set_unique_id(self, unique_id: str) -> None:
+            self._unique_id = unique_id
+
+        def _abort_if_unique_id_configured(self) -> None:
+            return None
+
+        def _async_current_entries(self) -> list[Any]:
+            return list(self._current_entries)
+
+        def _get_reauth_entry(self):
+            return self._reauth_entry
+
+        def _get_reconfigure_entry(self):
+            return self._reconfigure_entry
+
+        def async_show_form(
+            self,
+            *,
+            step_id: str,
+            data_schema=None,
+            errors=None,
+            description_placeholders=None,
+        ):
+            return {
+                "type": "form",
+                "step_id": step_id,
+                "data_schema": data_schema,
+                "errors": errors or {},
+                "description_placeholders": description_placeholders,
+            }
+
+        def async_show_menu(self, *, step_id: str, menu_options: list[str]):
+            return {"type": "menu", "step_id": step_id, "menu_options": menu_options}
+
+        def async_create_entry(self, *, title: str, data: dict[str, Any]):
+            return {"type": "create_entry", "title": title, "data": data}
+
+        def async_abort(self, *, reason: str):
+            return {"type": "abort", "reason": reason}
+
+        def async_update_reload_and_abort(self, entry, *, data_updates: dict[str, Any]):
+            return {
+                "type": "abort",
+                "reason": "reauth_successful",
+                "entry": entry,
+                "data_updates": data_updates,
+            }
+
+    class OptionsFlow:
+        def __init__(self, config_entry=None) -> None:
+            self.config_entry = config_entry
+            self.hass = None
+
+        def async_show_form(
+            self,
+            *,
+            step_id: str,
+            data_schema=None,
+            errors=None,
+            description_placeholders=None,
+        ):
+            return {
+                "type": "form",
+                "step_id": step_id,
+                "data_schema": data_schema,
+                "errors": errors or {},
+                "description_placeholders": description_placeholders,
+            }
+
+        def async_show_menu(self, *, step_id: str, menu_options: list[str]):
+            return {"type": "menu", "step_id": step_id, "menu_options": menu_options}
+
+        def async_create_entry(self, *, title: str, data: dict[str, Any]):
+            return {"type": "create_entry", "title": title, "data": data}
+
     ce_mod.ConfigEntry = ConfigEntry
+    ce_mod.ConfigFlow = ConfigFlow
+    ce_mod.ConfigFlowResult = dict
+    ce_mod.OptionsFlow = OptionsFlow
 
     # homeassistant.core
     core_mod = _ensure_module("homeassistant.core")
@@ -90,8 +180,81 @@ def _install_homeassistant_stubs() -> None:
     ex_mod.ConfigEntryAuthFailed = ConfigEntryAuthFailed
 
     # helpers
-    _ensure_module("homeassistant.helpers")
+    helpers_mod = _ensure_module("homeassistant.helpers")
     _ensure_module("homeassistant.helpers.entity_platform").AddEntitiesCallback = object
+
+    er_mod = _ensure_module("homeassistant.helpers.entity_registry")
+
+    class _Registry:
+        def __init__(self) -> None:
+            self.removed: list[str] = []
+            self.entries: list[Any] = []
+
+        def async_remove(self, entity_id: str) -> None:
+            self.removed.append(entity_id)
+
+    def async_get(_hass):
+        return getattr(_hass, "entity_registry", _Registry())
+
+    def async_entries_for_config_entry(registry, entry_id: str):
+        return [
+            entry
+            for entry in getattr(registry, "entries", [])
+            if getattr(entry, "config_entry_id", None) == entry_id
+        ]
+
+    er_mod.async_get = async_get
+    er_mod.async_entries_for_config_entry = async_entries_for_config_entry
+
+    selector_mod = _ensure_module("homeassistant.helpers.selector")
+
+    @dataclass
+    class NumberSelectorConfig:
+        min: float | int | None = None
+        max: float | int | None = None
+        step: float | int | None = None
+        mode: str | None = None
+
+    @dataclass
+    class SelectSelectorConfig:
+        options: list[Any] | tuple[Any, ...]
+        multiple: bool = False
+        mode: str | None = None
+
+    @dataclass
+    class TextSelectorConfig:
+        type: str | None = None
+        autocomplete: str | None = None
+
+    class NumberSelector:
+        def __init__(self, config=None):
+            self.config = config
+
+    class SelectSelector:
+        def __init__(self, config=None):
+            self.config = config
+
+    class TextSelector:
+        def __init__(self, config=None):
+            self.config = config
+
+    class BooleanSelector:
+        def __init__(self, config=None):
+            self.config = config
+
+    class SelectSelectorMode(str, Enum):
+        DROPDOWN = "dropdown"
+
+    selector_mod.BooleanSelector = BooleanSelector
+    selector_mod.NumberSelector = NumberSelector
+    selector_mod.NumberSelectorConfig = NumberSelectorConfig
+    selector_mod.SelectSelector = SelectSelector
+    selector_mod.SelectSelectorConfig = SelectSelectorConfig
+    selector_mod.SelectSelectorMode = SelectSelectorMode
+    selector_mod.TextSelector = TextSelector
+    selector_mod.TextSelectorConfig = TextSelectorConfig
+
+    helpers_mod.entity_registry = er_mod
 
     dr_mod = _ensure_module("homeassistant.helpers.device_registry")
 
@@ -131,9 +294,7 @@ def _install_homeassistant_stubs() -> None:
     uc_mod.UpdateFailed = UpdateFailed
     uc_mod.CoordinatorEntity = CoordinatorEntity
 
-    # Component base classes
     _ensure_module("homeassistant.components")
-
     _ensure_module("homeassistant.components.sensor").SensorEntity = object
     _ensure_module("homeassistant.components.binary_sensor").BinarySensorEntity = object
     _ensure_module("homeassistant.components.switch").SwitchEntity = object
@@ -148,7 +309,6 @@ def _install_homeassistant_stubs() -> None:
     _ensure_module("homeassistant.components.notify").NotifyEntity = object
     _ensure_module("homeassistant.components.weather").WeatherEntity = object
 
-    # Light
     light_mod = _ensure_module("homeassistant.components.light")
 
     class ColorMode(str, Enum):
@@ -188,7 +348,6 @@ def _install_homeassistant_stubs() -> None:
     ]:
         setattr(light_mod, attr, attr.lower())
 
-    # Fan
     fan_mod = _ensure_module("homeassistant.components.fan")
 
     class FanEntityFeature(IntFlag):
@@ -199,7 +358,6 @@ def _install_homeassistant_stubs() -> None:
     fan_mod.FanEntity = object
     fan_mod.FanEntityFeature = FanEntityFeature
 
-    # Climate
     climate_mod = _ensure_module("homeassistant.components.climate")
     climate_mod.ClimateEntity = object
 
@@ -213,7 +371,6 @@ def _install_homeassistant_stubs() -> None:
 
     climate_const_mod.HVACMode = HVACMode
 
-    # Cover
     cover_mod = _ensure_module("homeassistant.components.cover")
 
     class CoverEntityFeature(IntFlag):
@@ -227,7 +384,67 @@ def _install_homeassistant_stubs() -> None:
     cover_mod.ATTR_POSITION = "position"
 
 
+def _install_voluptuous_stubs() -> None:
+    vol_mod = _ensure_module("voluptuous")
+
+    class Marker:
+        def __init__(self, schema, default=None):
+            self.schema = schema
+            self.default = default
+
+    class Required(Marker):
+        pass
+
+    class Optional(Marker):
+        pass
+
+    class Schema:
+        def __init__(self, schema):
+            self.schema = schema
+
+        def __call__(self, value):
+            return value
+
+    vol_mod.Required = Required
+    vol_mod.Optional = Optional
+    vol_mod.Schema = Schema
+
+
+def _install_asyncua_stubs() -> None:
+    asyncua_mod = _ensure_module("asyncua")
+
+    class _DummyClient:
+        def __init__(self, endpoint: str) -> None:
+            self.endpoint = endpoint
+            self.security = None
+            self.username = None
+            self.password = None
+
+        async def set_security_string(self, value: str) -> None:
+            self.security = value
+
+        def set_user(self, username: str) -> None:
+            self.username = username
+
+        def set_password(self, password: str) -> None:
+            self.password = password
+
+        async def connect(self) -> None:
+            return None
+
+        async def disconnect(self) -> None:
+            return None
+
+        def get_node(self, node_id: str):
+            raise NotImplementedError(node_id)
+
+    asyncua_mod.Client = _DummyClient
+    asyncua_mod.ua = types.SimpleNamespace()
+
+
 _install_homeassistant_stubs()
+_install_voluptuous_stubs()
+_install_asyncua_stubs()
 
 from custom_components.opcua.const import CONF_NODE_ID, CONF_NODE_NAME  # noqa: E402
 
@@ -249,6 +466,48 @@ class MockCoordinator:
 
     async def async_request_refresh(self) -> None:
         self.refresh_count += 1
+
+
+@pytest.fixture
+def mock_hass():
+    class _ConfigEntries:
+        def __init__(self) -> None:
+            self.updated: list[tuple[Any, dict[str, Any] | None, dict[str, Any] | None]] = []
+            self.reloaded: list[str] = []
+
+        def async_update_entry(self, entry, *, data=None, options=None) -> None:
+            self.updated.append((entry, data, options))
+            if data is not None:
+                entry.data = data
+            if options is not None:
+                entry.options = options
+
+        async def async_reload(self, entry_id: str) -> None:
+            self.reloaded.append(entry_id)
+
+    class _Hass:
+        def __init__(self) -> None:
+            self.config_entries = _ConfigEntries()
+            self.entity_registry = types.SimpleNamespace(entries=[], removed=[])
+            self.entity_registry.async_remove = self.entity_registry.removed.append
+
+    return _Hass()
+
+
+@pytest.fixture
+def mock_config_entry():
+    class _Entry:
+        def __init__(self) -> None:
+            self.entry_id = "entry-1"
+            self.data = {
+                "endpoint": "opc.tcp://127.0.0.1:4840",
+                "security_policy": "None",
+                "scan_interval": 2.0,
+                "nodes": [],
+            }
+            self.options = {}
+
+    return _Entry()
 
 
 @pytest.fixture
