@@ -52,9 +52,9 @@ Prepare the existing `opcua` integration for a PR against `home-assistant/core`.
    - [x] `tests/components/opcua/test_<platform>.py` (all currently supported platforms present)
 
 3. **Core artifacts/standards review**
-   - Add diagnostics (`diagnostics.py`) as needed
-   - Add Repairs/issue handling for setup failures as needed
-   - Polish translation keys/strings to Core review quality
+   - [x] Diagnostics (`diagnostics.py`) implemented
+   - [ ] Add Repairs/issue handling for setup failures
+   - [ ] Polish translation keys/strings to Core review quality
 
 4. **Remove smoke-only helper code**
    - [ ] Remove `Platform` fallback in `const.py` before Core PR.
@@ -100,4 +100,8 @@ tests/ha_opcua_regression/run.sh
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/platform_coverage_check.py
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/notification_e2e_check.py
 /home/user/.openclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/security_configflow_check.py
+```
+nclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/security_configflow_check.py
+```
+penclaw/workspace/.pw-venv/bin/python tests/ha_opcua_regression/security_configflow_check.py
 ```

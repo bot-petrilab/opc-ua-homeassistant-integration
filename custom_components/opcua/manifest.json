@@ -4,6 +4,7 @@
   "version": "1.0.51",
   "config_flow": true,
   "documentation": "https://github.com/bot-petrilab/opc-ua-homeassistant-integration",
+  "issue_tracker": "https://github.com/bot-petrilab/opc-ua-homeassistant-integration/issues",
   "requirements": ["asyncua==1.2b2"],
   "codeowners": ["@fabianpetri"],
   "integration_type": "hub",

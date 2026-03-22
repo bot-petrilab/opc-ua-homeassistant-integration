@@ -29,7 +29,9 @@ References:
 
 ## Test status
 
-- [x] `pytest tests/components/opcua -q` → PASS (`32 passed`)
+- [x] `pytest tests/components/opcua -q` → PASS (`123 passed` at latest verified local run)
+- [x] `coverage run -m pytest tests/components/opcua -q` → PASS
+- [x] `ruff check custom_components/opcua tests/components/opcua tests/ci_smoke.py` → PASS
 - [x] `tests/ci_smoke.py` → PASS
 
 ## Notes
