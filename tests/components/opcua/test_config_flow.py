@@ -492,6 +492,80 @@ async def test_auto_discovery_review_apply_appends_unique_nodes(mock_hass, mock_
 
 
 @pytest.mark.asyncio
+async def test_discover_servers_flow_updates_entry_and_handles_errors(monkeypatch, mock_hass, mock_config_entry) -> None:
+    async def _discover(url, include_network=False):
+        assert url == "opc.tcp://127.0.0.1:4840"
+        assert include_network is True
+        return [
+            {
+                "application_name": "Test Server",
+                "endpoint_url": "opc.tcp://127.0.0.1:4841",
+                "security_policy": "None",
+                "security_mode": "None",
+                "supported_now": True,
+            }
+        ]
+
+    monkeypatch.setattr("custom_components.opcua.config_flow.OpcUaClientManager.discover_servers", _discover)
+
+    flow = OpcUaOptionsFlow(mock_config_entry)
+    flow.hass = mock_hass
+
+    result = await flow.async_step_discover_servers(
+        {"discovery_url": "opc.tcp://127.0.0.1:4840", "include_network": True}
+    )
+    assert result["type"] == "form"
+    assert result["step_id"] == "discover_servers_select"
+
+    result = await flow.async_step_discover_servers_select({"selected": "0"})
+    assert result["type"] == "menu"
+    assert mock_config_entry.data[CONF_ENDPOINT] == "opc.tcp://127.0.0.1:4841"
+    assert mock_hass.config_entries.reloaded == [mock_config_entry.entry_id]
+
+    async def _discover_fail(url, include_network=False):
+        raise RuntimeError("nope")
+
+    monkeypatch.setattr("custom_components.opcua.config_flow.OpcUaClientManager.discover_servers", _discover_fail)
+    result = await flow.async_step_discover_servers(
+        {"discovery_url": "opc.tcp://127.0.0.1:4840", "include_network": False}
+    )
+    assert result["type"] == "form"
+    assert result["errors"]["base"] == "cannot_connect"
+
+
+@pytest.mark.asyncio
+async def test_remove_and_poll_setting_steps_persist_changes(mock_hass, mock_config_entry) -> None:
+    flow = OpcUaOptionsFlow(mock_config_entry)
+    flow.hass = mock_hass
+    flow._options[CONF_NODES] = [
+        {CONF_NODE_KIND: NODE_KIND_SENSOR, CONF_NODE_NAME: "Temp", CONF_NODE_ID: "ns=2;s=Temp"},
+        {CONF_NODE_KIND: NODE_KIND_SWITCH, CONF_NODE_NAME: "Pump", CONF_NODE_ID: "ns=2;s=Pump"},
+    ]
+
+    form = await flow.async_step_remove_node()
+    assert form["type"] == "form"
+    result = await flow.async_step_remove_node({"remove": ["0"]})
+    assert result["type"] == "menu"
+    assert len(flow._options[CONF_NODES]) == 1
+
+    form = await flow.async_step_set_node_poll_profile()
+    assert form["type"] == "form"
+    result = await flow.async_step_set_node_poll_profile({"node_index": "0", "poll_profile": "fast"})
+    assert result["type"] == "menu"
+    assert flow._options[CONF_NODES][0]["poll_profile"] == "fast"
+
+    result = await flow.async_step_set_poll_groups(
+        {"poll_fast_interval": 0.5, "poll_normal_interval": 2.0, "poll_slow_interval": 10.0}
+    )
+    assert result["type"] == "menu"
+    assert flow._options["poll_fast_interval"] == 0.5
+
+    result = await flow.async_step_set_poll_interval({CONF_SCAN_INTERVAL: 3.5})
+    assert result["type"] == "menu"
+    assert flow._options[CONF_SCAN_INTERVAL] == 3.5
+
+
+@pytest.mark.asyncio
 async def test_browse_add_switch_adds_selected_variable(mock_hass, mock_config_entry) -> None:
     flow = OpcUaOptionsFlow(mock_config_entry)
     flow.hass = mock_hass
