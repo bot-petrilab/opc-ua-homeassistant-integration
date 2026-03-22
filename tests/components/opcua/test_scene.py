@@ -16,3 +16,16 @@ async def test_scene_activate(coordinator_all):
     )
     await e.async_activate()
     assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Test.Node", True)
+    assert coordinator_all.refresh_count == 1
+
+
+@pytest.mark.asyncio
+async def test_scene_default_activate_value_true(coordinator_all):
+    e = OpcUaScene(
+        "e",
+        "opc.tcp://127.0.0.1:4846",
+        {"name": "SC", "node_id": "ns=2;s=EntityMatrix.Test.Node"},
+        coordinator_all,
+    )
+    await e.async_activate()
+    assert coordinator_all.manager.writes[-1] == ("ns=2;s=EntityMatrix.Test.Node", True)

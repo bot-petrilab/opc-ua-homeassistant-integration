@@ -2,6 +2,17 @@ import pytest
 from custom_components.opcua.text import OpcUaText
 
 
+def test_text_native_value(coordinator_all):
+    e = OpcUaText(
+        "e",
+        "opc.tcp://127.0.0.1:4846",
+        {"name": "T", "node_id": "ns=2;s=EntityMatrix.Text.Value", "text_max": 64},
+        coordinator_all,
+    )
+    assert e.native_value == "Recipe-A"
+    assert e._attr_native_max == 64
+
+
 @pytest.mark.asyncio
 async def test_text_set_value(coordinator_all):
     e = OpcUaText(
