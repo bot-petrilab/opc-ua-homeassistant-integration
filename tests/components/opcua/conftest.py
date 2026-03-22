@@ -19,7 +19,7 @@ def _ensure_module(name: str) -> types.ModuleType:
 
 
 def _install_homeassistant_stubs() -> None:
-    ha = _ensure_module("homeassistant")
+    _ensure_module("homeassistant")
 
     # homeassistant.const
     const_mod = _ensure_module("homeassistant.const")
@@ -83,10 +83,14 @@ def _install_homeassistant_stubs() -> None:
     class ConfigEntryNotReady(Exception):
         pass
 
+    class ConfigEntryAuthFailed(Exception):
+        pass
+
     ex_mod.ConfigEntryNotReady = ConfigEntryNotReady
+    ex_mod.ConfigEntryAuthFailed = ConfigEntryAuthFailed
 
     # helpers
-    hp_mod = _ensure_module("homeassistant.helpers")
+    _ensure_module("homeassistant.helpers")
     _ensure_module("homeassistant.helpers.entity_platform").AddEntitiesCallback = object
 
     dr_mod = _ensure_module("homeassistant.helpers.device_registry")
@@ -111,6 +115,9 @@ def _install_homeassistant_stubs() -> None:
         def __class_getitem__(cls, _item):
             return cls
 
+    class UpdateFailed(Exception):
+        pass
+
     class CoordinatorEntity:
         def __init__(self, coordinator):
             self.coordinator = coordinator
@@ -120,6 +127,7 @@ def _install_homeassistant_stubs() -> None:
             return cls
 
     uc_mod.DataUpdateCoordinator = DataUpdateCoordinator
+    uc_mod.UpdateFailed = UpdateFailed
     uc_mod.CoordinatorEntity = CoordinatorEntity
 
     # Component base classes
@@ -220,7 +228,7 @@ def _install_homeassistant_stubs() -> None:
 
 _install_homeassistant_stubs()
 
-from custom_components.opcua.const import CONF_NODE_ID, CONF_NODE_NAME
+from custom_components.opcua.const import CONF_NODE_ID, CONF_NODE_NAME  # noqa: E402
 
 
 @dataclass
@@ -240,6 +248,14 @@ class MockCoordinator:
 
     async def async_request_refresh(self) -> None:
         self.refresh_count += 1
+
+
+@pytest.fixture
+def coordinator_factory():
+    def _build(data: dict[str, Any]) -> MockCoordinator:
+        return MockCoordinator(data=dict(data))
+
+    return _build
 
 
 @pytest.fixture

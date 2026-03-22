@@ -5,7 +5,7 @@ import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     CONF_NODE_ID,
@@ -51,14 +51,22 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._notification_primed = False
         self._node_last_polled: dict[str, float] = {}
 
-        merged_intervals = {"fast": 1.0, "normal": max(0.1, float(scan_interval_seconds)), "slow": 30.0}
+        merged_intervals = {
+            "fast": 1.0,
+            "normal": max(0.1, float(scan_interval_seconds)),
+            "slow": 30.0,
+        }
         if poll_intervals:
             for k, v in poll_intervals.items():
                 if k in merged_intervals:
                     merged_intervals[k] = max(0.1, float(v))
         self.poll_intervals = merged_intervals
 
-        min_interval = min(self.poll_intervals.values()) if self.poll_intervals else max(0.1, float(scan_interval_seconds))
+        min_interval = (
+            min(self.poll_intervals.values())
+            if self.poll_intervals
+            else max(0.1, float(scan_interval_seconds))
+        )
 
         super().__init__(
             hass,
@@ -76,8 +84,13 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if not main_node_id:
                 continue
 
-            profile = str(node.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE) or DEFAULT_POLL_PROFILE).lower()
-            interval = float(self.poll_intervals.get(profile, self.poll_intervals.get("normal", 5.0)))
+            profile = str(
+                node.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)
+                or DEFAULT_POLL_PROFILE
+            ).lower()
+            interval = float(
+                self.poll_intervals.get(profile, self.poll_intervals.get("normal", 5.0))
+            )
 
             last = self._node_last_polled.get(main_node_id)
             if last is None or (now - last) >= interval:
@@ -94,7 +107,12 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if not node_ids:
             return dict(self._last_values)
 
-        data = await self.manager.read_nodes(sorted(node_ids))
+        try:
+            data = await self.manager.read_nodes(sorted(node_ids))
+        except Exception as err:
+            raise UpdateFailed(
+                f"OPC UA endpoint {self.endpoint} is unavailable: {err}"
+            ) from err
 
         for node in due_nodes:
             main_node_id = str(node.get(CONF_NODE_ID, ""))
@@ -176,14 +194,16 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if not self.notify_enabled:
             return
 
-        service = self.notify_service if "." in self.notify_service else "persistent_notification.create"
+        service = (
+            self.notify_service
+            if "." in self.notify_service
+            else "persistent_notification.create"
+        )
         domain, service_name = service.split(".", 1)
 
         title = f"{self.notify_title_prefix}: {node_name}"
         message = (
-            f"OPC-UA notification from {self.endpoint}\n"
-            f"Node: {node_id}\n"
-            f"Value: {value}"
+            f"OPC-UA notification from {self.endpoint}\nNode: {node_id}\nValue: {value}"
         )
 
         payload: dict[str, Any]
@@ -201,6 +221,8 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             }
 
         try:
-            await self.hass.services.async_call(domain, service_name, payload, blocking=False)
+            await self.hass.services.async_call(
+                domain, service_name, payload, blocking=False
+            )
         except Exception as err:
             _LOGGER.warning("Failed to send notification via %s: %s", service, err)
