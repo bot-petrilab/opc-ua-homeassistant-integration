@@ -258,12 +258,9 @@ def _install_homeassistant_stubs() -> None:
 
     dr_mod = _ensure_module("homeassistant.helpers.device_registry")
 
-    @dataclass
-    class DeviceInfo:
-        identifiers: set[tuple[str, str]]
-        name: str
-        manufacturer: str
-        model: str
+    class DeviceInfo(dict):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
 
     dr_mod.DeviceInfo = DeviceInfo
 
