@@ -10,26 +10,50 @@ from custom_components.opcua.const import (
     CONF_CLIENT_CERT_PATH,
     CONF_CLIENT_KEY_PASSWORD,
     CONF_CLIENT_KEY_PATH,
+    CONF_CLIMATE_HVAC_MODE_NODE_ID,
+    CONF_CLIMATE_MAX_TEMP,
+    CONF_CLIMATE_MIN_TEMP,
+    CONF_CLIMATE_TEMP_STEP,
+    CONF_COVER_CLOSE_NODE_ID,
+    CONF_COVER_OPEN_NODE_ID,
+    CONF_COVER_SET_POSITION_NODE_ID,
+    CONF_COVER_STOP_NODE_ID,
+    CONF_FAN_SPEED_NODE_ID,
     CONF_ENDPOINT,
     CONF_LIGHT_BRIGHTNESS_NODE_ID,
     CONF_LIGHT_BRIGHTNESS_SCALE,
     CONF_LIGHT_EFFECT_LIST,
     CONF_LIGHT_EFFECT_NODE_ID,
+    CONF_NODE_DEVICE_CLASS,
+    CONF_NODE_ICON,
     CONF_NODE_ID,
     CONF_NODE_INVERT,
     CONF_NODE_KIND,
     CONF_NODE_NAME,
     CONF_NODES,
+    CONF_NODE_STATE_CLASS,
+    CONF_NODE_TARGET_NODE_ID,
+    CONF_NODE_UNIT,
     CONF_NOTIFY_ENABLED,
     CONF_NOTIFY_KEYWORDS,
+    CONF_NOTIFY_MESSAGE_NODE_ID,
+    CONF_NOTIFY_TITLE_NODE_ID,
+    CONF_NUMBER_MAX,
+    CONF_NUMBER_MIN,
+    CONF_NUMBER_STEP,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_SCENE_ACTIVATE_VALUE,
     CONF_SECURITY_POLICY,
     CONF_SELECT_OPTIONS,
     CONF_SERVER_CERT_PATH,
+    CONF_TEXT_MAX,
     CONF_USERNAME,
     CONF_VALIDATE_ON_SAVE,
+    CONF_WEATHER_CONDITION_NODE_ID,
+    CONF_WEATHER_HUMIDITY_NODE_ID,
+    CONF_WEATHER_PRESSURE_NODE_ID,
+    CONF_WEATHER_WIND_SPEED_NODE_ID,
     DEFAULT_BRIGHTNESS_SCALE,
     DEFAULT_NOTIFY_KEYWORDS,
     NODE_KIND_BINARY_SENSOR,
@@ -45,6 +69,41 @@ from custom_components.opcua.const import (
 def test_config_flow_module_is_importable() -> None:
     assert OpcUaConfigFlow.__name__ == "OpcUaConfigFlow"
     assert OpcUaConfigFlow.__mro__[0].__name__ == "OpcUaConfigFlow"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("step_name", "expected_step_id"),
+    [
+        ("async_step_init", "init"),
+        ("async_step_menu_add_entities", "menu_add_entities"),
+        ("async_step_menu_add_entities_advanced", "menu_add_entities_advanced"),
+        ("async_step_menu_discovery_tools", "menu_discovery_tools"),
+        ("async_step_menu_settings", "menu_settings"),
+        ("async_step_add_sensor", "add_sensor"),
+        ("async_step_add_binary_sensor", "add_binary_sensor"),
+        ("async_step_add_switch", "add_switch"),
+        ("async_step_add_light", "add_light"),
+        ("async_step_add_button", "add_button"),
+        ("async_step_add_climate", "add_climate"),
+        ("async_step_add_cover", "add_cover"),
+        ("async_step_add_date", "add_date"),
+        ("async_step_add_datetime", "add_datetime"),
+        ("async_step_add_fan", "add_fan"),
+        ("async_step_add_notify", "add_notify"),
+        ("async_step_add_number", "add_number"),
+        ("async_step_add_scene", "add_scene"),
+        ("async_step_add_select", "add_select"),
+        ("async_step_add_text", "add_text"),
+        ("async_step_add_time", "add_time"),
+        ("async_step_add_weather", "add_weather"),
+    ],
+)
+async def test_options_flow_menu_and_form_steps_render(mock_config_entry, step_name, expected_step_id) -> None:
+    flow = OpcUaOptionsFlow(mock_config_entry)
+    result = await getattr(flow, step_name)()
+    assert result["step_id"] == expected_step_id
+    assert result["type"] in {"menu", "form"}
 
 
 @pytest.mark.asyncio
@@ -200,6 +259,114 @@ async def test_options_add_select_splits_csv_options(mock_hass, mock_config_entr
     node = flow._options[CONF_NODES][0]
     assert node[CONF_NODE_KIND] == NODE_KIND_SELECT
     assert node[CONF_SELECT_OPTIONS] == ["auto", "manual", "eco"]
+
+
+@pytest.mark.asyncio
+async def test_options_add_various_platforms_persist_expected_fields(mock_hass, mock_config_entry) -> None:
+    flow = OpcUaOptionsFlow(mock_config_entry)
+    flow.hass = mock_hass
+
+    await flow.async_step_add_sensor(
+        {
+            CONF_NODE_NAME: "Temp",
+            CONF_NODE_ID: "ns=2;s=Temp",
+            CONF_NODE_UNIT: "°C",
+            CONF_NODE_DEVICE_CLASS: "temperature",
+            CONF_NODE_STATE_CLASS: "measurement",
+            CONF_NODE_ICON: "mdi:thermometer",
+        }
+    )
+    await flow.async_step_add_binary_sensor(
+        {
+            CONF_NODE_NAME: "Leak",
+            CONF_NODE_ID: "ns=2;s=Leak",
+            CONF_NODE_DEVICE_CLASS: "moisture",
+            CONF_NODE_ICON: "mdi:water-alert",
+            CONF_NODE_INVERT: True,
+        }
+    )
+    await flow.async_step_add_climate(
+        {
+            CONF_NODE_NAME: "HVAC",
+            CONF_NODE_ID: "ns=2;s=Current",
+            CONF_NODE_TARGET_NODE_ID: "ns=2;s=Target",
+            CONF_CLIMATE_HVAC_MODE_NODE_ID: "ns=2;s=Mode",
+            CONF_CLIMATE_MIN_TEMP: 5,
+            CONF_CLIMATE_MAX_TEMP: 30,
+            CONF_CLIMATE_TEMP_STEP: 0.5,
+        }
+    )
+    await flow.async_step_add_cover(
+        {
+            CONF_NODE_NAME: "Blind",
+            CONF_NODE_ID: "ns=2;s=Pos",
+            CONF_NODE_TARGET_NODE_ID: "ns=2;s=Target",
+            CONF_COVER_SET_POSITION_NODE_ID: "ns=2;s=SetPos",
+            CONF_COVER_OPEN_NODE_ID: "ns=2;s=Open",
+            CONF_COVER_CLOSE_NODE_ID: "ns=2;s=Close",
+            CONF_COVER_STOP_NODE_ID: "ns=2;s=Stop",
+        }
+    )
+    await flow.async_step_add_date({CONF_NODE_NAME: "Date", CONF_NODE_ID: "ns=2;s=Date"})
+    await flow.async_step_add_datetime({CONF_NODE_NAME: "DateTime", CONF_NODE_ID: "ns=2;s=DateTime"})
+    await flow.async_step_add_fan(
+        {
+            CONF_NODE_NAME: "Fan",
+            CONF_NODE_ID: "ns=2;s=FanOn",
+            CONF_FAN_SPEED_NODE_ID: "ns=2;s=FanSpeed",
+            CONF_NODE_INVERT: True,
+        }
+    )
+    await flow.async_step_add_notify(
+        {
+            CONF_NODE_NAME: "Notifier",
+            CONF_NODE_ID: "ns=2;s=Notify",
+            CONF_NOTIFY_MESSAGE_NODE_ID: "ns=2;s=NotifyMsg",
+            CONF_NOTIFY_TITLE_NODE_ID: "ns=2;s=NotifyTitle",
+        }
+    )
+    await flow.async_step_add_number(
+        {
+            CONF_NODE_NAME: "Setpoint",
+            CONF_NODE_ID: "ns=2;s=Setpoint",
+            CONF_NUMBER_MIN: 1,
+            CONF_NUMBER_MAX: 9,
+            CONF_NUMBER_STEP: 0.5,
+            CONF_NODE_UNIT: "bar",
+        }
+    )
+    await flow.async_step_add_text(
+        {
+            CONF_NODE_NAME: "Message",
+            CONF_NODE_ID: "ns=2;s=Text",
+            CONF_TEXT_MAX: 64,
+        }
+    )
+    await flow.async_step_add_time({CONF_NODE_NAME: "Start", CONF_NODE_ID: "ns=2;s=Time"})
+    await flow.async_step_add_weather(
+        {
+            CONF_NODE_NAME: "Weather",
+            CONF_NODE_ID: "ns=2;s=Weather.Temp",
+            CONF_WEATHER_HUMIDITY_NODE_ID: "ns=2;s=Weather.Humidity",
+            CONF_WEATHER_PRESSURE_NODE_ID: "ns=2;s=Weather.Pressure",
+            CONF_WEATHER_WIND_SPEED_NODE_ID: "ns=2;s=Weather.Wind",
+            CONF_WEATHER_CONDITION_NODE_ID: "ns=2;s=Weather.Condition",
+        }
+    )
+
+    nodes = flow._options[CONF_NODES]
+    assert len(nodes) == 12
+    assert nodes[0][CONF_NODE_UNIT] == "°C"
+    assert nodes[1][CONF_NODE_INVERT] is True
+    assert nodes[2][CONF_NODE_TARGET_NODE_ID] == "ns=2;s=Target"
+    assert nodes[3][CONF_COVER_OPEN_NODE_ID] == "ns=2;s=Open"
+    assert nodes[6][CONF_FAN_SPEED_NODE_ID] == "ns=2;s=FanSpeed"
+    assert nodes[7][CONF_NOTIFY_TITLE_NODE_ID] == "ns=2;s=NotifyTitle"
+    assert nodes[8][CONF_NUMBER_STEP] == 0.5
+    assert nodes[9][CONF_TEXT_MAX] == 64
+    assert nodes[10][CONF_NODE_KIND] == "time"
+    assert nodes[11][CONF_WEATHER_CONDITION_NODE_ID] == "ns=2;s=Weather.Condition"
+    assert mock_hass.config_entries.reloaded
 
 
 @pytest.mark.asyncio
