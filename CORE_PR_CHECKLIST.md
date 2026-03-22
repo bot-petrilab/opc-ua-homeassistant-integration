@@ -24,6 +24,7 @@ References:
 
 - [x] Reauth flow implemented (`async_step_reauth` + `async_step_reauth_confirm`)
 - [x] Diagnostics implemented (`diagnostics.py`) with sensitive-data redaction
+- [x] Repairs implemented for actionable secure-configuration issues (`repairs.py` + issue strings)
 - [x] Repairs-style auth handling path in setup (`ConfigEntryAuthFailed` on auth/security failures)
 - [x] Extended unit tests and smoke validation
 

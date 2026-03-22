@@ -36,6 +36,7 @@ from .const import (
 )
 from .coordinator import OpcUaCoordinator
 from .opcua_client import OpcUaClientManager
+from .repairs import async_delete_repairs, async_sync_repairs
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -167,6 +168,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         ) from err
 
     entry.runtime_data = OpcUaRuntimeData(manager=manager, coordinator=coordinator)
+    async_sync_repairs(hass, entry)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
@@ -183,6 +185,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> bo
     await runtime.manager.disconnect()
 
     if unload_ok:
+        async_delete_repairs(hass, entry)
         _LOGGER.info("OPC-UA unloaded for endpoint %s", entry.data.get(CONF_ENDPOINT))
 
     return unload_ok

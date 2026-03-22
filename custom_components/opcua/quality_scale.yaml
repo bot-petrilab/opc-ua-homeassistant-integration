@@ -60,9 +60,7 @@ rules:
   exception_translations: done
   icon_translations: done
   reconfiguration_flow: done
-  repair_issues:
-    status: in_progress
-    comment: Authentication/security problems currently trigger reauth flow only; dedicated Home Assistant repair issues are not implemented yet.
+  repair_issues: done
   stale_devices: done
 
   async_dependency: done

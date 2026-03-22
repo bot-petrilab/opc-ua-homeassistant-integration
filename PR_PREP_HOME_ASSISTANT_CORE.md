@@ -53,7 +53,7 @@ Prepare the existing `opcua` integration for a PR against `home-assistant/core`.
 
 3. **Core artifacts/standards review**
    - [x] Diagnostics (`diagnostics.py`) implemented
-   - [ ] Add Repairs/issue handling for setup failures
+   - [x] Repairs/issue handling for actionable secure-config problems
    - [ ] Polish translation keys/strings to Core review quality
 
 4. **Remove smoke-only helper code**

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
@@ -14,26 +15,12 @@ REDACT_KEYS = {
 }
 
 
-def _redact_obj(value: Any) -> Any:
-    if isinstance(value, dict):
-        out: dict[str, Any] = {}
-        for k, v in value.items():
-            if str(k).lower() in REDACT_KEYS:
-                out[k] = "REDACTED"
-            else:
-                out[k] = _redact_obj(v)
-        return out
-    if isinstance(value, list):
-        return [_redact_obj(v) for v in value]
-    return value
-
-
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
-    data = _redact_obj(dict(entry.data))
-    options = _redact_obj(dict(entry.options))
+    data = async_redact_data(dict(entry.data), REDACT_KEYS)
+    options = async_redact_data(dict(entry.options), REDACT_KEYS)
 
     # Keep node counts visible while avoiding accidental sensitive payload leakage.
     node_count = len(options.get(CONF_NODES, []) or data.get(CONF_NODES, []))

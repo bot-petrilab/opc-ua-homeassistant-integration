@@ -256,6 +256,45 @@ def _install_homeassistant_stubs() -> None:
 
     helpers_mod.entity_registry = er_mod
 
+    diag_mod = _ensure_module("homeassistant.components.diagnostics")
+
+    def async_redact_data(data, to_redact):
+        def _walk(value):
+            if isinstance(value, dict):
+                out = {}
+                for k, v in value.items():
+                    if str(k).lower() in {str(x).lower() for x in to_redact}:
+                        out[k] = "REDACTED"
+                    else:
+                        out[k] = _walk(v)
+                return out
+            if isinstance(value, list):
+                return [_walk(v) for v in value]
+            return value
+
+        return _walk(data)
+
+    diag_mod.async_redact_data = async_redact_data
+
+    ir_mod = _ensure_module("homeassistant.helpers.issue_registry")
+
+    class IssueSeverity(str, Enum):
+        ERROR = "error"
+        WARNING = "warning"
+
+    def async_create_issue(hass, domain, issue_id, **kwargs):
+        issues = getattr(hass, "_issues", [])
+        issues.append((domain, issue_id, kwargs))
+        hass._issues = issues
+
+    def async_delete_issue(hass, domain, issue_id):
+        issues = getattr(hass, "_issues", [])
+        hass._issues = [item for item in issues if not (item[0] == domain and item[1] == issue_id)]
+
+    ir_mod.IssueSeverity = IssueSeverity
+    ir_mod.async_create_issue = async_create_issue
+    ir_mod.async_delete_issue = async_delete_issue
+
     dr_mod = _ensure_module("homeassistant.helpers.device_registry")
 
     class DeviceInfo(dict):
