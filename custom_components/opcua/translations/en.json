@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect to OPC UA server",
-        "description": "Create an OPC UA endpoint connection.",
+        "title": "Set up OPC UA",
+        "description": "Enter the connection details for your OPC UA server.",
         "data": {
           "title": "Name",
           "endpoint": "Endpoint URL",
@@ -12,8 +12,8 @@
         }
       },
       "user_auth": {
-        "title": "Authentication and certificates",
-        "description": "Provide only the credentials and certificate paths required by the selected OPC UA security policy.",
+        "title": "Authentication",
+        "description": "Enter the credentials and certificate paths required by the selected security policy.",
         "data": {
           "username": "Username",
           "password": "Password",
@@ -25,7 +25,7 @@
       },
       "user_notifications": {
         "title": "Notifications",
-        "description": "Configure optional built-in OPC UA notifications.",
+        "description": "Configure optional built-in notifications.",
         "data": {
           "notify_enabled": "Enable built-in OPC UA notifications",
           "notify_service": "Notification service (domain.service)",
@@ -35,15 +35,15 @@
       },
       "zeroconf_setup": {
         "title": "Discovered OPC UA server",
-        "description": "Found {name} at {endpoint}. Choose the security policy to continue.",
+        "description": "Found {name} at {endpoint}. Choose a security policy to continue.",
         "data": {
           "security_policy": "Security policy",
           "validate_on_save": "Validate connection before save"
         }
       },
       "zeroconf_auth": {
-        "title": "Authentication and certificates",
-        "description": "Provide only the credentials and certificate paths required by the selected OPC UA security policy.",
+        "title": "Authentication",
+        "description": "Enter the credentials and certificate paths required by the selected security policy.",
         "data": {
           "username": "Username",
           "password": "Password",
@@ -55,7 +55,7 @@
       },
       "zeroconf_notifications": {
         "title": "Notifications",
-        "description": "Configure optional built-in OPC UA notifications.",
+        "description": "Configure optional built-in notifications.",
         "data": {
           "notify_enabled": "Enable built-in OPC-UA notifications",
           "notify_service": "Notification service (domain.service)",
@@ -65,7 +65,7 @@
       },
       "zeroconf_confirm": {
         "title": "Discovered OPC UA server",
-        "description": "Found {name} at {endpoint}. Do you want to add it?"
+        "description": "Found {name} at {endpoint}."
       }
     },
     "error": {

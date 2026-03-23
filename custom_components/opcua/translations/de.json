@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Mit OPC-UA-Server verbinden",
-        "description": "Erstelle eine Verbindung zu einem OPC-UA-Endpoint.",
+        "title": "OPC UA einrichten",
+        "description": "Gib die Verbindungsdaten für deinen OPC-UA-Server ein.",
         "data": {
           "title": "Name",
           "endpoint": "Endpoint-URL",
@@ -12,8 +12,8 @@
         }
       },
       "user_auth": {
-        "title": "Authentifizierung und Zertifikate",
-        "description": "Gib nur die Zugangsdaten und Zertifikatspfade an, die für die gewählte OPC-UA-Sicherheitsrichtlinie wirklich benötigt werden.",
+        "title": "Authentifizierung",
+        "description": "Gib die Zugangsdaten und Zertifikatspfade an, die für die gewählte Sicherheitsrichtlinie benötigt werden.",
         "data": {
           "username": "Benutzername",
           "password": "Passwort",
@@ -25,7 +25,7 @@
       },
       "user_notifications": {
         "title": "Benachrichtigungen",
-        "description": "Konfiguriere optionale eingebaute OPC-UA-Benachrichtigungen.",
+        "description": "Konfiguriere optionale integrierte Benachrichtigungen.",
         "data": {
           "notify_enabled": "Eingebaute OPC-UA-Benachrichtigungen aktivieren",
           "notify_service": "Benachrichtigungsdienst (domain.service)",
@@ -35,15 +35,15 @@
       },
       "zeroconf_setup": {
         "title": "OPC-UA-Server entdeckt",
-        "description": "{name} unter {endpoint} gefunden. Wähle die Sicherheitsrichtlinie, um fortzufahren.",
+        "description": "{name} unter {endpoint} gefunden. Wähle eine Sicherheitsrichtlinie, um fortzufahren.",
         "data": {
           "security_policy": "Sicherheitsrichtlinie",
           "validate_on_save": "Verbindung vor dem Speichern prüfen"
         }
       },
       "zeroconf_auth": {
-        "title": "Authentifizierung und Zertifikate",
-        "description": "Gib nur die Zugangsdaten und Zertifikatspfade an, die für die gewählte OPC-UA-Sicherheitsrichtlinie wirklich benötigt werden.",
+        "title": "Authentifizierung",
+        "description": "Gib die Zugangsdaten und Zertifikatspfade an, die für die gewählte Sicherheitsrichtlinie benötigt werden.",
         "data": {
           "username": "Benutzername",
           "password": "Passwort",
@@ -55,7 +55,7 @@
       },
       "zeroconf_notifications": {
         "title": "Benachrichtigungen",
-        "description": "Konfiguriere optionale eingebaute OPC-UA-Benachrichtigungen.",
+        "description": "Konfiguriere optionale integrierte Benachrichtigungen.",
         "data": {
           "notify_enabled": "Eingebaute OPC-UA-Benachrichtigungen aktivieren",
           "notify_service": "Benachrichtigungsdienst (domain.service)",
@@ -65,7 +65,7 @@
       },
       "zeroconf_confirm": {
         "title": "OPC-UA-Server entdeckt",
-        "description": "{name} unter {endpoint} gefunden. Möchtest du ihn hinzufügen?"
+        "description": "{name} unter {endpoint} gefunden."
       }
     },
     "error": {
