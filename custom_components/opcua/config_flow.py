@@ -157,6 +157,76 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
 
     _discovered_endpoint: str | None = None
     _discovered_name: str | None = None
+    _pending_user_data: dict[str, Any] | None = None
+    _pending_zeroconf_data: dict[str, Any] | None = None
+
+    @staticmethod
+    def _normalize_keywords(raw: str | None) -> list[str]:
+        text = str(raw or "").strip()
+        if not text:
+            return list(DEFAULT_NOTIFY_KEYWORDS)
+        return [k.strip().lower() for k in text.split(",") if k.strip()]
+
+    @staticmethod
+    def _notification_schema(defaults: Mapping[str, Any]) -> dict[Any, Any]:
+        return {
+            vol.Optional(
+                CONF_NOTIFY_ENABLED, default=defaults.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)
+            ): BooleanSelector(),
+            vol.Optional(
+                CONF_NOTIFY_SERVICE,
+                default=defaults.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE),
+            ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+            vol.Optional(
+                CONF_NOTIFY_TITLE_PREFIX,
+                default=defaults.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX),
+            ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+            vol.Optional(
+                CONF_NOTIFY_KEYWORDS,
+                default=defaults.get(CONF_NOTIFY_KEYWORDS, ",".join(DEFAULT_NOTIFY_KEYWORDS)),
+            ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
+        }
+
+    @staticmethod
+    def _security_schema(defaults: Mapping[str, Any]) -> dict[Any, Any]:
+        return {
+            vol.Optional(CONF_USERNAME, default=defaults.get(CONF_USERNAME, "")): TextSelector(
+                TextSelectorConfig(type="text")
+            ),
+            vol.Optional(CONF_PASSWORD, default=defaults.get(CONF_PASSWORD, "")): TextSelector(
+                TextSelectorConfig(type="password")
+            ),
+            vol.Optional(CONF_CLIENT_CERT_PATH, default=defaults.get(CONF_CLIENT_CERT_PATH, "")): TextSelector(
+                TextSelectorConfig(type="text", autocomplete="off")
+            ),
+            vol.Optional(CONF_CLIENT_KEY_PATH, default=defaults.get(CONF_CLIENT_KEY_PATH, "")): TextSelector(
+                TextSelectorConfig(type="text", autocomplete="off")
+            ),
+            vol.Optional(CONF_SERVER_CERT_PATH, default=defaults.get(CONF_SERVER_CERT_PATH, "")): TextSelector(
+                TextSelectorConfig(type="text", autocomplete="off")
+            ),
+            vol.Optional(CONF_CLIENT_KEY_PASSWORD, default=defaults.get(CONF_CLIENT_KEY_PASSWORD, "")): TextSelector(
+                TextSelectorConfig(type="password")
+            ),
+        }
+
+    async def _validate_pending_connection(self, pending: Mapping[str, Any]) -> bool:
+        if not pending.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE):
+            return True
+        manager = OpcUaClientManager(
+            endpoint=str(pending[CONF_ENDPOINT]),
+            security_policy=str(pending[CONF_SECURITY_POLICY]),
+            username=pending.get(CONF_USERNAME) or None,
+            password=pending.get(CONF_PASSWORD) or None,
+            client_cert_path=pending.get(CONF_CLIENT_CERT_PATH) or None,
+            client_key_path=pending.get(CONF_CLIENT_KEY_PATH) or None,
+            server_cert_path=pending.get(CONF_SERVER_CERT_PATH) or None,
+            client_key_password=pending.get(CONF_CLIENT_KEY_PASSWORD) or None,
+        )
+        await manager.ensure_connected()
+        await manager.disconnect()
+        return True
+
 
     async def async_step_zeroconf(self, discovery_info: Any) -> ConfigFlowResult:
         """Handle zeroconf discovery for OPC-UA servers."""
@@ -216,7 +286,7 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_zeroconf_setup(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Configure security/auth for a discovered OPC-UA server before creating entry."""
+        """Collect the basic security mode for a discovered OPC-UA server."""
         endpoint = self._discovered_endpoint
         if not endpoint:
             return self.async_abort(reason="cannot_connect")
@@ -224,85 +294,17 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
-            username = user_input.get(CONF_USERNAME) or None
-            password = user_input.get(CONF_PASSWORD) or None
-            client_cert_path = (
-                user_input.get(CONF_CLIENT_CERT_PATH) or ""
-            ).strip() or None
-            client_key_path = (
-                user_input.get(CONF_CLIENT_KEY_PATH) or ""
-            ).strip() or None
-            server_cert_path = (
-                user_input.get(CONF_SERVER_CERT_PATH) or ""
-            ).strip() or None
-            client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
-            notify_enabled = bool(
-                user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)
-            )
-            notify_service = str(
-                user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE
-            ).strip()
-            notify_title_prefix = str(
-                user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX
-            ).strip()
-            notify_keywords_raw = str(
-                user_input.get(CONF_NOTIFY_KEYWORDS) or ""
-            ).strip()
-            if notify_keywords_raw:
-                notify_keywords = [
-                    k.strip().lower()
-                    for k in notify_keywords_raw.split(",")
-                    if k.strip()
-                ]
-            else:
-                notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
-
             validate_on_save = bool(
                 user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE)
             )
-
-            if not errors and validate_on_save:
-                try:
-                    manager = OpcUaClientManager(
-                        endpoint=endpoint,
-                        security_policy=security_policy,
-                        username=username,
-                        password=password,
-                        client_cert_path=client_cert_path,
-                        client_key_path=client_key_path,
-                        server_cert_path=server_cert_path,
-                        client_key_password=client_key_password,
-                    )
-                    await manager.ensure_connected()
-                    await manager.disconnect()
-                except Exception as err:
-                    _LOGGER.warning(
-                        "OPC UA zeroconf setup validation failed for %s: %s",
-                        endpoint,
-                        err,
-                    )
-                    errors["base"] = "cannot_connect"
-
-            if not errors:
-                title = self._discovered_name or endpoint
-                return self.async_create_entry(
-                    title=title,
-                    data={
-                        CONF_ENDPOINT: endpoint,
-                        CONF_SECURITY_POLICY: security_policy,
-                        CONF_USERNAME: username,
-                        CONF_PASSWORD: password,
-                        CONF_CLIENT_CERT_PATH: client_cert_path,
-                        CONF_CLIENT_KEY_PATH: client_key_path,
-                        CONF_SERVER_CERT_PATH: server_cert_path,
-                        CONF_CLIENT_KEY_PASSWORD: client_key_password,
-                        CONF_NOTIFY_ENABLED: notify_enabled,
-                        CONF_NOTIFY_SERVICE: notify_service,
-                        CONF_NOTIFY_TITLE_PREFIX: notify_title_prefix,
-                        CONF_NOTIFY_KEYWORDS: notify_keywords,
-                        CONF_NODES: [],
-                    },
-                )
+            self._pending_zeroconf_data = {
+                CONF_ENDPOINT: endpoint,
+                CONF_SECURITY_POLICY: security_policy,
+                CONF_VALIDATE_ON_SAVE: validate_on_save,
+            }
+            if security_policy == SECURITY_POLICY_NONE:
+                return await self.async_step_zeroconf_notifications()
+            return await self.async_step_zeroconf_auth()
 
         data_schema = vol.Schema(
             {
@@ -314,39 +316,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 ),
-                vol.Optional(CONF_USERNAME): TextSelector(
-                    TextSelectorConfig(type="text")
-                ),
-                vol.Optional(CONF_PASSWORD): TextSelector(
-                    TextSelectorConfig(type="password")
-                ),
-                vol.Optional(CONF_CLIENT_CERT_PATH): TextSelector(
-                    TextSelectorConfig(type="text", autocomplete="off")
-                ),
-                vol.Optional(CONF_CLIENT_KEY_PATH): TextSelector(
-                    TextSelectorConfig(type="text", autocomplete="off")
-                ),
-                vol.Optional(CONF_SERVER_CERT_PATH): TextSelector(
-                    TextSelectorConfig(type="text", autocomplete="off")
-                ),
-                vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
-                    TextSelectorConfig(type="password")
-                ),
-                vol.Optional(
-                    CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED
-                ): BooleanSelector(),
-                vol.Optional(
-                    CONF_NOTIFY_SERVICE,
-                    default=DEFAULT_NOTIFY_SERVICE,
-                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Optional(
-                    CONF_NOTIFY_TITLE_PREFIX,
-                    default=DEFAULT_NOTIFY_TITLE_PREFIX,
-                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Optional(
-                    CONF_NOTIFY_KEYWORDS,
-                    default=",".join(DEFAULT_NOTIFY_KEYWORDS),
-                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
                 vol.Required(
                     CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE
                 ): BooleanSelector(),
@@ -363,6 +332,76 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             },
         )
 
+    async def async_step_zeroconf_auth(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        pending = self._pending_zeroconf_data or {}
+        if not pending:
+            return self.async_abort(reason="cannot_connect")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            pending.update({
+                CONF_USERNAME: (user_input.get(CONF_USERNAME) or None),
+                CONF_PASSWORD: (user_input.get(CONF_PASSWORD) or None),
+                CONF_CLIENT_CERT_PATH: (user_input.get(CONF_CLIENT_CERT_PATH) or "").strip() or None,
+                CONF_CLIENT_KEY_PATH: (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None,
+                CONF_SERVER_CERT_PATH: (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None,
+                CONF_CLIENT_KEY_PASSWORD: (user_input.get(CONF_CLIENT_KEY_PASSWORD) or None),
+            })
+            return await self.async_step_zeroconf_notifications()
+
+        return self.async_show_form(
+            step_id="zeroconf_auth",
+            data_schema=vol.Schema(self._security_schema(pending)),
+            errors=errors,
+            description_placeholders={"endpoint": str(pending[CONF_ENDPOINT])},
+        )
+
+    async def async_step_zeroconf_notifications(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        pending = self._pending_zeroconf_data or {}
+        if not pending:
+            return self.async_abort(reason="cannot_connect")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            pending.update({
+                CONF_NOTIFY_ENABLED: bool(user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)),
+                CONF_NOTIFY_SERVICE: str(user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE).strip(),
+                CONF_NOTIFY_TITLE_PREFIX: str(user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX).strip(),
+                CONF_NOTIFY_KEYWORDS: self._normalize_keywords(user_input.get(CONF_NOTIFY_KEYWORDS)),
+                CONF_NODES: [],
+            })
+            try:
+                await self._validate_pending_connection(pending)
+            except Exception as err:
+                _LOGGER.warning(
+                    "OPC UA zeroconf setup validation failed for %s: %s",
+                    pending.get(CONF_ENDPOINT),
+                    err,
+                )
+                errors["base"] = "cannot_connect"
+            if not errors:
+                title = self._discovered_name or str(pending[CONF_ENDPOINT])
+                data = dict(pending)
+                data.pop(CONF_VALIDATE_ON_SAVE, None)
+                return self.async_create_entry(title=title, data=data)
+
+        defaults = {
+            CONF_NOTIFY_ENABLED: pending.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED),
+            CONF_NOTIFY_SERVICE: pending.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE),
+            CONF_NOTIFY_TITLE_PREFIX: pending.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX),
+            CONF_NOTIFY_KEYWORDS: ",".join(pending.get(CONF_NOTIFY_KEYWORDS, DEFAULT_NOTIFY_KEYWORDS)),
+        }
+        return self.async_show_form(
+            step_id="zeroconf_notifications",
+            data_schema=vol.Schema(self._notification_schema(defaults)),
+            errors=errors,
+            description_placeholders={"endpoint": str(pending[CONF_ENDPOINT])},
+        )
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -371,39 +410,7 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             endpoint = str(user_input[CONF_ENDPOINT]).strip()
             security_policy = str(user_input[CONF_SECURITY_POLICY]).strip()
-            username = user_input.get(CONF_USERNAME) or None
-            password = user_input.get(CONF_PASSWORD) or None
-            client_cert_path = (
-                user_input.get(CONF_CLIENT_CERT_PATH) or ""
-            ).strip() or None
-            client_key_path = (
-                user_input.get(CONF_CLIENT_KEY_PATH) or ""
-            ).strip() or None
-            server_cert_path = (
-                user_input.get(CONF_SERVER_CERT_PATH) or ""
-            ).strip() or None
-            client_key_password = user_input.get(CONF_CLIENT_KEY_PASSWORD) or None
-            notify_enabled = bool(
-                user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)
-            )
-            notify_service = str(
-                user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE
-            ).strip()
-            notify_title_prefix = str(
-                user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX
-            ).strip()
-            notify_keywords_raw = str(
-                user_input.get(CONF_NOTIFY_KEYWORDS) or ""
-            ).strip()
-            if notify_keywords_raw:
-                notify_keywords = [
-                    k.strip().lower()
-                    for k in notify_keywords_raw.split(",")
-                    if k.strip()
-                ]
-            else:
-                notify_keywords = list(DEFAULT_NOTIFY_KEYWORDS)
-
+            title = str(user_input.get("title") or DEFAULT_TITLE).strip() or DEFAULT_TITLE
             validate_on_save = bool(
                 user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE)
             )
@@ -414,54 +421,20 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors[CONF_ENDPOINT] = "invalid_endpoint"
 
             if not errors:
-                # Avoid false "already_in_progress" collisions with concurrent zeroconf flows.
                 for entry in self._async_current_entries():
-                    if (
-                        str((entry.data or {}).get(CONF_ENDPOINT, "")).strip()
-                        == endpoint
-                    ):
+                    if str((entry.data or {}).get(CONF_ENDPOINT, "")).strip() == endpoint:
                         return self.async_abort(reason="already_configured")
 
-                if validate_on_save:
-                    try:
-                        manager = OpcUaClientManager(
-                            endpoint=endpoint,
-                            security_policy=security_policy,
-                            username=username,
-                            password=password,
-                            client_cert_path=client_cert_path,
-                            client_key_path=client_key_path,
-                            server_cert_path=server_cert_path,
-                            client_key_password=client_key_password,
-                        )
-                        await manager.ensure_connected()
-                        await manager.disconnect()
-                    except Exception as err:
-                        _LOGGER.warning(
-                            "OPC UA validation failed for %s: %s", endpoint, err
-                        )
-                        errors["base"] = "cannot_connect"
-
             if not errors:
-                title = user_input.get("title") or DEFAULT_TITLE
-                return self.async_create_entry(
-                    title=title,
-                    data={
-                        CONF_ENDPOINT: endpoint,
-                        CONF_SECURITY_POLICY: security_policy,
-                        CONF_USERNAME: username,
-                        CONF_PASSWORD: password,
-                        CONF_CLIENT_CERT_PATH: client_cert_path,
-                        CONF_CLIENT_KEY_PATH: client_key_path,
-                        CONF_SERVER_CERT_PATH: server_cert_path,
-                        CONF_CLIENT_KEY_PASSWORD: client_key_password,
-                        CONF_NOTIFY_ENABLED: notify_enabled,
-                        CONF_NOTIFY_SERVICE: notify_service,
-                        CONF_NOTIFY_TITLE_PREFIX: notify_title_prefix,
-                        CONF_NOTIFY_KEYWORDS: notify_keywords,
-                        CONF_NODES: [],
-                    },
-                )
+                self._pending_user_data = {
+                    "title": title,
+                    CONF_ENDPOINT: endpoint,
+                    CONF_SECURITY_POLICY: security_policy,
+                    CONF_VALIDATE_ON_SAVE: validate_on_save,
+                }
+                if security_policy == SECURITY_POLICY_NONE:
+                    return await self.async_step_user_notifications()
+                return await self.async_step_user_auth()
 
         data_schema = vol.Schema(
             {
@@ -477,39 +450,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 ),
-                vol.Optional(CONF_USERNAME): TextSelector(
-                    TextSelectorConfig(type="text")
-                ),
-                vol.Optional(CONF_PASSWORD): TextSelector(
-                    TextSelectorConfig(type="password")
-                ),
-                vol.Optional(CONF_CLIENT_CERT_PATH): TextSelector(
-                    TextSelectorConfig(type="text", autocomplete="off")
-                ),
-                vol.Optional(CONF_CLIENT_KEY_PATH): TextSelector(
-                    TextSelectorConfig(type="text", autocomplete="off")
-                ),
-                vol.Optional(CONF_SERVER_CERT_PATH): TextSelector(
-                    TextSelectorConfig(type="text", autocomplete="off")
-                ),
-                vol.Optional(CONF_CLIENT_KEY_PASSWORD): TextSelector(
-                    TextSelectorConfig(type="password")
-                ),
-                vol.Optional(
-                    CONF_NOTIFY_ENABLED, default=DEFAULT_NOTIFY_ENABLED
-                ): BooleanSelector(),
-                vol.Optional(
-                    CONF_NOTIFY_SERVICE,
-                    default=DEFAULT_NOTIFY_SERVICE,
-                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Optional(
-                    CONF_NOTIFY_TITLE_PREFIX,
-                    default=DEFAULT_NOTIFY_TITLE_PREFIX,
-                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Optional(
-                    CONF_NOTIFY_KEYWORDS,
-                    default=",".join(DEFAULT_NOTIFY_KEYWORDS),
-                ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
                 vol.Required(
                     CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE
                 ): BooleanSelector(),
@@ -518,6 +458,74 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user", data_schema=data_schema, errors=errors
+        )
+
+    async def async_step_user_auth(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        pending = self._pending_user_data or {}
+        if not pending:
+            return self.async_abort(reason="cannot_connect")
+
+        if user_input is not None:
+            pending.update({
+                CONF_USERNAME: (user_input.get(CONF_USERNAME) or None),
+                CONF_PASSWORD: (user_input.get(CONF_PASSWORD) or None),
+                CONF_CLIENT_CERT_PATH: (user_input.get(CONF_CLIENT_CERT_PATH) or "").strip() or None,
+                CONF_CLIENT_KEY_PATH: (user_input.get(CONF_CLIENT_KEY_PATH) or "").strip() or None,
+                CONF_SERVER_CERT_PATH: (user_input.get(CONF_SERVER_CERT_PATH) or "").strip() or None,
+                CONF_CLIENT_KEY_PASSWORD: (user_input.get(CONF_CLIENT_KEY_PASSWORD) or None),
+            })
+            return await self.async_step_user_notifications()
+
+        return self.async_show_form(
+            step_id="user_auth",
+            data_schema=vol.Schema(self._security_schema(pending)),
+            errors={},
+            description_placeholders={"endpoint": str(pending[CONF_ENDPOINT])},
+        )
+
+    async def async_step_user_notifications(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        pending = self._pending_user_data or {}
+        if not pending:
+            return self.async_abort(reason="cannot_connect")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            pending.update({
+                CONF_NOTIFY_ENABLED: bool(user_input.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)),
+                CONF_NOTIFY_SERVICE: str(user_input.get(CONF_NOTIFY_SERVICE) or DEFAULT_NOTIFY_SERVICE).strip(),
+                CONF_NOTIFY_TITLE_PREFIX: str(user_input.get(CONF_NOTIFY_TITLE_PREFIX) or DEFAULT_NOTIFY_TITLE_PREFIX).strip(),
+                CONF_NOTIFY_KEYWORDS: self._normalize_keywords(user_input.get(CONF_NOTIFY_KEYWORDS)),
+                CONF_NODES: [],
+            })
+            try:
+                await self._validate_pending_connection(pending)
+            except Exception as err:
+                _LOGGER.warning(
+                    "OPC UA validation failed for %s: %s", pending.get(CONF_ENDPOINT), err
+                )
+                errors["base"] = "cannot_connect"
+            if not errors:
+                title = str(pending.get("title") or DEFAULT_TITLE)
+                data = dict(pending)
+                data.pop("title", None)
+                data.pop(CONF_VALIDATE_ON_SAVE, None)
+                return self.async_create_entry(title=title, data=data)
+
+        defaults = {
+            CONF_NOTIFY_ENABLED: pending.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED),
+            CONF_NOTIFY_SERVICE: pending.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE),
+            CONF_NOTIFY_TITLE_PREFIX: pending.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX),
+            CONF_NOTIFY_KEYWORDS: ",".join(pending.get(CONF_NOTIFY_KEYWORDS, DEFAULT_NOTIFY_KEYWORDS)),
+        }
+        return self.async_show_form(
+            step_id="user_notifications",
+            data_schema=vol.Schema(self._notification_schema(defaults)),
+            errors=errors,
+            description_placeholders={"endpoint": str(pending[CONF_ENDPOINT])},
         )
 
     async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:

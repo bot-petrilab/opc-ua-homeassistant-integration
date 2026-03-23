@@ -15,6 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SIM_SERVER = REPO_ROOT / "testbed" / "opcua-sim" / "server_all_entities.py"
 COMPONENT_DIR = REPO_ROOT / "custom_components" / "opcua"
 CLIENT_MODULE = COMPONENT_DIR / "opcua_client.py"
+SIM_PORT = 4849
 
 
 def wait_for_port(host: str, port: int, timeout: float = 30.0) -> bool:
@@ -55,7 +56,7 @@ async def run_smoke() -> None:
     OpcUaClientManager = load_client_manager()
 
     rows = await OpcUaClientManager.discover_servers(
-        "opc.tcp://127.0.0.1:4840", include_network=False
+        f"opc.tcp://127.0.0.1:{SIM_PORT}", include_network=False
     )
     if not rows:
         raise AssertionError("discover_servers returned no endpoints")
@@ -65,7 +66,7 @@ async def run_smoke() -> None:
         raise AssertionError(f"No security_policy None endpoint in discovery: {rows}")
 
     manager = OpcUaClientManager(
-        endpoint="opc.tcp://127.0.0.1:4840",
+        endpoint=f"opc.tcp://127.0.0.1:{SIM_PORT}",
         security_policy="None",
         username=None,
         password=None,
@@ -101,6 +102,7 @@ def main() -> None:
         raise SystemExit(f"Simulator script missing: {SIM_SERVER}")
 
     env = dict(os.environ)
+    env["OPCUA_SIM_PORT"] = str(SIM_PORT)
     proc = subprocess.Popen(
         [sys.executable, str(SIM_SERVER)],
         stdout=subprocess.PIPE,
@@ -111,11 +113,11 @@ def main() -> None:
     )
 
     try:
-        if not wait_for_port("127.0.0.1", 4840, timeout=40.0):
+        if not wait_for_port("127.0.0.1", SIM_PORT, timeout=40.0):
             logs = ""
             if proc.stdout:
                 logs = proc.stdout.read()
-            raise SystemExit(f"Simulator did not open port 4840 in time. Logs:\n{logs}")
+            raise SystemExit(f"Simulator did not open port {SIM_PORT} in time. Logs:\n{logs}")
 
         asyncio.run(run_smoke())
         print("CI smoke test: PASS")

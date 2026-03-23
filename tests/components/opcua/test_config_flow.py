@@ -131,9 +131,17 @@ async def test_user_step_creates_entry_and_normalizes_keywords() -> None:
             "title": "PLC A",
             CONF_ENDPOINT: "opc.tcp://plc-a:4840",
             CONF_SECURITY_POLICY: "None",
+            CONF_VALIDATE_ON_SAVE: False,
+        }
+    )
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "user_notifications"
+
+    result = await flow.async_step_user_notifications(
+        {
             CONF_NOTIFY_ENABLED: True,
             CONF_NOTIFY_KEYWORDS: " Alarm, WARN ,  , Fault ",
-            CONF_VALIDATE_ON_SAVE: False,
         }
     )
 
@@ -171,9 +179,17 @@ async def test_zeroconf_setup_uses_default_keywords_when_blank() -> None:
     result = await flow.async_step_zeroconf_setup(
         {
             CONF_SECURITY_POLICY: "None",
+            CONF_VALIDATE_ON_SAVE: False,
+        }
+    )
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "zeroconf_notifications"
+
+    result = await flow.async_step_zeroconf_notifications(
+        {
             CONF_NOTIFY_ENABLED: True,
             CONF_NOTIFY_KEYWORDS: "   ",
-            CONF_VALIDATE_ON_SAVE: False,
         }
     )
 
@@ -618,6 +634,21 @@ async def test_zeroconf_confirm_without_endpoint_aborts() -> None:
     flow = OpcUaConfigFlow()
     result = await flow.async_step_zeroconf_confirm()
     assert result == {"type": "abort", "reason": "cannot_connect"}
+
+
+@pytest.mark.asyncio
+async def test_user_step_with_secure_policy_goes_to_auth_step() -> None:
+    flow = OpcUaConfigFlow()
+    result = await flow.async_step_user(
+        {
+            "title": "PLC A",
+            CONF_ENDPOINT: "opc.tcp://plc-a:4840",
+            CONF_SECURITY_POLICY: "Basic256Sha256_SignAndEncrypt",
+            CONF_VALIDATE_ON_SAVE: False,
+        }
+    )
+    assert result["type"] == "form"
+    assert result["step_id"] == "user_auth"
 
 
 @pytest.mark.asyncio

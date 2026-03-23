@@ -1,12 +1,13 @@
 import asyncio
 import datetime as dt
+import os
 import socket
 
 from asyncua import Server, ua
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 SIM_VERSION = "0.2.0-all-entities"
-PORT = 4840
+PORT = int(os.environ.get("OPCUA_SIM_PORT", "4840"))
 
 
 async def _add_var(parent, node_id: str, name: str, initial, writable: bool = False):
