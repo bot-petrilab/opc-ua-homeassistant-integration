@@ -7,18 +7,60 @@
         "data": {
           "title": "Name",
           "endpoint": "Endpoint-URL",
-          "security_policy": "Security Policy",
+          "security_policy": "Sicherheitsrichtlinie",
+          "validate_on_save": "Verbindung vor dem Speichern prüfen"
+        }
+      },
+      "user_auth": {
+        "title": "Authentifizierung und Zertifikate",
+        "description": "Gib nur die Zugangsdaten und Zertifikatspfade an, die für die gewählte OPC-UA-Sicherheitsrichtlinie wirklich benötigt werden.",
+        "data": {
           "username": "Benutzername",
           "password": "Passwort",
-          "client_cert_path": "Pfad Client-Zertifikat",
-          "client_key_path": "Pfad Client-Private-Key",
-          "server_cert_path": "Pfad Server-Zertifikat (optional)",
-          "client_key_password": "Passwort Client-Key (optional)",
-          "notify_enabled": "Eingebaute OPC-UA Benachrichtigungen aktivieren",
+          "client_cert_path": "Pfad zum Client-Zertifikat",
+          "client_key_path": "Pfad zum privaten Client-Schlüssel",
+          "server_cert_path": "Pfad zum Server-Zertifikat",
+          "client_key_password": "Passwort für den Client-Schlüssel"
+        }
+      },
+      "user_notifications": {
+        "title": "Benachrichtigungen",
+        "description": "Konfiguriere optionale eingebaute OPC-UA-Benachrichtigungen.",
+        "data": {
+          "notify_enabled": "Eingebaute OPC-UA-Benachrichtigungen aktivieren",
           "notify_service": "Benachrichtigungsdienst (domain.service)",
-          "notify_title_prefix": "Titel-Präfix für Benachrichtigungen",
-          "notify_keywords": "Benachrichtigungs-Keywords (kommagetrennt)",
+          "notify_title_prefix": "Titelpräfix für Benachrichtigungen",
+          "notify_keywords": "Benachrichtigungs-Schlüsselwörter (kommagetrennt)"
+        }
+      },
+      "zeroconf_setup": {
+        "title": "OPC-UA-Server entdeckt",
+        "description": "{name} unter {endpoint} gefunden. Wähle die Sicherheitsrichtlinie, um fortzufahren.",
+        "data": {
+          "security_policy": "Sicherheitsrichtlinie",
           "validate_on_save": "Verbindung vor dem Speichern prüfen"
+        }
+      },
+      "zeroconf_auth": {
+        "title": "Authentifizierung und Zertifikate",
+        "description": "Gib nur die Zugangsdaten und Zertifikatspfade an, die für die gewählte OPC-UA-Sicherheitsrichtlinie wirklich benötigt werden.",
+        "data": {
+          "username": "Benutzername",
+          "password": "Passwort",
+          "client_cert_path": "Pfad zum Client-Zertifikat",
+          "client_key_path": "Pfad zum privaten Client-Schlüssel",
+          "server_cert_path": "Pfad zum Server-Zertifikat",
+          "client_key_password": "Passwort für den Client-Schlüssel"
+        }
+      },
+      "zeroconf_notifications": {
+        "title": "Benachrichtigungen",
+        "description": "Konfiguriere optionale eingebaute OPC-UA-Benachrichtigungen.",
+        "data": {
+          "notify_enabled": "Eingebaute OPC-UA-Benachrichtigungen aktivieren",
+          "notify_service": "Benachrichtigungsdienst (domain.service)",
+          "notify_title_prefix": "Titelpräfix für Benachrichtigungen",
+          "notify_keywords": "Benachrichtigungs-Schlüsselwörter (kommagetrennt)"
         }
       },
       "zeroconf_confirm": {

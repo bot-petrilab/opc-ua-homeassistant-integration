@@ -8,17 +8,59 @@
           "title": "Name",
           "endpoint": "Endpoint URL",
           "security_policy": "Security policy",
+          "validate_on_save": "Validate connection before save"
+        }
+      },
+      "user_auth": {
+        "title": "Authentication and certificates",
+        "description": "Provide only the credentials and certificate paths required by the selected OPC UA security policy.",
+        "data": {
           "username": "Username",
           "password": "Password",
           "client_cert_path": "Client certificate path",
           "client_key_path": "Client private key path",
-          "server_cert_path": "Server certificate path (optional)",
-          "client_key_password": "Client key password (optional)",
+          "server_cert_path": "Server certificate path",
+          "client_key_password": "Client key password"
+        }
+      },
+      "user_notifications": {
+        "title": "Notifications",
+        "description": "Configure optional built-in OPC UA notifications.",
+        "data": {
+          "notify_enabled": "Enable built-in OPC UA notifications",
+          "notify_service": "Notification service (domain.service)",
+          "notify_title_prefix": "Notification title prefix",
+          "notify_keywords": "Notification keywords (comma separated)"
+        }
+      },
+      "zeroconf_setup": {
+        "title": "Discovered OPC UA server",
+        "description": "Found {name} at {endpoint}. Choose the security policy to continue.",
+        "data": {
+          "security_policy": "Security policy",
+          "validate_on_save": "Validate connection before save"
+        }
+      },
+      "zeroconf_auth": {
+        "title": "Authentication and certificates",
+        "description": "Provide only the credentials and certificate paths required by the selected OPC UA security policy.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "client_cert_path": "Client certificate path",
+          "client_key_path": "Client private key path",
+          "server_cert_path": "Server certificate path",
+          "client_key_password": "Client key password"
+        }
+      },
+      "zeroconf_notifications": {
+        "title": "Notifications",
+        "description": "Configure optional built-in OPC UA notifications.",
+        "data": {
           "notify_enabled": "Enable built-in OPC-UA notifications",
           "notify_service": "Notification service (domain.service)",
           "notify_title_prefix": "Notification title prefix",
-          "notify_keywords": "Notification keywords (comma separated)",
-          "validate_on_save": "Validate connection before save"
+          "notify_keywords": "Notification keywords (comma separated)"
         }
       },
       "zeroconf_confirm": {
