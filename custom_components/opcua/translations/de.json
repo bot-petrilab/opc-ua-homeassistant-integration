@@ -89,7 +89,7 @@
     },
     "step": {
       "init": {
-        "title": "OPC-UA Node-Setup",
+        "title": "OPC-UA-Nodes einrichten",
         "menu_options": {
           "add_sensor": "Sensor hinzufügen",
           "add_binary_sensor": "Binary Sensor hinzufügen",
@@ -118,7 +118,7 @@
         }
       },
       "add_sensor": {
-        "title": "Sensor-Node hinzufügen",
+        "title": "Sensor hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node-ID",
@@ -129,7 +129,7 @@
         }
       },
       "add_binary_sensor": {
-        "title": "Binary-Sensor-Node hinzufügen",
+        "title": "Binary Sensor hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node-ID",
@@ -139,7 +139,7 @@
         }
       },
       "add_switch": {
-        "title": "Switch-Node hinzufügen",
+        "title": "Switch hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node-ID",
@@ -148,8 +148,8 @@
         }
       },
       "add_light": {
-        "title": "Light-Node hinzufügen",
-        "description": "Nur die Felder konfigurieren, die du wirklich brauchst. Alle erweiterten Light-Features sind optional.",
+        "title": "Licht hinzufügen",
+        "description": "Konfiguriere nur die Felder, die du benötigst. Alle erweiterten Lichtfunktionen sind optional.",
         "data": {
           "name": "Entitätsname",
           "node_id": "On/Off Node-ID",
@@ -189,22 +189,22 @@
         }
       },
       "discover_servers": {
-        "title": "OPC-UA Server entdecken",
-        "description": "Fragt einen Discovery-Endpoint ab und listet verfügbare Server-Endpoints.",
+        "title": "Server entdecken",
+        "description": "Frage einen Discovery-Endpoint ab und liste verfügbare Server-Endpoints auf.",
         "data": {
           "discovery_url": "Discovery-URL",
           "include_network": "FindServersOnNetwork versuchen (benötigt LDS-ME)"
         }
       },
       "discover_servers_select": {
-        "title": "Entdeckten Endpoint auswählen",
+        "title": "Endpoint auswählen",
         "data": {
           "selected": "Entdeckte Endpoints"
         }
       },
       "auto_discovery": {
         "title": "Auto-Discovery",
-        "description": "Scannt ab einer Root-Node und mappt Variablen automatisch auf Entitäten. Discovery läuft ohne Tiefe/Max-Nodes/Import-Limit (vollständiger Teilbaum-Scan ab der gewählten Root-Node).",
+        "description": "Scanne einen Root-Node und ordne unterstützte Variablen automatisch Entitäten zu.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)",
           "include_readonly": "Read-only Variablen einbeziehen",
@@ -212,15 +212,15 @@
         }
       },
       "auto_discovery_review": {
-        "title": "Discovery-Ergebnis",
-        "description": "Gefunden: {total} Kandidaten (Sensor {sensors}, Binary {binary}, Switch {switches}, Light {lights}). Beispiel: {sample}",
+        "title": "Gefundene Entitäten prüfen",
+        "description": "{total} Kandidaten gefunden. Sensoren: {sensors}, Binary Sensoren: {binary}, Switches: {switches}, Lichter: {lights}. Beispiel: {sample}",
         "data": {
           "apply": "Gefundene Entitäten jetzt importieren"
         }
       },
       "browse_nodes": {
-        "title": "OPC-UA Nodes browsen",
-        "description": "Durchsucht einen Teilbaum und lässt dich danach den Importtyp wählen. Browse läuft ohne Tiefe/Max-Nodes-Limit (vollständiger Teilbaum-Scan ab der gewählten Root-Node).",
+        "title": "Nodes browsen",
+        "description": "Browse einen Teilbaum und wähle aus, wie Nodes importiert werden sollen.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)"
         }
@@ -253,8 +253,8 @@
         }
       },
       "browse_add_sensor": {
-        "title": "Baumansicht: Sensoren hinzufügen",
-        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "title": "Browse: sensor hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Zu importierende Variablen",
           "open_branch": "Unterzweig öffnen",
@@ -262,8 +262,8 @@
         }
       },
       "browse_add_binary_sensor": {
-        "title": "Baumansicht: Binary Sensoren hinzufügen",
-        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "title": "Browse: binary sensor hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Zu importierende Variablen",
           "open_branch": "Unterzweig öffnen",
@@ -271,8 +271,8 @@
         }
       },
       "browse_add_switch": {
-        "title": "Baumansicht: Switches hinzufügen",
-        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "title": "Browse: switch hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Zu importierende Variablen",
           "open_branch": "Unterzweig öffnen",
@@ -280,8 +280,8 @@
         }
       },
       "browse_add_light": {
-        "title": "Baumansicht: Lights hinzufügen",
-        "description": "Aktueller Zweig: {current}. Importierbare Variablen hier: {count}",
+        "title": "Browse: light hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Zu importierende Variablen",
           "open_branch": "Unterzweig öffnen",
@@ -295,7 +295,7 @@
         }
       },
       "add_button": {
-        "title": "Button-Node hinzufügen",
+        "title": "Button hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -304,7 +304,7 @@
         }
       },
       "add_climate": {
-        "title": "Klima-Node hinzufügen",
+        "title": "Klima hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -317,7 +317,7 @@
         }
       },
       "add_cover": {
-        "title": "Cover-Node hinzufügen",
+        "title": "Cover hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -331,7 +331,7 @@
         }
       },
       "add_date": {
-        "title": "Datum-Node hinzufügen",
+        "title": "Datum hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -339,7 +339,7 @@
         }
       },
       "add_datetime": {
-        "title": "Datum/Uhrzeit-Node hinzufügen",
+        "title": "Datum und Uhrzeit hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -347,7 +347,7 @@
         }
       },
       "add_fan": {
-        "title": "Lüfter-Node hinzufügen",
+        "title": "Lüfter hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -357,7 +357,7 @@
         }
       },
       "add_notify": {
-        "title": "Notify-Node hinzufügen",
+        "title": "Benachrichtigungsentität hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -367,7 +367,7 @@
         }
       },
       "add_number": {
-        "title": "Zahlen-Node hinzufügen",
+        "title": "Zahl hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -379,7 +379,7 @@
         }
       },
       "add_scene": {
-        "title": "Szenen-Node hinzufügen",
+        "title": "Szene hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -388,7 +388,7 @@
         }
       },
       "add_select": {
-        "title": "Auswahl-Node hinzufügen",
+        "title": "Auswahl hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -397,7 +397,7 @@
         }
       },
       "add_text": {
-        "title": "Text-Node hinzufügen",
+        "title": "Text hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -406,7 +406,7 @@
         }
       },
       "add_time": {
-        "title": "Uhrzeit-Node hinzufügen",
+        "title": "Uhrzeit hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -414,7 +414,7 @@
         }
       },
       "add_weather": {
-        "title": "Wetter-Node hinzufügen",
+        "title": "Wetter hinzufügen",
         "data": {
           "name": "Entitätsname",
           "node_id": "Node ID",
@@ -426,8 +426,8 @@
         }
       },
       "browse_add_button": {
-        "title": "Baum: Buttons importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: button hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -435,8 +435,8 @@
         }
       },
       "browse_add_climate": {
-        "title": "Baum: Klima importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: climate hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -444,8 +444,8 @@
         }
       },
       "browse_add_cover": {
-        "title": "Baum: Cover importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: cover hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -453,8 +453,8 @@
         }
       },
       "browse_add_date": {
-        "title": "Baum: Datum importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: date hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -462,8 +462,8 @@
         }
       },
       "browse_add_datetime": {
-        "title": "Baum: Datum/Uhrzeit importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: datetime hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -471,8 +471,8 @@
         }
       },
       "browse_add_fan": {
-        "title": "Baum: Lüfter importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: fan hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -480,8 +480,8 @@
         }
       },
       "browse_add_notify": {
-        "title": "Baum: Notify importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: notify hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -489,8 +489,8 @@
         }
       },
       "browse_add_number": {
-        "title": "Baum: Zahlen importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: number hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -498,8 +498,8 @@
         }
       },
       "browse_add_scene": {
-        "title": "Baum: Szenen importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: scene hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -507,8 +507,8 @@
         }
       },
       "browse_add_select": {
-        "title": "Baum: Auswahl importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: select hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -516,8 +516,8 @@
         }
       },
       "browse_add_text": {
-        "title": "Baum: Texte importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: text hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -525,8 +525,8 @@
         }
       },
       "browse_add_time": {
-        "title": "Baum: Uhrzeiten importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: time hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -534,8 +534,8 @@
         }
       },
       "browse_add_weather": {
-        "title": "Baum: Wetter importieren",
-        "description": "Aktueller Zweig: {current}. Importkandidaten hier: {count}",
+        "title": "Browse: weather hinzufügen",
+        "description": "Aktueller Zweig: {current}. Verfügbare Variablen: {count}",
         "data": {
           "node_ids": "Variablen zum Import",
           "open_branch": "Unterzweig öffnen",
@@ -543,7 +543,7 @@
         }
       },
       "menu_add_entities": {
-        "title": "Add entities (basic)",
+        "title": "Entitäten hinzufügen",
         "menu_options": {
           "add_sensor": "Add sensor",
           "add_binary_sensor": "Add binary sensor",
@@ -558,7 +558,7 @@
         }
       },
       "menu_add_entities_advanced": {
-        "title": "Add entities (advanced)",
+        "title": "Weitere Entitäten hinzufügen",
         "menu_options": {
           "add_climate": "Add climate",
           "add_cover": "Add cover",
@@ -574,7 +574,7 @@
         }
       },
       "menu_discovery_tools": {
-        "title": "Discovery & browse",
+        "title": "Entdecken und browsen",
         "menu_options": {
           "auto_discovery": "Auto discovery (native + companion)",
           "browse_nodes": "Browse OPC UA nodes",
@@ -582,14 +582,14 @@
         }
       },
       "menu_settings": {
-        "title": "Manage existing setup",
+        "title": "Nodes verwalten",
         "menu_options": {
           "remove_node": "Nodes entfernen",
           "init": "← Back to main menu"
         }
       },
       "browse_pick_kind_basic": {
-        "title": "Import browsed nodes (basic)",
+        "title": "Als Basis-Entitäten importieren",
         "menu_options": {
           "browse_add_sensor": "Add as sensors",
           "browse_add_binary_sensor": "Add as binary sensors",
@@ -604,7 +604,7 @@
         }
       },
       "browse_pick_kind_advanced": {
-        "title": "Import browsed nodes (advanced)",
+        "title": "Als erweiterte Entitäten importieren",
         "menu_options": {
           "browse_add_climate": "Add as climates",
           "browse_add_cover": "Add as covers",

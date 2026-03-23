@@ -89,7 +89,7 @@
     },
     "step": {
       "init": {
-        "title": "OPC UA node setup",
+        "title": "Set up OPC UA nodes",
         "menu_options": {
           "menu_add_entities": "Add entities",
           "menu_discovery_tools": "Discovery & browse",
@@ -97,7 +97,7 @@
         }
       },
       "menu_add_entities": {
-        "title": "Add entities (basic)",
+        "title": "Add entities",
         "menu_options": {
           "add_sensor": "Add sensor",
           "add_binary_sensor": "Add binary sensor",
@@ -112,7 +112,7 @@
         }
       },
       "menu_add_entities_advanced": {
-        "title": "Add entities (advanced)",
+        "title": "Add more entities",
         "menu_options": {
           "add_climate": "Add climate",
           "add_cover": "Add cover",
@@ -128,7 +128,7 @@
         }
       },
       "menu_discovery_tools": {
-        "title": "Discovery & browse",
+        "title": "Discover and browse",
         "menu_options": {
           "auto_discovery": "Auto discovery",
           "browse_nodes": "Browse OPC UA nodes",
@@ -136,14 +136,14 @@
         }
       },
       "menu_settings": {
-        "title": "Manage existing setup",
+        "title": "Manage nodes",
         "menu_options": {
           "remove_node": "Remove nodes",
           "init": "← Back to main menu"
         }
       },
       "add_sensor": {
-        "title": "Add sensor node",
+        "title": "Add sensor",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -154,7 +154,7 @@
         }
       },
       "add_binary_sensor": {
-        "title": "Add binary sensor node",
+        "title": "Add binary sensor",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -164,7 +164,7 @@
         }
       },
       "add_switch": {
-        "title": "Add switch node",
+        "title": "Add switch",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -173,8 +173,8 @@
         }
       },
       "add_light": {
-        "title": "Add light node",
-        "description": "Only configure fields you actually need. Every advanced light feature is optional.",
+        "title": "Add light",
+        "description": "Configure only the fields you need. All advanced light features are optional.",
         "data": {
           "name": "Entity name",
           "node_id": "On/Off node ID",
@@ -214,7 +214,7 @@
         }
       },
       "discover_servers": {
-        "title": "Discover OPC UA servers",
+        "title": "Discover servers",
         "description": "Query a discovery endpoint and list available server endpoints.",
         "data": {
           "discovery_url": "Discovery URL",
@@ -222,14 +222,14 @@
         }
       },
       "discover_servers_select": {
-        "title": "Select discovered endpoint",
+        "title": "Select endpoint",
         "data": {
           "selected": "Discovered endpoints"
         }
       },
       "auto_discovery": {
-        "title": "Auto discovery",
-        "description": "Scan from a root node and auto-map variables to entities. Discovery runs without depth/max/import limits (full subtree scan from the selected root).",
+        "title": "Auto-discovery",
+        "description": "Scan a root node and map supported variables to entities.",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)",
           "include_readonly": "Include read-only variables",
@@ -237,15 +237,15 @@
         }
       },
       "auto_discovery_review": {
-        "title": "Discovery result",
-        "description": "Found {total} candidates (sensor {sensors}, binary {binary}, switch {switches}, light {lights}). Sample: {sample}",
+        "title": "Review discovered entities",
+        "description": "Found {total} candidates. Sensors: {sensors}, binary sensors: {binary}, switches: {switches}, lights: {lights}. Sample: {sample}",
         "data": {
           "apply": "Import discovered entities now"
         }
       },
       "browse_nodes": {
-        "title": "Browse OPC UA nodes",
-        "description": "Browse a subtree and then choose how to import nodes. Browse runs without depth/max limits (full subtree scan from the selected root).",
+        "title": "Browse nodes",
+        "description": "Browse a subtree and choose how to import nodes.",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)"
         }
@@ -261,7 +261,7 @@
         }
       },
       "browse_pick_kind_basic": {
-        "title": "Import browsed nodes (basic)",
+        "title": "Import as basic entities",
         "menu_options": {
           "browse_add_sensor": "Add as sensors",
           "browse_add_binary_sensor": "Add as binary sensors",
@@ -276,7 +276,7 @@
         }
       },
       "browse_pick_kind_advanced": {
-        "title": "Import browsed nodes (advanced)",
+        "title": "Import as advanced entities",
         "menu_options": {
           "browse_add_climate": "Add as climates",
           "browse_add_cover": "Add as covers",
@@ -292,8 +292,8 @@
         }
       },
       "browse_add_sensor": {
-        "title": "Browse tree: add sensors",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add sensor",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -301,8 +301,8 @@
         }
       },
       "browse_add_binary_sensor": {
-        "title": "Browse tree: add binary sensors",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add binary sensor",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -310,8 +310,8 @@
         }
       },
       "browse_add_switch": {
-        "title": "Browse tree: add switches",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add switch",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -319,8 +319,8 @@
         }
       },
       "browse_add_light": {
-        "title": "Browse tree: add lights",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add light",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -334,7 +334,7 @@
         }
       },
       "add_button": {
-        "title": "Add button node",
+        "title": "Add button",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -343,7 +343,7 @@
         }
       },
       "add_climate": {
-        "title": "Add climate node",
+        "title": "Add climate",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -356,7 +356,7 @@
         }
       },
       "add_cover": {
-        "title": "Add cover node",
+        "title": "Add cover",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -370,7 +370,7 @@
         }
       },
       "add_date": {
-        "title": "Add date node",
+        "title": "Add date",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -378,7 +378,7 @@
         }
       },
       "add_datetime": {
-        "title": "Add datetime node",
+        "title": "Add date and time",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -386,7 +386,7 @@
         }
       },
       "add_fan": {
-        "title": "Add fan node",
+        "title": "Add fan",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -396,7 +396,7 @@
         }
       },
       "add_notify": {
-        "title": "Add notify node",
+        "title": "Add notification entity",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -406,7 +406,7 @@
         }
       },
       "add_number": {
-        "title": "Add number node",
+        "title": "Add number",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -418,7 +418,7 @@
         }
       },
       "add_scene": {
-        "title": "Add scene node",
+        "title": "Add scene",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -427,7 +427,7 @@
         }
       },
       "add_select": {
-        "title": "Add select node",
+        "title": "Add select",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -436,7 +436,7 @@
         }
       },
       "add_text": {
-        "title": "Add text node",
+        "title": "Add text",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -445,7 +445,7 @@
         }
       },
       "add_time": {
-        "title": "Add time node",
+        "title": "Add time",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -453,7 +453,7 @@
         }
       },
       "add_weather": {
-        "title": "Add weather node",
+        "title": "Add weather",
         "data": {
           "name": "Entity name",
           "node_id": "Node ID",
@@ -465,8 +465,8 @@
         }
       },
       "browse_add_button": {
-        "title": "Browse tree: add buttons",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add button",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -474,8 +474,8 @@
         }
       },
       "browse_add_climate": {
-        "title": "Browse tree: add climates",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add climate",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -483,8 +483,8 @@
         }
       },
       "browse_add_cover": {
-        "title": "Browse tree: add covers",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add cover",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -492,8 +492,8 @@
         }
       },
       "browse_add_date": {
-        "title": "Browse tree: add dates",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add date",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -501,8 +501,8 @@
         }
       },
       "browse_add_datetime": {
-        "title": "Browse tree: add datetimes",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add datetime",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -510,8 +510,8 @@
         }
       },
       "browse_add_fan": {
-        "title": "Browse tree: add fans",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add fan",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -519,8 +519,8 @@
         }
       },
       "browse_add_notify": {
-        "title": "Browse tree: add notify entities",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add notify",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -528,8 +528,8 @@
         }
       },
       "browse_add_number": {
-        "title": "Browse tree: add numbers",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add number",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -537,8 +537,8 @@
         }
       },
       "browse_add_scene": {
-        "title": "Browse tree: add scenes",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add scene",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -546,8 +546,8 @@
         }
       },
       "browse_add_select": {
-        "title": "Browse tree: add selects",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add select",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -555,8 +555,8 @@
         }
       },
       "browse_add_text": {
-        "title": "Browse tree: add texts",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add text",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -564,8 +564,8 @@
         }
       },
       "browse_add_time": {
-        "title": "Browse tree: add times",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add time",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
@@ -573,8 +573,8 @@
         }
       },
       "browse_add_weather": {
-        "title": "Browse tree: add weather entities",
-        "description": "Current branch: {current}. Import candidates here: {count}",
+        "title": "Browse: add weather",
+        "description": "Current branch: {current}. Available variables: {count}",
         "data": {
           "node_ids": "Variables to import",
           "open_branch": "Open sub-branch",
