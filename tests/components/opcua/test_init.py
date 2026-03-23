@@ -16,7 +16,6 @@ from custom_components.opcua.const import (
     CONF_ENDPOINT,
     CONF_NODES,
     CONF_NOTIFY_KEYWORDS,
-    CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
     DEFAULT_NOTIFY_KEYWORDS,
 )
@@ -29,7 +28,6 @@ class _FakeEntry:
         self.data = {
             CONF_ENDPOINT: "opc.tcp://127.0.0.1:4846",
             CONF_SECURITY_POLICY: "None",
-            CONF_SCAN_INTERVAL: 2,
             CONF_NODES: [],
         }
         self.options = {}

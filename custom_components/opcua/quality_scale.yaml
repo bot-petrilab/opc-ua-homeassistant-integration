@@ -14,7 +14,7 @@ rules:
   docs_removal_instructions: done
   entity_event_setup:
     status: exempt
-    comment: Runtime model is coordinator polling; no explicit event subscription lifecycle is used.
+    comment: Runtime model is coordinator-level OPC-UA subscriptions; entities consume coordinator state and do not directly manage event subscriptions.
   entity_unique_id: done
   has_entity_name: done
   runtime_data: done

@@ -69,7 +69,6 @@ Setup flow fields:
 
 Options flow includes:
 
-- polling profile/group intervals
 - node/entity management
 - browse and auto-discovery tools
 - notification settings

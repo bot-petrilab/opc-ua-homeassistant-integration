@@ -114,8 +114,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         hass=hass,
         manager=manager,
         nodes=nodes,
-        scan_interval_seconds=None,
-        poll_intervals=None,
         entry_id=entry.entry_id,
         endpoint=endpoint,
         notify_enabled=notify_enabled,

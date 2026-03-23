@@ -13,11 +13,9 @@
     "notify_service": "persistent_notification.create",
     "notify_title_prefix": "OPC-UA",
     "notify_keywords": ["alarm", "warning", "fault", "error", "smoke", "water"],
-    "scan_interval": 2,
     "nodes": []
   },
   "options": {
-    "scan_interval": 2,
     "nodes": [
       {
         "kind": "sensor",

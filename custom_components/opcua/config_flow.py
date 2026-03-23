@@ -91,11 +91,6 @@ from .const import (
     CONF_NUMBER_MAX,
     CONF_NUMBER_MIN,
     CONF_NUMBER_STEP,
-    CONF_POLL_FAST_INTERVAL,
-    CONF_POLL_NORMAL_INTERVAL,
-    CONF_POLL_PROFILE,
-    CONF_POLL_SLOW_INTERVAL,
-    CONF_SCAN_INTERVAL,
     CONF_SCENE_ACTIVATE_VALUE,
     CONF_SECURITY_POLICY,
     CONF_SELECT_OPTIONS,
@@ -121,12 +116,7 @@ from .const import (
     DEFAULT_NUMBER_MAX,
     DEFAULT_NUMBER_MIN,
     DEFAULT_NUMBER_STEP,
-    DEFAULT_POLL_FAST_INTERVAL_SECONDS,
-    DEFAULT_POLL_NORMAL_INTERVAL_SECONDS,
-    DEFAULT_POLL_PROFILE,
-    DEFAULT_POLL_SLOW_INTERVAL_SECONDS,
     DEFAULT_RGB_SCALE,
-    DEFAULT_SCAN_INTERVAL_SECONDS,
     DEFAULT_SECURITY_POLICY,
     DEFAULT_TITLE,
     DEFAULT_VALIDATE_ON_SAVE,
@@ -747,21 +737,6 @@ class OpcUaOptionsFlow(OptionsFlow):
         self._entry = config_entry
         self._options: dict[str, Any] = dict(config_entry.options)
         self._options.setdefault(
-            CONF_SCAN_INTERVAL,
-            float(
-                config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS)
-            ),
-        )
-        self._options.setdefault(
-            CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS
-        )
-        self._options.setdefault(
-            CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS
-        )
-        self._options.setdefault(
-            CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS
-        )
-        self._options.setdefault(
             CONF_NODES, list(config_entry.data.get(CONF_NODES, []))
         )
         self._browse_cache: list[dict[str, Any]] = []
@@ -770,14 +745,8 @@ class OpcUaOptionsFlow(OptionsFlow):
         self._discovery_cache: list[dict[str, Any]] = []
         self._server_discovery_cache: list[dict[str, Any]] = []
 
-        for node in self._options.get(CONF_NODES, []):
-            node.setdefault(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)
-
     async def _persist_options(self) -> None:
         """Persist options immediately and reload entry so entities appear at once."""
-        for node in self._options.get(CONF_NODES, []):
-            node.setdefault(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)
-
         self.hass.config_entries.async_update_entry(self._entry, options=self._options)
         await self._cleanup_orphan_entity_registry_entries()
         await self.hass.config_entries.async_reload(self._entry.entry_id)
@@ -2159,7 +2128,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             node_id = str(node.get(CONF_NODE_ID, ""))
             if not node_id or node_id in existing_ids:
                 continue
-            node.setdefault(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)
             self._options[CONF_NODES].append(node)
             existing_ids.add(node_id)
             added += 1

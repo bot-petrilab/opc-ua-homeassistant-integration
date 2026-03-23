@@ -84,7 +84,6 @@ async def main() -> None:
                 "title": "OPC-UA Notify Test",
                 "endpoint": ENDPOINT,
                 "security_policy": "None",
-                "scan_interval": 1,
                 "validate_on_save": False,
                 "notify_enabled": True,
                 "notify_service": "persistent_notification.create",

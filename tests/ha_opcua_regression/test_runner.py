@@ -297,7 +297,6 @@ async def run() -> dict:
             "title": "OPC UA Regression",
             "endpoint": OPC_ENDPOINT,
             "security_policy": "None",
-            "scan_interval": 2,
             "validate_on_save": False,
             "notify_enabled": True,
             "notify_service": "persistent_notification.create",
@@ -375,9 +374,6 @@ async def run() -> dict:
         )
 
         manual_test_node_id = await find_manual_test_node_id()
-        stacklight_base_path = None
-        if manual_test_node_id and ".ManualTest" in manual_test_node_id:
-            stacklight_base_path = manual_test_node_id.split(".ManualTest", 1)[0]
         add_check("manual_test_node_detected", True, str(manual_test_node_id))
 
         # 6) add one dedicated light on available manual-test node (if present)
@@ -494,105 +490,6 @@ async def run() -> dict:
             True,
             "stack light profile no longer part of options flow",
         )
-
-        # 10) polling groups and per-node profile assignment
-        opt_pg = await start_options_flow(entry_id)
-        fid_pg = opt_pg["flow_id"]
-        await opt_step(fid_pg, {"next_step_id": "menu_settings"})
-        await opt_step(fid_pg, {"next_step_id": "set_poll_groups"})
-        pg_done = await opt_step(
-            fid_pg,
-            {
-                "poll_fast_interval": 2,
-                "poll_normal_interval": 7,
-                "poll_slow_interval": 25,
-            },
-        )
-        add_check(
-            "set_poll_groups_apply",
-            pg_done.get("step_id") == "menu_settings",
-            f"step={pg_done.get('step_id')}",
-        )
-
-        opt_np = await start_options_flow(entry_id)
-        fid_np = opt_np["flow_id"]
-        await opt_step(fid_np, {"next_step_id": "menu_settings"})
-        np_form = await opt_step(fid_np, {"next_step_id": "set_node_poll_profile"})
-
-        selected_node_value = None
-        try:
-            node_field = schema_field(np_form, "node_index")
-            node_options = (
-                ((node_field or {}).get("selector") or {}).get("select") or {}
-            ).get("options") or []
-            if node_options and isinstance(node_options[0], dict):
-                selected_node_value = node_options[0].get("value")
-        except Exception:
-            selected_node_value = None
-
-        if selected_node_value is not None:
-            np_done = await opt_step(
-                fid_np, {"node_index": selected_node_value, "poll_profile": "slow"}
-            )
-            add_check(
-                "set_node_poll_profile_apply",
-                np_done.get("step_id") == "menu_settings",
-                f"step={np_done.get('step_id')}",
-            )
-        else:
-            add_check(
-                "set_node_poll_profile_apply_optional",
-                True,
-                "no node options available",
-            )
-
-        # verify persisted poll-group values by reopening the step and checking defaults
-        opt_pg_verify = await start_options_flow(entry_id)
-        fid_pg_verify = opt_pg_verify["flow_id"]
-        await opt_step(fid_pg_verify, {"next_step_id": "menu_settings"})
-        pg_verify = await opt_step(fid_pg_verify, {"next_step_id": "set_poll_groups"})
-
-        def schema_default(step_obj: dict, field_name: str):
-            fld = schema_field(step_obj, field_name)
-            return None if not fld else fld.get("default")
-
-        pf = schema_default(pg_verify, "poll_fast_interval")
-        pn = schema_default(pg_verify, "poll_normal_interval")
-        ps = schema_default(pg_verify, "poll_slow_interval")
-        add_check(
-            "poll_group_values_persisted",
-            pf == 2 and pn == 7 and ps == 25,
-            f"fast={pf} normal={pn} slow={ps}",
-        )
-
-        # verify per-node profile assignment by checking selector labels include the chosen profile
-        opt_np_verify = await start_options_flow(entry_id)
-        fid_np_verify = opt_np_verify["flow_id"]
-        await opt_step(fid_np_verify, {"next_step_id": "menu_settings"})
-        np_verify = await opt_step(
-            fid_np_verify, {"next_step_id": "set_node_poll_profile"}
-        )
-        node_field_verify = schema_field(np_verify, "node_index")
-        node_options_verify = (
-            ((node_field_verify or {}).get("selector") or {}).get("select") or {}
-        ).get("options") or []
-        if node_options_verify:
-            has_profile = any(
-                "(slow |" in str((opt or {}).get("label", ""))
-                for opt in node_options_verify
-                if isinstance(opt, dict)
-            )
-            add_check(
-                "node_poll_profile_present",
-                has_profile,
-                f"options={len(node_options_verify)}",
-            )
-        else:
-            add_check(
-                "node_poll_profile_present_optional",
-                True,
-                "no node options available for this endpoint",
-            )
 
         # 11) entity verification
         states = await call_api("GET", "states")

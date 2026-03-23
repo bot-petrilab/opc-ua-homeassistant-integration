@@ -87,7 +87,6 @@ async def main() -> None:
                 "title": "OPC UA Platform Matrix",
                 "endpoint": OPC_ENDPOINT,
                 "security_policy": "None",
-                "scan_interval": 2,
                 "validate_on_save": False,
                 "notify_enabled": True,
                 "notify_service": "persistent_notification.create",

@@ -25,8 +25,6 @@ class OpcUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         hass: HomeAssistant,
         manager: OpcUaClientManager,
         nodes: list[dict[str, Any]],
-        scan_interval_seconds: float | None,
-        poll_intervals: dict[str, float] | None,
         entry_id: str,
         endpoint: str,
         notify_enabled: bool,

@@ -74,7 +74,6 @@
 - If no explicit device mapping is present, entity is created without a device (standalone entity in HA).
 
 ## 1.0.39
-- Polling intervals now support decimal seconds (0.1s granularity) across setup and options flows.
 - You can now configure values like `0.5` seconds (500 ms) for base interval and poll groups.
 - Coordinator timing now uses float intervals and allows sub-second scheduling (minimum `0.1s`).
 

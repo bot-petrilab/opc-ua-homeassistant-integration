@@ -9,7 +9,7 @@ This matrix tracks implementation state in this repository.
 
 ## Bronze
 - [x] action-setup *(N/A: no custom domain service actions; uses entity platform services)*
-- [x] appropriate-polling
+- [x] appropriate-polling *(N/A: runtime is subscription-driven rather than polling-based)*
 - [x] brands
 - [x] common-modules
 - [x] config-flow-test-coverage
@@ -61,7 +61,7 @@ This matrix tracks implementation state in this repository.
 - [x] exception-translations
 - [x] icon-translations
 - [x] reconfiguration-flow
-- [x] repair-issues *(auth/security failures mapped to reauth path + config flow guidance)*
+- [x] repair-issues *(actionable Home Assistant repair issue for missing secure certificate files + auth/security handling paths)*
 - [x] stale-devices *(device mapping by explicit config context; stale cleanup via config entry lifecycle)*
 
 ## Platinum

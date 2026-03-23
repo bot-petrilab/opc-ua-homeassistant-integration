@@ -51,7 +51,6 @@ async def main():
                 "title": "SEC CFG TEST",
                 "endpoint": "opc.tcp://127.0.0.1:4840",
                 "security_policy": "Basic256Sha256_Sign",
-                "scan_interval": 2,
                 "validate_on_save": False,
             },
         )
@@ -73,7 +72,6 @@ async def main():
                 "security_policy": "Basic256Sha256_Sign",
                 "client_cert_path": "/tmp/fake-client.crt",
                 "client_key_path": "/tmp/fake-client.key",
-                "scan_interval": 2,
                 "validate_on_save": False,
             },
         )
