@@ -42,7 +42,6 @@ from custom_components.opcua.const import (
     CONF_NUMBER_MIN,
     CONF_NUMBER_STEP,
     CONF_PASSWORD,
-    CONF_SCAN_INTERVAL,
     CONF_SCENE_ACTIVATE_VALUE,
     CONF_SECURITY_POLICY,
     CONF_SELECT_OPTIONS,
@@ -114,7 +113,6 @@ async def test_user_step_rejects_invalid_endpoint() -> None:
         {
             CONF_ENDPOINT: "http://example.com",
             CONF_SECURITY_POLICY: "None",
-            CONF_SCAN_INTERVAL: 2,
             CONF_VALIDATE_ON_SAVE: False,
         }
     )
@@ -135,7 +133,6 @@ async def test_user_step_creates_entry_and_normalizes_keywords() -> None:
             CONF_SECURITY_POLICY: "None",
             CONF_NOTIFY_ENABLED: True,
             CONF_NOTIFY_KEYWORDS: " Alarm, WARN ,  , Fault ",
-            CONF_SCAN_INTERVAL: 1.5,
             CONF_VALIDATE_ON_SAVE: False,
         }
     )
@@ -158,7 +155,6 @@ async def test_user_step_aborts_when_endpoint_already_configured() -> None:
         {
             CONF_ENDPOINT: "opc.tcp://plc-a:4840",
             CONF_SECURITY_POLICY: "None",
-            CONF_SCAN_INTERVAL: 2,
             CONF_VALIDATE_ON_SAVE: False,
         }
     )
@@ -177,7 +173,6 @@ async def test_zeroconf_setup_uses_default_keywords_when_blank() -> None:
             CONF_SECURITY_POLICY: "None",
             CONF_NOTIFY_ENABLED: True,
             CONF_NOTIFY_KEYWORDS: "   ",
-            CONF_SCAN_INTERVAL: 2,
             CONF_VALIDATE_ON_SAVE: False,
         }
     )
@@ -531,38 +526,6 @@ async def test_discover_servers_flow_updates_entry_and_handles_errors(monkeypatc
     )
     assert result["type"] == "form"
     assert result["errors"]["base"] == "cannot_connect"
-
-
-@pytest.mark.asyncio
-async def test_remove_and_poll_setting_steps_persist_changes(mock_hass, mock_config_entry) -> None:
-    flow = OpcUaOptionsFlow(mock_config_entry)
-    flow.hass = mock_hass
-    flow._options[CONF_NODES] = [
-        {CONF_NODE_KIND: NODE_KIND_SENSOR, CONF_NODE_NAME: "Temp", CONF_NODE_ID: "ns=2;s=Temp"},
-        {CONF_NODE_KIND: NODE_KIND_SWITCH, CONF_NODE_NAME: "Pump", CONF_NODE_ID: "ns=2;s=Pump"},
-    ]
-
-    form = await flow.async_step_remove_node()
-    assert form["type"] == "form"
-    result = await flow.async_step_remove_node({"remove": ["0"]})
-    assert result["type"] == "menu"
-    assert len(flow._options[CONF_NODES]) == 1
-
-    form = await flow.async_step_set_node_poll_profile()
-    assert form["type"] == "form"
-    result = await flow.async_step_set_node_poll_profile({"node_index": "0", "poll_profile": "fast"})
-    assert result["type"] == "menu"
-    assert flow._options[CONF_NODES][0]["poll_profile"] == "fast"
-
-    result = await flow.async_step_set_poll_groups(
-        {"poll_fast_interval": 0.5, "poll_normal_interval": 2.0, "poll_slow_interval": 10.0}
-    )
-    assert result["type"] == "menu"
-    assert flow._options["poll_fast_interval"] == 0.5
-
-    result = await flow.async_step_set_poll_interval({CONF_SCAN_INTERVAL: 3.5})
-    assert result["type"] == "menu"
-    assert flow._options[CONF_SCAN_INTERVAL] == 3.5
 
 
 @pytest.mark.asyncio

@@ -150,7 +150,6 @@ from .const import (
     NODE_KIND_TEXT,
     NODE_KIND_TIME,
     NODE_KIND_WEATHER,
-    POLL_PROFILES,
     SECURITY_POLICIES,
     SECURITY_POLICY_BASIC256SHA256_SIGN,
     SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
@@ -271,7 +270,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             validate_on_save = bool(
                 user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE)
             )
-            scan_interval = float(user_input[CONF_SCAN_INTERVAL])
 
             if not errors and validate_on_save:
                 try:
@@ -312,7 +310,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_NOTIFY_SERVICE: notify_service,
                         CONF_NOTIFY_TITLE_PREFIX: notify_title_prefix,
                         CONF_NOTIFY_KEYWORDS: notify_keywords,
-                        CONF_SCAN_INTERVAL: scan_interval,
                         CONF_NODES: [],
                     },
                 )
@@ -360,11 +357,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_NOTIFY_KEYWORDS,
                     default=",".join(DEFAULT_NOTIFY_KEYWORDS),
                 ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Required(
-                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS
-                ): NumberSelector(
-                    NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
-                ),
                 vol.Required(
                     CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE
                 ): BooleanSelector(),
@@ -425,7 +417,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             validate_on_save = bool(
                 user_input.get(CONF_VALIDATE_ON_SAVE, DEFAULT_VALIDATE_ON_SAVE)
             )
-            scan_interval = float(user_input[CONF_SCAN_INTERVAL])
 
             if not endpoint:
                 errors[CONF_ENDPOINT] = "required"
@@ -478,7 +469,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_NOTIFY_SERVICE: notify_service,
                         CONF_NOTIFY_TITLE_PREFIX: notify_title_prefix,
                         CONF_NOTIFY_KEYWORDS: notify_keywords,
-                        CONF_SCAN_INTERVAL: scan_interval,
                         CONF_NODES: [],
                     },
                 )
@@ -530,11 +520,6 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_NOTIFY_KEYWORDS,
                     default=",".join(DEFAULT_NOTIFY_KEYWORDS),
                 ): TextSelector(TextSelectorConfig(type="text", autocomplete="off")),
-                vol.Required(
-                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL_SECONDS
-                ): NumberSelector(
-                    NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
-                ),
                 vol.Required(
                     CONF_VALIDATE_ON_SAVE, default=DEFAULT_VALIDATE_ON_SAVE
                 ): BooleanSelector(),
@@ -890,9 +875,6 @@ class OpcUaOptionsFlow(OptionsFlow):
             step_id="menu_settings",
             menu_options=[
                 "remove_node",
-                "set_node_poll_profile",
-                "set_poll_groups",
-                "set_poll_interval",
                 "init",
             ],
         )
@@ -2763,130 +2745,3 @@ class OpcUaOptionsFlow(OptionsFlow):
         )
         return self.async_show_form(step_id="remove_node", data_schema=schema)
 
-    async def async_step_set_node_poll_profile(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        nodes = self._options.get(CONF_NODES, [])
-        if not nodes:
-            return await self.async_step_menu_settings()
-
-        options = []
-        for idx, node in enumerate(nodes):
-            node_id = str(node.get(CONF_NODE_ID, ""))
-            node_name = str(node.get(CONF_NODE_NAME, node_id))
-            current = str(node.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE))
-            options.append(
-                {
-                    "value": str(idx),
-                    "label": f"{node_name} ({current} | {node_id})"[:220],
-                }
-            )
-
-        if user_input is not None:
-            idx = int(str(user_input.get("node_index", "0")))
-            profile = str(
-                user_input.get(CONF_POLL_PROFILE, DEFAULT_POLL_PROFILE)
-            ).lower()
-            if 0 <= idx < len(nodes):
-                nodes[idx][CONF_POLL_PROFILE] = profile
-                await self._persist_options()
-            return await self.async_step_menu_settings()
-
-        schema = vol.Schema(
-            {
-                vol.Required("node_index"): SelectSelector(
-                    SelectSelectorConfig(
-                        options=options,
-                        multiple=False,
-                        mode=SelectSelectorMode.DROPDOWN,
-                    )
-                ),
-                vol.Required(
-                    CONF_POLL_PROFILE, default=DEFAULT_POLL_PROFILE
-                ): SelectSelector(
-                    SelectSelectorConfig(
-                        options=list(POLL_PROFILES),
-                        multiple=False,
-                        mode=SelectSelectorMode.DROPDOWN,
-                    )
-                ),
-            }
-        )
-        return self.async_show_form(step_id="set_node_poll_profile", data_schema=schema)
-
-    async def async_step_set_poll_groups(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        if user_input is not None:
-            self._options[CONF_POLL_FAST_INTERVAL] = float(
-                user_input[CONF_POLL_FAST_INTERVAL]
-            )
-            self._options[CONF_POLL_NORMAL_INTERVAL] = float(
-                user_input[CONF_POLL_NORMAL_INTERVAL]
-            )
-            self._options[CONF_POLL_SLOW_INTERVAL] = float(
-                user_input[CONF_POLL_SLOW_INTERVAL]
-            )
-            await self._persist_options()
-            return await self.async_step_menu_settings()
-
-        schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_POLL_FAST_INTERVAL,
-                    default=float(
-                        self._options.get(
-                            CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS
-                        )
-                    ),
-                ): NumberSelector(
-                    NumberSelectorConfig(min=0.1, max=120, step=0.1, mode="box")
-                ),
-                vol.Required(
-                    CONF_POLL_NORMAL_INTERVAL,
-                    default=float(
-                        self._options.get(
-                            CONF_POLL_NORMAL_INTERVAL,
-                            DEFAULT_POLL_NORMAL_INTERVAL_SECONDS,
-                        )
-                    ),
-                ): NumberSelector(
-                    NumberSelectorConfig(min=0.1, max=300, step=0.1, mode="box")
-                ),
-                vol.Required(
-                    CONF_POLL_SLOW_INTERVAL,
-                    default=float(
-                        self._options.get(
-                            CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS
-                        )
-                    ),
-                ): NumberSelector(
-                    NumberSelectorConfig(min=0.1, max=1200, step=0.1, mode="box")
-                ),
-            }
-        )
-        return self.async_show_form(step_id="set_poll_groups", data_schema=schema)
-
-    async def async_step_set_poll_interval(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        if user_input is not None:
-            self._options[CONF_SCAN_INTERVAL] = float(user_input[CONF_SCAN_INTERVAL])
-            await self._persist_options()
-            return await self.async_step_menu_settings()
-
-        schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_SCAN_INTERVAL,
-                    default=float(
-                        self._options.get(
-                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS
-                        )
-                    ),
-                ): NumberSelector(
-                    NumberSelectorConfig(min=0.1, max=60, step=0.1, mode="box")
-                )
-            }
-        )
-        return self.async_show_form(step_id="set_poll_interval", data_schema=schema)

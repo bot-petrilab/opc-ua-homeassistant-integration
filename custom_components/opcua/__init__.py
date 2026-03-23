@@ -18,20 +18,12 @@ from .const import (
     CONF_NOTIFY_KEYWORDS,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TITLE_PREFIX,
-    CONF_POLL_FAST_INTERVAL,
-    CONF_POLL_NORMAL_INTERVAL,
-    CONF_POLL_SLOW_INTERVAL,
-    CONF_SCAN_INTERVAL,
     CONF_SECURITY_POLICY,
     CONF_SERVER_CERT_PATH,
     DEFAULT_NOTIFY_ENABLED,
     DEFAULT_NOTIFY_KEYWORDS,
     DEFAULT_NOTIFY_SERVICE,
     DEFAULT_NOTIFY_TITLE_PREFIX,
-    DEFAULT_POLL_FAST_INTERVAL_SECONDS,
-    DEFAULT_POLL_NORMAL_INTERVAL_SECONDS,
-    DEFAULT_POLL_SLOW_INTERVAL_SECONDS,
-    DEFAULT_SCAN_INTERVAL_SECONDS,
     PLATFORMS,
 )
 from .coordinator import OpcUaCoordinator
@@ -79,31 +71,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
     server_cert_path: str | None = entry.data.get(CONF_SERVER_CERT_PATH)
     client_key_password: str | None = entry.data.get(CONF_CLIENT_KEY_PASSWORD)
 
-    scan_interval: float = float(
-        entry.options.get(
-            CONF_SCAN_INTERVAL,
-            entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS),
-        )
-    )
     nodes: list[dict] = entry.options.get(CONF_NODES, entry.data.get(CONF_NODES, []))
 
-    poll_intervals = {
-        "fast": float(
-            entry.options.get(
-                CONF_POLL_FAST_INTERVAL, DEFAULT_POLL_FAST_INTERVAL_SECONDS
-            )
-        ),
-        "normal": float(
-            entry.options.get(
-                CONF_POLL_NORMAL_INTERVAL, DEFAULT_POLL_NORMAL_INTERVAL_SECONDS
-            )
-        ),
-        "slow": float(
-            entry.options.get(
-                CONF_POLL_SLOW_INTERVAL, DEFAULT_POLL_SLOW_INTERVAL_SECONDS
-            )
-        ),
-    }
 
     notify_enabled = bool(
         entry.options.get(
@@ -145,8 +114,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpcUaConfigEntry) -> boo
         hass=hass,
         manager=manager,
         nodes=nodes,
-        scan_interval_seconds=scan_interval,
-        poll_intervals=poll_intervals,
+        scan_interval_seconds=None,
+        poll_intervals=None,
         entry_id=entry.entry_id,
         endpoint=endpoint,
         notify_enabled=notify_enabled,

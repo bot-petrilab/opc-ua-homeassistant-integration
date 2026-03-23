@@ -555,7 +555,6 @@ def mock_config_entry():
             self.data = {
                 "endpoint": "opc.tcp://127.0.0.1:4840",
                 "security_policy": "None",
-                "scan_interval": 2.0,
                 "nodes": [],
             }
             self.options = {}

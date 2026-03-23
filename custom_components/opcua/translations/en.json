@@ -18,7 +18,6 @@
           "notify_service": "Notification service (domain.service)",
           "notify_title_prefix": "Notification title prefix",
           "notify_keywords": "Notification keywords (comma separated)",
-          "scan_interval": "Polling interval (seconds)",
           "validate_on_save": "Validate connection before save"
         }
       },
@@ -98,9 +97,6 @@
         "title": "Manage existing setup",
         "menu_options": {
           "remove_node": "Remove nodes",
-          "set_node_poll_profile": "Set node speed group",
-          "set_poll_groups": "Set speed-group intervals",
-          "set_poll_interval": "Set base polling interval",
           "init": "← Back to main menu"
         }
       },
@@ -293,27 +289,6 @@
         "title": "Remove nodes",
         "data": {
           "remove": "Select nodes to remove"
-        }
-      },
-      "set_node_poll_profile": {
-        "title": "Set node speed group",
-        "data": {
-          "node_index": "Node",
-          "poll_profile": "Speed group"
-        }
-      },
-      "set_poll_groups": {
-        "title": "Set speed-group intervals",
-        "data": {
-          "poll_fast_interval": "Fast interval (seconds)",
-          "poll_normal_interval": "Normal interval (seconds)",
-          "poll_slow_interval": "Slow interval (seconds)"
-        }
-      },
-      "set_poll_interval": {
-        "title": "Set base polling interval",
-        "data": {
-          "scan_interval": "Base interval (seconds)"
         }
       },
       "add_button": {

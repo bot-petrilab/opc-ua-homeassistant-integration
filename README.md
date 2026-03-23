@@ -65,7 +65,6 @@ Setup flow fields:
 - `username` / `password` (optional, depending on server identity policy)
 - `client_cert_path` / `client_key_path` and optional `client_key_password` (required for secure policy usage)
 - `server_cert_path` (optional)
-- `scan_interval`
 - `validate_on_save`
 
 Options flow includes:
