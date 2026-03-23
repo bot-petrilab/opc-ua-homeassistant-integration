@@ -11,7 +11,7 @@ References:
 - [x] `unique_config_entry` – duplicate entries are prevented
 - [x] `runtime_data` – uses `ConfigEntry.runtime_data`
 - [x] `test_before_setup` – setup validates connection (`ConfigEntryNotReady` / auth-aware handling)
-- [x] `appropriate_polling` – coordinator interval configurable (including sub-second)
+- [x] Subscription-driven runtime implemented (coordinator uses OPC-UA monitored-item updates instead of periodic polling)
 - [x] `entity_unique_id` – unique IDs per entity
 - [x] `config_entry_unloading` – unload implemented
 - [x] `discovery` – zeroconf + discovery flows implemented

@@ -28,7 +28,7 @@ Prepare the existing `opcua` integration for a PR against `home-assistant/core`.
 - `tests/ha_opcua_regression/setup_entity_matrix_entry.py` → PASS
 - `tests/ha_opcua_regression/entity_matrix_service_actions_check.py` → PASS
   - `number.set_value`, `date.set_value`, `time.set_value`, `fan.turn_on`
-- `pytest tests/components/opcua -q` → PASS
+- `pytest tests/components/opcua -q` → PASS (`125 passed` latest verified local run)
 - `tests/ci_smoke.py` → PASS
 
 ## Verified CI (repo)

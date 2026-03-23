@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections import deque
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from asyncua import Client, ua
@@ -14,6 +15,24 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class _SubscriptionHandler:
+    """Forward asyncua subscription callbacks to the integration callback."""
+
+    def __init__(self, callback: Callable[[str, Any], Awaitable[None] | None]) -> None:
+        self._callback = callback
+
+    async def datachange_notification(self, node, val, _data) -> None:
+        node_id_obj = getattr(node, "nodeid", node)
+        node_id = (
+            node_id_obj.to_string()
+            if hasattr(node_id_obj, "to_string")
+            else str(node_id_obj)
+        )
+        maybe_awaitable = self._callback(node_id, val)
+        if asyncio.iscoroutine(maybe_awaitable):
+            await maybe_awaitable
 
 
 class OpcUaClientManager:
@@ -40,6 +59,9 @@ class OpcUaClientManager:
         self.client_key_password = client_key_password
 
         self._client: Client | None = None
+        self._subscription = None
+        self._subscription_handles: list[Any] = []
+        self._subscribed_node_ids: list[str] = []
         self._lock = asyncio.Lock()
 
     async def ensure_connected(self) -> None:
@@ -137,11 +159,32 @@ class OpcUaClientManager:
             self._client = client
             _LOGGER.info("Connected to OPC UA endpoint %s", self.endpoint)
 
+    async def _clear_subscription(self) -> None:
+        if self._subscription is None:
+            self._subscription_handles = []
+            self._subscribed_node_ids = []
+            return
+        try:
+            if self._subscription_handles:
+                try:
+                    await self._subscription.unsubscribe(self._subscription_handles)
+                except Exception:
+                    _LOGGER.debug("Error while unsubscribing OPC UA nodes", exc_info=True)
+            try:
+                await self._subscription.delete()
+            except Exception:
+                _LOGGER.debug("Error while deleting OPC UA subscription", exc_info=True)
+        finally:
+            self._subscription = None
+            self._subscription_handles = []
+            self._subscribed_node_ids = []
+
     async def disconnect(self) -> None:
         async with self._lock:
             if self._client is None:
                 return
             try:
+                await self._clear_subscription()
                 await self._client.disconnect()
             except Exception:
                 _LOGGER.debug("Error while disconnecting OPC UA client", exc_info=True)
@@ -203,6 +246,43 @@ class OpcUaClientManager:
                 await self.disconnect()
                 if attempt == 1:
                     raise
+
+    async def subscribe_nodes(
+        self,
+        node_ids: list[str],
+        callback: Callable[[str, Any], Awaitable[None] | None],
+    ) -> dict[str, Any]:
+        """Subscribe to node updates and return an initial snapshot."""
+        uniq_node_ids = list(dict.fromkeys(node_ids))
+        await self.ensure_connected()
+        assert self._client is not None
+
+        initial = await self.read_nodes(uniq_node_ids)
+        await self._clear_subscription()
+
+        if not uniq_node_ids:
+            return initial
+
+        handler = _SubscriptionHandler(callback)
+        subscription = await self._client.create_subscription(1000, handler)
+        handles: list[Any] = []
+        for node_id in uniq_node_ids:
+            try:
+                node = self._client.get_node(node_id)
+                handle = await subscription.subscribe_data_change(node)
+                handles.append(handle)
+            except Exception as err:
+                _LOGGER.debug(
+                    "Subscription setup failed for node %s on %s: %s",
+                    node_id,
+                    self.endpoint,
+                    err,
+                )
+
+        self._subscription = subscription
+        self._subscription_handles = handles
+        self._subscribed_node_ids = uniq_node_ids
+        return initial
 
     async def browse_nodes(
         self,

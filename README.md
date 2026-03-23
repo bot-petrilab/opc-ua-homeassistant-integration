@@ -135,11 +135,11 @@ If secure setup is used, verify that:
 
 ## Data update behavior
 
-- Integration is `local_polling`.
-- Data is refreshed through a coordinator on configured intervals.
-- Polling supports sub-second values with 0.1 second granularity.
+- Integration is `local_push`.
+- Data updates are driven by OPC-UA subscriptions / monitored items.
+- The coordinator keeps an in-memory snapshot and applies subscription updates as they arrive.
 - On disconnect, reconnect attempts are handled by the client/coordinator flow.
-- This integration currently uses polling, not OPC-UA subscriptions.
+- One-shot reads are still used for initial snapshots and explicit refreshes after writes.
 
 ## Supported devices and functions
 

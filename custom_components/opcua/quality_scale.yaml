@@ -2,7 +2,7 @@ rules:
   action_setup:
     status: exempt
     comment: Integration does not register custom domain services; it relies on Home Assistant entity platform services.
-  appropriate_polling: done
+  appropriate_polling: exempt
   brands: done
   common_modules: done
   config_flow: done
@@ -67,4 +67,6 @@ rules:
   inject_websession:
     status: exempt
     comment: asyncua dependency is OPC-UA socket based and does not use HTTP client sessions.
+  strict_typing: done
+t use HTTP client sessions.
   strict_typing: done

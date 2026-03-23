@@ -311,6 +311,10 @@ def _install_homeassistant_stubs() -> None:
             self.data = {}
             self.last_update_success = True
 
+        def async_set_updated_data(self, data):
+            self.data = data
+            self.last_update_success = True
+
         @classmethod
         def __class_getitem__(cls, _item):
             return cls
