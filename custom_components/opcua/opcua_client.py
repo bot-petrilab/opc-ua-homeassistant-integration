@@ -18,24 +18,6 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class _SubscriptionHandler:
-    """Forward asyncua subscription callbacks to the integration callback."""
-
-    def __init__(self, callback: Callable[[str, Any], Awaitable[None] | None]) -> None:
-        self._callback = callback
-
-    async def datachange_notification(self, node, val, _data) -> None:
-        node_id_obj = getattr(node, "nodeid", node)
-        node_id = (
-            node_id_obj.to_string()
-            if hasattr(node_id_obj, "to_string")
-            else str(node_id_obj)
-        )
-        maybe_awaitable = self._callback(node_id, val)
-        if asyncio.iscoroutine(maybe_awaitable):
-            await maybe_awaitable
-
-
 class OpcUaClientManager:
     """Thin asyncua client wrapper with reconnect support."""
 
@@ -263,71 +245,6 @@ class OpcUaClientManager:
                 if attempt == 1:
                     raise
 
-    @staticmethod
-    def _build_discovered_endpoint(endpoint, include_network: bool) -> dict[str, Any] | None:
-        try:
-            ep_url = endpoint.EndpointUrl
-            sec_uri = endpoint.SecurityPolicyUri or ""
-            sec_name = sec_uri.rsplit("/", 1)[-1] if "/" in sec_uri else sec_uri
-            sec_mode = getattr(endpoint.SecurityMode, "name", str(endpoint.SecurityMode))
-            sec_level = int(getattr(endpoint, "SecurityLevel", 0) or 0)
-            transport = getattr(endpoint, "TransportProfileUri", None)
-            server = getattr(endpoint, "Server", None)
-            app_uri = getattr(server, "ApplicationUri", None) if server else None
-            app_name_obj = getattr(server, "ApplicationName", None) if server else None
-            app_name = getattr(app_name_obj, "Text", None) if app_name_obj else None
-            hostname = ""
-            if include_network:
-                parsed = urlparse(ep_url)
-                hostname = parsed.hostname or ""
-            supported_now = sec_name in {SECURITY_POLICY_NONE, "Basic256Sha256"}
-            return {
-                "endpoint_url": ep_url,
-                "security_policy": sec_name,
-                "security_mode": sec_mode,
-                "security_level": sec_level,
-                "transport_profile_uri": transport,
-                "application_uri": app_uri,
-                "application_name": app_name,
-                "hostname": hostname,
-                "supported_now": supported_now,
-            }
-        except Exception as err:
-            _LOGGER.debug("Endpoint mapping failed: %s", err)
-            return None
-
-    async def _read_single_node_value(self, node_id: str) -> Any:
-        assert self._client is not None
-        node = self._client.get_node(node_id)
-        return await node.read_value()
-
-    async def _read_node_batch(self, node_ids: list[str]) -> dict[str, Any]:
-        results: dict[str, Any] = {}
-        for node_id in node_ids:
-            try:
-                results[node_id] = await self._read_single_node_value(node_id)
-            except Exception as err:
-                _LOGGER.debug(
-                    "Read failed for node %s on %s: %s",
-                    node_id,
-                    self.endpoint,
-                    err,
-                )
-        return results
-
-    @staticmethod
-    async def _browse_collect_child_rows(node, queue, rows, seen, max_nodes: int) -> None:
-        children = await node.get_children()
-        for child in children:
-            if len(rows) >= max_nodes:
-                break
-            nodeid_obj = child.nodeid
-            node_id = nodeid_obj.to_string() if hasattr(nodeid_obj, "to_string") else str(nodeid_obj)
-            if node_id in seen:
-                continue
-            seen.add(node_id)
-            queue.append(child)
-
     async def _establish_subscription(
         self,
         node_ids: list[str],
@@ -335,29 +252,12 @@ class OpcUaClientManager:
     ) -> None:
         assert self._client is not None
         await self._clear_subscription(clear_desired=False)
-
-        if not node_ids:
-            return
-
-        handler = _SubscriptionHandler(callback)
-        subscription = await self._client.create_subscription(1000, handler)
-        handles: list[Any] = []
-        for node_id in node_ids:
-            try:
-                node = self._client.get_node(node_id)
-                handle = await subscription.subscribe_data_change(node)
-                handles.append(handle)
-            except Exception as err:
-                _LOGGER.debug(
-                    "Subscription setup failed for node %s on %s: %s",
-                    node_id,
-                    self.endpoint,
-                    err,
-                )
-
+        subscription, handles, subscribed_node_ids = await establish_subscription(
+            self._client, node_ids, callback, _LOGGER, self.endpoint
+        )
         self._subscription = subscription
         self._subscription_handles = handles
-        self._subscribed_node_ids = list(node_ids)
+        self._subscribed_node_ids = subscribed_node_ids
 
     async def subscribe_nodes(
         self,
