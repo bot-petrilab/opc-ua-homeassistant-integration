@@ -245,7 +245,7 @@
       },
       "browse_nodes": {
         "title": "Browse nodes",
-        "description": "Current branch: {current}. Folders: {folders}. Variables: {variables}.",
+        "description": "Current branch: {current}. Folders: {folders}. Importable variables: {variables}. Other nodes: {other}.",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)"
         }
@@ -259,7 +259,7 @@
           "menu_discovery_tools": "← Back to discovery menu",
           "init": "← Back to main menu"
         },
-        "description": "Choose how to import variables from the current branch."
+        "description": "Choose how to import variables from the current branch. Folder navigation stays separate from import selection."
       },
       "browse_pick_kind_basic": {
         "title": "Import basic entities",
@@ -275,7 +275,7 @@
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
         },
-        "description": "Add variables from the current branch as basic entity types."
+        "description": "Add importable variables from the current branch as basic entity types."
       },
       "browse_pick_kind_advanced": {
         "title": "Import advanced entities",
@@ -292,7 +292,7 @@
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
         },
-        "description": "Add variables from the current branch as advanced entity types."
+        "description": "Add importable variables from the current branch as advanced entity types."
       },
       "browse_add_sensor": {
         "title": "Browse: add sensor",

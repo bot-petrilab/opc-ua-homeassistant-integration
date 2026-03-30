@@ -585,12 +585,20 @@ async def test_browse_nodes_shows_folder_and_variable_counts(mock_hass, mock_con
             "is_writable": True,
             "path": "Objects/Home/LivingRoom/Enable",
         },
+        {
+            "node_id": "ns=2;s=Method1",
+            "parent_node_id": "i=85",
+            "node_class": "Method",
+            "name": "Run",
+            "path": "Objects/Home/LivingRoom/Run",
+        },
     ]
 
     result = await flow.async_step_browse_nodes()
     assert result["type"] == "form"
     assert result["description_placeholders"]["folders"] == "1"
     assert result["description_placeholders"]["variables"] == "1"
+    assert result["description_placeholders"]["other"] == "1"
 
 
 @pytest.mark.asyncio

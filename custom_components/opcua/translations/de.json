@@ -220,7 +220,7 @@
       },
       "browse_nodes": {
         "title": "Nodes browsen",
-        "description": "Aktueller Zweig: {current}. Ordner: {folders}. Variablen: {variables}.",
+        "description": "Aktueller Zweig: {current}. Ordner: {folders}. Importierbare Variablen: {variables}. Weitere Nodes: {other}.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)"
         }
@@ -251,7 +251,7 @@
           "menu_discovery_tools": "← Back to discovery menu",
           "init": "← Back to main menu"
         },
-        "description": "Wähle aus, wie Variablen aus dem aktuellen Zweig importiert werden sollen."
+        "description": "Wähle aus, wie Variablen aus dem aktuellen Zweig importiert werden sollen. Die Ordnernavigation bleibt von der Importauswahl getrennt."
       },
       "browse_add_sensor": {
         "title": "Browse: sensor hinzufügen",
@@ -603,7 +603,7 @@
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
         },
-        "description": "Füge Variablen aus dem aktuellen Zweig als Basis-Entitätstypen hinzu."
+        "description": "Füge importierbare Variablen aus dem aktuellen Zweig als Basis-Entitätstypen hinzu."
       },
       "browse_pick_kind_advanced": {
         "title": "Erweiterte Entitäten importieren",
@@ -620,7 +620,7 @@
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
         },
-        "description": "Füge Variablen aus dem aktuellen Zweig als erweiterte Entitätstypen hinzu."
+        "description": "Füge importierbare Variablen aus dem aktuellen Zweig als erweiterte Entitätstypen hinzu."
       }
     }
   }
