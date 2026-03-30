@@ -4,10 +4,13 @@ import os
 import socket
 
 from asyncua import Server, ua
+from zeroconf import ServiceInfo, Zeroconf
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 SIM_VERSION = "0.2.0-all-entities"
 PORT = int(os.environ.get("OPCUA_SIM_PORT", "4840"))
+ZEROCONF_TYPE = "_opcua-tcp._tcp.local."
+ZEROCONF_NAME = "opcua-all-entities._opcua-tcp._tcp.local."
 
 
 async def _add_var(parent, node_id: str, name: str, initial, writable: bool = False):
@@ -27,6 +30,7 @@ def _best_ipv4() -> str:
 
 
 async def main() -> None:
+    zeroconf, info = register_zeroconf()
     server = Server()
     await server.init()
     server.set_endpoint(f"opc.tcp://0.0.0.0:{PORT}")
