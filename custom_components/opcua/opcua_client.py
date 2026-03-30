@@ -5,6 +5,7 @@ import logging
 from collections import deque
 from collections.abc import Awaitable, Callable
 from typing import Any
+from urllib.parse import urlparse
 
 from asyncua import Client, ua
 
@@ -261,6 +262,71 @@ class OpcUaClientManager:
                 await self.disconnect(preserve_subscription=True)
                 if attempt == 1:
                     raise
+
+    @staticmethod
+    def _build_discovered_endpoint(endpoint, include_network: bool) -> dict[str, Any] | None:
+        try:
+            ep_url = endpoint.EndpointUrl
+            sec_uri = endpoint.SecurityPolicyUri or ""
+            sec_name = sec_uri.rsplit("/", 1)[-1] if "/" in sec_uri else sec_uri
+            sec_mode = getattr(endpoint.SecurityMode, "name", str(endpoint.SecurityMode))
+            sec_level = int(getattr(endpoint, "SecurityLevel", 0) or 0)
+            transport = getattr(endpoint, "TransportProfileUri", None)
+            server = getattr(endpoint, "Server", None)
+            app_uri = getattr(server, "ApplicationUri", None) if server else None
+            app_name_obj = getattr(server, "ApplicationName", None) if server else None
+            app_name = getattr(app_name_obj, "Text", None) if app_name_obj else None
+            hostname = ""
+            if include_network:
+                parsed = urlparse(ep_url)
+                hostname = parsed.hostname or ""
+            supported_now = sec_name in {SECURITY_POLICY_NONE, "Basic256Sha256"}
+            return {
+                "endpoint_url": ep_url,
+                "security_policy": sec_name,
+                "security_mode": sec_mode,
+                "security_level": sec_level,
+                "transport_profile_uri": transport,
+                "application_uri": app_uri,
+                "application_name": app_name,
+                "hostname": hostname,
+                "supported_now": supported_now,
+            }
+        except Exception as err:
+            _LOGGER.debug("Endpoint mapping failed: %s", err)
+            return None
+
+    async def _read_single_node_value(self, node_id: str) -> Any:
+        assert self._client is not None
+        node = self._client.get_node(node_id)
+        return await node.read_value()
+
+    async def _read_node_batch(self, node_ids: list[str]) -> dict[str, Any]:
+        results: dict[str, Any] = {}
+        for node_id in node_ids:
+            try:
+                results[node_id] = await self._read_single_node_value(node_id)
+            except Exception as err:
+                _LOGGER.debug(
+                    "Read failed for node %s on %s: %s",
+                    node_id,
+                    self.endpoint,
+                    err,
+                )
+        return results
+
+    @staticmethod
+    async def _browse_collect_child_rows(node, queue, rows, seen, max_nodes: int) -> None:
+        children = await node.get_children()
+        for child in children:
+            if len(rows) >= max_nodes:
+                break
+            nodeid_obj = child.nodeid
+            node_id = nodeid_obj.to_string() if hasattr(nodeid_obj, "to_string") else str(nodeid_obj)
+            if node_id in seen:
+                continue
+            seen.add(node_id)
+            queue.append(child)
 
     async def _establish_subscription(
         self,
