@@ -4,7 +4,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from custom_components.opcua.config_flow import OpcUaConfigFlow, OpcUaOptionsFlow
+from custom_components.opcua.config_flow import (
+    OpcUaConfigFlow,
+    OpcUaOptionsFlow,
+    _browse_option_label,
+    _friendly_node_name,
+)
 from custom_components.opcua.const import (
     CONF_BUTTON_PAYLOAD,
     CONF_CLIENT_CERT_PATH,
@@ -68,6 +73,17 @@ from custom_components.opcua.const import (
 def test_config_flow_module_is_importable() -> None:
     assert OpcUaConfigFlow.__name__ == "OpcUaConfigFlow"
     assert OpcUaConfigFlow.__mro__[0].__name__ == "OpcUaConfigFlow"
+
+
+def test_friendly_node_helpers_improve_labels() -> None:
+    item = {
+        "name": "living_room_temperature",
+        "path": "Objects/Home/LivingRoom/Temperature",
+        "sample_type": "float",
+        "is_writable": False,
+    }
+    assert _friendly_node_name(item) == "Livingroom – Temperature"
+    assert _browse_option_label(item) == "Livingroom – Temperature (float, read-only)"
 
 
 @pytest.mark.asyncio
@@ -464,6 +480,7 @@ async def test_auto_discovery_maps_light_and_generic_nodes(monkeypatch, mock_has
     assert result["description_placeholders"]["lights"] == "1"
     assert result["description_placeholders"]["switches"] == "1"
     assert result["description_placeholders"]["sensors"] == "1"
+    assert "Light 1" in result["description_placeholders"]["sample"]
     assert len(flow._discovery_cache) == 3
     assert {node[CONF_NODE_KIND] for node in flow._discovery_cache} == {
         NODE_KIND_LIGHT,
@@ -620,6 +637,21 @@ def test_map_discovered_item_classifies_basic_types(mock_config_entry) -> None:
     )
     assert sensor[CONF_NODE_KIND] == NODE_KIND_SENSOR
     assert sensor["unit_of_measurement"] == "°C"
+    assert sensor["device_class"] == "temperature"
+    assert sensor["state_class"] == "measurement"
+
+    motion = flow._map_discovered_item(
+        {
+            "node_id": "ns=2;s=Motion",
+            "node_class": "Variable",
+            "name": "Motion Detected",
+            "sample_type": "bool",
+            "is_writable": False,
+        },
+        include_readonly=True,
+    )
+    assert motion[CONF_NODE_KIND] == NODE_KIND_BINARY_SENSOR
+    assert motion["device_class"] == "motion"
 
 
 @pytest.mark.asyncio
