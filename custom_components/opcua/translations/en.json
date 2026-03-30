@@ -245,23 +245,24 @@
       },
       "browse_nodes": {
         "title": "Browse nodes",
-        "description": "Browse a subtree and choose how to import nodes.",
+        "description": "Current branch: {current}. Folders: {folders}. Variables: {variables}.",
         "data": {
           "root_node_id": "Root node ID (optional, default: i=85)"
         }
       },
       "browse_pick_kind": {
-        "title": "Import browsed nodes",
+        "title": "Import from current branch",
         "menu_options": {
           "browse_pick_kind_basic": "Import as basic entities",
           "browse_pick_kind_advanced": "Import as advanced entities",
           "browse_nodes": "Browse again",
           "menu_discovery_tools": "← Back to discovery menu",
           "init": "← Back to main menu"
-        }
+        },
+        "description": "Choose how to import variables from the current branch."
       },
       "browse_pick_kind_basic": {
-        "title": "Import as basic entities",
+        "title": "Import basic entities",
         "menu_options": {
           "browse_add_sensor": "Add as sensors",
           "browse_add_binary_sensor": "Add as binary sensors",
@@ -273,10 +274,11 @@
           "browse_add_button": "Add as buttons",
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
-        }
+        },
+        "description": "Add variables from the current branch as basic entity types."
       },
       "browse_pick_kind_advanced": {
-        "title": "Import as advanced entities",
+        "title": "Import advanced entities",
         "menu_options": {
           "browse_add_climate": "Add as climates",
           "browse_add_cover": "Add as covers",
@@ -289,7 +291,8 @@
           "browse_add_notify": "Add as notify entities",
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
-        }
+        },
+        "description": "Add variables from the current branch as advanced entity types."
       },
       "browse_add_sensor": {
         "title": "Browse: add sensor",

@@ -7,6 +7,7 @@ import pytest
 from custom_components.opcua.config_flow import (
     OpcUaConfigFlow,
     OpcUaOptionsFlow,
+    _browse_folder_label,
     _browse_option_label,
     _friendly_node_name,
 )
@@ -559,6 +560,37 @@ async def test_discover_servers_flow_updates_entry_and_handles_errors(monkeypatc
     )
     assert result["type"] == "form"
     assert result["errors"]["base"] == "cannot_connect"
+
+
+@pytest.mark.asyncio
+async def test_browse_nodes_shows_folder_and_variable_counts(mock_hass, mock_config_entry) -> None:
+    flow = OpcUaOptionsFlow(mock_config_entry)
+    flow.hass = mock_hass
+    flow._browse_root_node_id = "i=85"
+    flow._browse_current_parent = "i=85"
+    flow._browse_cache = [
+        {
+            "node_id": "ns=2;s=Folder",
+            "parent_node_id": "i=85",
+            "node_class": "Object",
+            "name": "LivingRoom",
+            "path": "Objects/Home/LivingRoom",
+        },
+        {
+            "node_id": "ns=2;s=Switch2",
+            "parent_node_id": "i=85",
+            "node_class": "Variable",
+            "name": "Enable",
+            "sample_type": "bool",
+            "is_writable": True,
+            "path": "Objects/Home/LivingRoom/Enable",
+        },
+    ]
+
+    result = await flow.async_step_browse_nodes()
+    assert result["type"] == "form"
+    assert result["description_placeholders"]["folders"] == "1"
+    assert result["description_placeholders"]["variables"] == "1"
 
 
 @pytest.mark.asyncio

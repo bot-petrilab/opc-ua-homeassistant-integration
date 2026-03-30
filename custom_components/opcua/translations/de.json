@@ -220,13 +220,13 @@
       },
       "browse_nodes": {
         "title": "Nodes browsen",
-        "description": "Browse einen Teilbaum und wähle aus, wie Nodes importiert werden sollen.",
+        "description": "Aktueller Zweig: {current}. Ordner: {folders}. Variablen: {variables}.",
         "data": {
           "root_node_id": "Root-Node-ID (optional, Standard: i=85)"
         }
       },
       "browse_pick_kind": {
-        "title": "Gebrowste Nodes importieren",
+        "title": "Aus aktuellem Zweig importieren",
         "menu_options": {
           "browse_add_sensor": "Als Sensoren hinzufügen",
           "browse_add_binary_sensor": "Als Binary Sensoren hinzufügen",
@@ -250,7 +250,8 @@
           "browse_pick_kind_advanced": "Import as advanced entities",
           "menu_discovery_tools": "← Back to discovery menu",
           "init": "← Back to main menu"
-        }
+        },
+        "description": "Wähle aus, wie Variablen aus dem aktuellen Zweig importiert werden sollen."
       },
       "browse_add_sensor": {
         "title": "Browse: sensor hinzufügen",
@@ -589,7 +590,7 @@
         }
       },
       "browse_pick_kind_basic": {
-        "title": "Als Basis-Entitäten importieren",
+        "title": "Basis-Entitäten importieren",
         "menu_options": {
           "browse_add_sensor": "Add as sensors",
           "browse_add_binary_sensor": "Add as binary sensors",
@@ -601,10 +602,11 @@
           "browse_add_button": "Add as buttons",
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
-        }
+        },
+        "description": "Füge Variablen aus dem aktuellen Zweig als Basis-Entitätstypen hinzu."
       },
       "browse_pick_kind_advanced": {
-        "title": "Als erweiterte Entitäten importieren",
+        "title": "Erweiterte Entitäten importieren",
         "menu_options": {
           "browse_add_climate": "Add as climates",
           "browse_add_cover": "Add as covers",
@@ -617,7 +619,8 @@
           "browse_add_notify": "Add as notify entities",
           "browse_pick_kind": "← Back",
           "init": "← Back to main menu"
-        }
+        },
+        "description": "Füge Variablen aus dem aktuellen Zweig als erweiterte Entitätstypen hinzu."
       }
     }
   }
