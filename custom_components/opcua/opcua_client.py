@@ -62,6 +62,10 @@ class OpcUaClientManager:
         self._subscription = None
         self._subscription_handles: list[Any] = []
         self._subscribed_node_ids: list[str] = []
+        self._desired_subscription_node_ids: list[str] = []
+        self._subscription_callback: (
+            Callable[[str, Any], Awaitable[None] | None] | None
+        ) = None
         self._lock = asyncio.Lock()
 
     async def ensure_connected(self) -> None:
@@ -157,12 +161,20 @@ class OpcUaClientManager:
                     raise
 
             self._client = client
+            if self._desired_subscription_node_ids and self._subscription_callback:
+                await self._establish_subscription(
+                    self._desired_subscription_node_ids,
+                    self._subscription_callback,
+                )
             _LOGGER.info("Connected to OPC UA endpoint %s", self.endpoint)
 
-    async def _clear_subscription(self) -> None:
+    async def _clear_subscription(self, *, clear_desired: bool = False) -> None:
         if self._subscription is None:
             self._subscription_handles = []
             self._subscribed_node_ids = []
+            if clear_desired:
+                self._desired_subscription_node_ids = []
+                self._subscription_callback = None
             return
         try:
             if self._subscription_handles:
@@ -178,13 +190,16 @@ class OpcUaClientManager:
             self._subscription = None
             self._subscription_handles = []
             self._subscribed_node_ids = []
+            if clear_desired:
+                self._desired_subscription_node_ids = []
+                self._subscription_callback = None
 
-    async def disconnect(self) -> None:
+    async def disconnect(self, *, preserve_subscription: bool = False) -> None:
         async with self._lock:
             if self._client is None:
                 return
             try:
-                await self._clear_subscription()
+                await self._clear_subscription(clear_desired=not preserve_subscription)
                 await self._client.disconnect()
             except Exception:
                 _LOGGER.debug("Error while disconnecting OPC UA client", exc_info=True)
@@ -219,7 +234,7 @@ class OpcUaClientManager:
                     attempt + 1,
                     err,
                 )
-                await self.disconnect()
+                await self.disconnect(preserve_subscription=True)
                 if attempt == 1:
                     raise
 
@@ -243,30 +258,25 @@ class OpcUaClientManager:
                     node_id,
                     err,
                 )
-                await self.disconnect()
+                await self.disconnect(preserve_subscription=True)
                 if attempt == 1:
                     raise
 
-    async def subscribe_nodes(
+    async def _establish_subscription(
         self,
         node_ids: list[str],
         callback: Callable[[str, Any], Awaitable[None] | None],
-    ) -> dict[str, Any]:
-        """Subscribe to node updates and return an initial snapshot."""
-        uniq_node_ids = list(dict.fromkeys(node_ids))
-        await self.ensure_connected()
+    ) -> None:
         assert self._client is not None
+        await self._clear_subscription(clear_desired=False)
 
-        initial = await self.read_nodes(uniq_node_ids)
-        await self._clear_subscription()
-
-        if not uniq_node_ids:
-            return initial
+        if not node_ids:
+            return
 
         handler = _SubscriptionHandler(callback)
         subscription = await self._client.create_subscription(1000, handler)
         handles: list[Any] = []
-        for node_id in uniq_node_ids:
+        for node_id in node_ids:
             try:
                 node = self._client.get_node(node_id)
                 handle = await subscription.subscribe_data_change(node)
@@ -281,7 +291,22 @@ class OpcUaClientManager:
 
         self._subscription = subscription
         self._subscription_handles = handles
-        self._subscribed_node_ids = uniq_node_ids
+        self._subscribed_node_ids = list(node_ids)
+
+    async def subscribe_nodes(
+        self,
+        node_ids: list[str],
+        callback: Callable[[str, Any], Awaitable[None] | None],
+    ) -> dict[str, Any]:
+        """Subscribe to node updates and return an initial snapshot."""
+        uniq_node_ids = list(dict.fromkeys(node_ids))
+        await self.ensure_connected()
+        assert self._client is not None
+
+        initial = await self.read_nodes(uniq_node_ids)
+        self._desired_subscription_node_ids = uniq_node_ids
+        self._subscription_callback = callback
+        await self._establish_subscription(uniq_node_ids, callback)
         return initial
 
     async def browse_nodes(
