@@ -14,6 +14,7 @@ from .const import (
     SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
     SECURITY_POLICY_NONE,
 )
+from .opcua_subscription import establish_subscription
 
 _LOGGER = logging.getLogger(__name__)
 

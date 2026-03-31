@@ -40,6 +40,26 @@ async def main() -> None:
                 raise RuntimeError(f"API {method} {path} failed: {obj.get('err')}")
             return obj.get("out")
 
+        async def call_ws(msg):
+            raw = await page.evaluate(
+                """async (msg) => {
+                  const ha = document.querySelector('home-assistant');
+                  try {
+                    const out = await ha.hass.callWS(msg);
+                    return JSON.stringify({ok: true, out});
+                  } catch (err) {
+                    let e = null;
+                    try { e = JSON.parse(JSON.stringify(err)); } catch (_) { e = String(err); }
+                    return JSON.stringify({ok: false, err: e});
+                  }
+                }""",
+                msg,
+            )
+            obj = json.loads(raw)
+            if not obj.get("ok"):
+                raise RuntimeError(f"WS failed: {obj.get('err')}")
+            return obj.get("out")
+
         async def start_options_flow(entry_id: str):
             return await call_api(
                 "POST", "config/config_entries/options/flow", {"handler": entry_id}
@@ -87,28 +107,48 @@ async def main() -> None:
                 "endpoint": OPC_ENDPOINT,
                 "security_policy": "None",
                 "validate_on_save": False,
-                "notify_enabled": True,
-                "notify_service": "persistent_notification.create",
-                "notify_title_prefix": "OPC-UA LightType",
-                "notify_keywords": "light,alarm,warning,fault,error",
             },
         )
+        if created.get("type") == "form" and created.get("step_id") == "user_notifications":
+            created = await call_api(
+                "POST",
+                f"config/config_entries/flow/{flow_id}",
+                {
+                    "notify_enabled": True,
+                    "notify_service": "persistent_notification.create",
+                    "notify_title_prefix": "OPC-UA LightType",
+                    "notify_keywords": "light,alarm,warning,fault,error",
+                },
+            )
         if created.get("type") not in {"create_entry", "abort"}:
             raise RuntimeError(f"Unexpected create result: {created}")
 
-        entries = await call_api("GET", "config/config_entries/entry")
-        target = [
-            x
-            for x in entries
-            if x.get("domain") == "opcua"
-            and (
-                x.get("title") == TITLE
-                or ((x.get("data") or {}).get("endpoint") == OPC_ENDPOINT)
-            )
-        ]
-        if not target:
-            raise RuntimeError("Failed to find created OPC UA entry")
-        entry_id = target[0]["entry_id"]
+        entry_id = None
+        if created.get("type") == "create_entry":
+            result = created.get("result") or {}
+            entry_id = result.get("entry_id") if isinstance(result, dict) else None
+
+        if not entry_id:
+            await page.wait_for_timeout(1500)
+            entries = await call_api("GET", "config/config_entries/entry")
+            target = [
+                x
+                for x in entries
+                if x.get("domain") == "opcua"
+                and x.get("title") == TITLE
+            ]
+            if not target:
+                target = [
+                    x
+                    for x in entries
+                    if x.get("domain") == "opcua"
+                    and x.get("title") == "OPC UA Entity Matrix"
+                ]
+            if not target:
+                target = [x for x in entries if x.get("domain") == "opcua"]
+            if not target:
+                raise RuntimeError("Failed to find created or reusable OPC UA entry")
+            entry_id = target[0]["entry_id"]
 
         # Run options flow -> auto discovery and apply discovered entities
         opt = await start_options_flow(entry_id)
@@ -140,6 +180,7 @@ async def main() -> None:
         await page.wait_for_timeout(8000)
 
         states = await call_api("GET", "states")
+        devices = await call_ws({"type": "config/device_registry/list"})
 
         # robust check for this integration: friendly names from simulator objects
         expected = {"Matrix Main", "Corridor", "Rainbow Pro"}
@@ -148,15 +189,24 @@ async def main() -> None:
             for s in states
             if str(s.get("entity_id", "")).startswith("light.")
         }
+        expected_devices = {"Panel 01", "RGB Controller 01"}
+        found_devices = {
+            str(d.get("name_by_user") or d.get("name") or "")
+            for d in devices
+            if str(d.get("manufacturer") or "") == "Petri Automation"
+        }
 
         missing = sorted(list(expected - found))
+        missing_devices = sorted(list(expected_devices - found_devices))
 
         print(f"ENTRY_ID={entry_id}")
         print(f"ENDPOINT={OPC_ENDPOINT}")
         print(f"FOUND_LIGHTS={sorted(list(found))}")
+        print(f"FOUND_DEVICES={sorted(list(found_devices))}")
         print(f"MISSING={missing}")
+        print(f"MISSING_DEVICES={missing_devices}")
 
-        if missing:
+        if missing or missing_devices:
             raise SystemExit(1)
 
         await browser.close()

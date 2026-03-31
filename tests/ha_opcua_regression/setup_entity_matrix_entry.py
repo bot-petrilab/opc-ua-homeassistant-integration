@@ -110,12 +110,19 @@ async def main() -> None:
                 "endpoint": OPC_ENDPOINT,
                 "security_policy": "None",
                 "validate_on_save": False,
-                "notify_enabled": True,
-                "notify_service": "persistent_notification.create",
-                "notify_title_prefix": "OPC-UA Matrix",
-                "notify_keywords": "alarm,warning,fault,error,matrix",
             },
         )
+        if created.get("type") == "form" and created.get("step_id") == "user_notifications":
+            created = await call_api(
+                "POST",
+                f"config/config_entries/flow/{flow_id}",
+                {
+                    "notify_enabled": True,
+                    "notify_service": "persistent_notification.create",
+                    "notify_title_prefix": "OPC-UA Matrix",
+                    "notify_keywords": "alarm,warning,fault,error,matrix",
+                },
+            )
         if created.get("type") not in {"create_entry", "abort"}:
             raise RuntimeError(f"Unexpected create result: {created}")
 
