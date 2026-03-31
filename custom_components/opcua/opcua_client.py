@@ -258,7 +258,9 @@ class OpcUaClientManager:
         )
         self._subscription = subscription
         self._subscription_handles = handles
-        self._subscribed_node_ids = subscribed_node_ids
+        # Keep track of all requested node ids for reconnect/preservation semantics,
+        # even if some individual subscribe calls failed.
+        self._subscribed_node_ids = list(node_ids)
 
     async def subscribe_nodes(
         self,

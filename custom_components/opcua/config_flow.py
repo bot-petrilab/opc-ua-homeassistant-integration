@@ -97,6 +97,11 @@ from .const import (
     CONF_SERVER_CERT_PATH,
     CONF_TEXT_MAX,
     CONF_VALIDATE_ON_SAVE,
+    CONF_VALVE_CLOSE_NODE_ID,
+    CONF_VALVE_INVERT_POSITION,
+    CONF_VALVE_OPEN_NODE_ID,
+    CONF_VALVE_SET_POSITION_NODE_ID,
+    CONF_VALVE_STOP_NODE_ID,
     CONF_WEATHER_CONDITION_NODE_ID,
     CONF_WEATHER_HUMIDITY_NODE_ID,
     CONF_WEATHER_PRESSURE_NODE_ID,
@@ -139,6 +144,7 @@ from .const import (
     NODE_KIND_SWITCH,
     NODE_KIND_TEXT,
     NODE_KIND_TIME,
+    NODE_KIND_VALVE,
     NODE_KIND_WEATHER,
     SECURITY_POLICIES,
     SECURITY_POLICY_BASIC256SHA256_SIGN,
@@ -148,6 +154,32 @@ from .const import (
 from .opcua_client import OpcUaClientManager
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _friendly_node_name(item: Mapping[str, Any]) -> str:
+    path = str(item.get("path") or "").strip("/")
+    if path:
+        leaf = path.split("/")[-1]
+        parent = path.split("/")[-2] if len(path.split("/")) >= 2 else ""
+        if parent and leaf:
+            return f"{parent.replace('_', ' ').title().replace(' ', '')} – {leaf.replace('_', ' ').title()}"
+        if leaf:
+            return leaf.replace('_', ' ').title()
+    name = str(item.get("name") or item.get("node_id") or "Node")
+    return name.replace('_', ' ').title()
+
+
+def _browse_option_label(item: Mapping[str, Any]) -> str:
+    label = _friendly_node_name(item)
+    sample_type = str(item.get("sample_type") or "unknown")
+    writable = bool(item.get("is_writable", False))
+    access = "writable" if writable else "read-only"
+    return f"{label} ({sample_type}, {access})"
+
+
+def _browse_folder_label(item: Mapping[str, Any]) -> str:
+    name = str(item.get("name") or item.get("path") or "Folder")
+    return name.strip("/").split("/")[-1].replace('_', ' ').title()
 
 
 class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -828,6 +860,7 @@ class OpcUaOptionsFlow(OptionsFlow):
                 "add_time",
                 "add_weather",
                 "add_notify",
+                "add_valve",
                 "menu_add_entities",
                 "init",
             ],
@@ -1155,6 +1188,28 @@ class OpcUaOptionsFlow(OptionsFlow):
             return "rpm"
         return None
 
+    def _guess_sensor_classes(self, name: str, path: str) -> tuple[str | None, str | None]:
+        token = f"{name} {path}".lower()
+        if "temp" in token:
+            return "temperature", "measurement"
+        if "humidity" in token or "feuchte" in token:
+            return "humidity", "measurement"
+        if "pressure" in token or "druck" in token:
+            return "pressure", "measurement"
+        if "power" in token:
+            return "power", "measurement"
+        return None, None
+
+    def _guess_binary_sensor_class(self, name: str, path: str) -> str | None:
+        token = f"{name} {path}".lower()
+        if "motion" in token or "beweg" in token:
+            return "motion"
+        if "door" in token or "window" in token or "fenster" in token or "tür" in token:
+            return "door"
+        if "alarm" in token or "fault" in token or "problem" in token:
+            return "problem"
+        return None
+
     @staticmethod
     def _normalize_discovery_name(name: str) -> str:
         return "".join(
@@ -1441,13 +1496,15 @@ class OpcUaOptionsFlow(OptionsFlow):
                     }
                 )
 
-            return _with_device(
-                {
-                    CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR,
-                    CONF_NODE_NAME: name,
-                    CONF_NODE_ID: node_id,
-                }
-            )
+            cfg = {
+                CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR,
+                CONF_NODE_NAME: name,
+                CONF_NODE_ID: node_id,
+            }
+            device_class = self._guess_binary_sensor_class(name, path)
+            if device_class:
+                cfg[CONF_NODE_DEVICE_CLASS] = device_class
+            return _with_device(cfg)
 
         if sample_type in (
             "int",
@@ -1467,6 +1524,11 @@ class OpcUaOptionsFlow(OptionsFlow):
             unit = self._guess_unit(name, path, item.get("engineering_units"))
             if unit:
                 cfg[CONF_NODE_UNIT] = unit
+            device_class, state_class = self._guess_sensor_classes(name, path)
+            if device_class:
+                cfg[CONF_NODE_DEVICE_CLASS] = device_class
+            if state_class:
+                cfg[CONF_NODE_STATE_CLASS] = state_class
             return _with_device(cfg)
 
         if sample_type in ("str", "string"):
@@ -1643,6 +1705,53 @@ class OpcUaOptionsFlow(OptionsFlow):
             }
         )
         return self.async_show_form(step_id="add_cover", data_schema=schema)
+
+    async def async_step_add_valve(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        if user_input is not None:
+            self._options[CONF_NODES].append(
+                {
+                    CONF_NODE_KIND: NODE_KIND_VALVE,
+                    CONF_NODE_NAME: user_input[CONF_NODE_NAME],
+                    CONF_NODE_ID: user_input[CONF_NODE_ID],
+                    CONF_NODE_TARGET_NODE_ID: user_input.get(CONF_NODE_TARGET_NODE_ID)
+                    or None,
+                    CONF_VALVE_SET_POSITION_NODE_ID: user_input.get(
+                        CONF_VALVE_SET_POSITION_NODE_ID
+                    )
+                    or None,
+                    CONF_VALVE_OPEN_NODE_ID: user_input.get(CONF_VALVE_OPEN_NODE_ID)
+                    or None,
+                    CONF_VALVE_CLOSE_NODE_ID: user_input.get(CONF_VALVE_CLOSE_NODE_ID)
+                    or None,
+                    CONF_VALVE_STOP_NODE_ID: user_input.get(CONF_VALVE_STOP_NODE_ID)
+                    or None,
+                    CONF_VALVE_INVERT_POSITION: bool(
+                        user_input.get(CONF_VALVE_INVERT_POSITION, False)
+                    ),
+                    CONF_NODE_ICON: user_input.get(CONF_NODE_ICON) or None,
+                }
+            )
+            await self._persist_options()
+            return await self.async_step_init()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NODE_NAME): TextSelector(),
+                vol.Required(CONF_NODE_ID): TextSelector(),
+                vol.Optional(CONF_NODE_TARGET_NODE_ID): TextSelector(),
+                vol.Optional(CONF_VALVE_SET_POSITION_NODE_ID): TextSelector(),
+                vol.Optional(CONF_VALVE_OPEN_NODE_ID): TextSelector(),
+                vol.Optional(CONF_VALVE_CLOSE_NODE_ID): TextSelector(),
+                vol.Optional(CONF_VALVE_STOP_NODE_ID): TextSelector(),
+                vol.Required(
+                    CONF_VALVE_INVERT_POSITION, default=False
+                ): BooleanSelector(),
+                vol.Optional(CONF_NODE_ICON, default="mdi:valve"): TextSelector(),
+            }
+        )
+        return self.async_show_form(step_id="add_valve", data_schema=schema)
 
     async def async_step_add_date(
         self, user_input: dict[str, Any] | None = None
@@ -2318,8 +2427,27 @@ class OpcUaOptionsFlow(OptionsFlow):
                 vol.Optional("root_node_id", default="i=85"): TextSelector(),
             }
         )
+        placeholders = None
+        if self._browse_cache and self._browse_current_parent:
+            branch = [
+                item
+                for item in self._browse_cache
+                if str(item.get("parent_node_id")) == str(self._browse_current_parent)
+            ]
+            folders = sum(1 for item in branch if str(item.get("node_class")) == "Object")
+            variables = sum(1 for item in branch if str(item.get("node_class")) == "Variable")
+            other = max(0, len(branch) - folders - variables)
+            placeholders = {
+                "current": str(self._browse_current_parent),
+                "folders": str(folders),
+                "variables": str(variables),
+                "other": str(other),
+            }
         return self.async_show_form(
-            step_id="browse_nodes", data_schema=schema, errors=errors
+            step_id="browse_nodes",
+            data_schema=schema,
+            errors=errors,
+            description_placeholders=placeholders,
         )
 
     async def async_step_browse_pick_kind(
@@ -2373,6 +2501,7 @@ class OpcUaOptionsFlow(OptionsFlow):
                 "browse_add_time",
                 "browse_add_weather",
                 "browse_add_notify",
+                "browse_add_valve",
                 "browse_pick_kind",
                 "init",
             ],

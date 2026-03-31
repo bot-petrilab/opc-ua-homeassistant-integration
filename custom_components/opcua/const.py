@@ -26,7 +26,7 @@ except Exception:  # pragma: no cover - fallback for standalone smoke/import tes
 
 
 DOMAIN = "opcua"
-PLATFORMS: list[Platform] = [
+PLATFORMS: list[Platform | str] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.SWITCH,
@@ -45,6 +45,11 @@ PLATFORMS: list[Platform] = [
     Platform.TIME,
     Platform.WEATHER,
 ]
+
+if hasattr(Platform, "VALVE"):
+    PLATFORMS.append(getattr(Platform, "VALVE"))
+else:
+    PLATFORMS.append("valve")
 
 CONF_ENDPOINT = "endpoint"
 CONF_SECURITY_POLICY = "security_policy"
@@ -99,6 +104,13 @@ CONF_COVER_OPEN_NODE_ID = "open_node_id"
 CONF_COVER_CLOSE_NODE_ID = "close_node_id"
 CONF_COVER_STOP_NODE_ID = "stop_node_id"
 CONF_COVER_INVERT_POSITION = "invert_position"
+
+# Valve
+CONF_VALVE_SET_POSITION_NODE_ID = "set_position_node_id"
+CONF_VALVE_OPEN_NODE_ID = "open_node_id"
+CONF_VALVE_CLOSE_NODE_ID = "close_node_id"
+CONF_VALVE_STOP_NODE_ID = "stop_node_id"
+CONF_VALVE_INVERT_POSITION = "invert_position"
 
 # Fan
 CONF_FAN_SPEED_NODE_ID = "speed_node_id"
@@ -185,6 +197,8 @@ NODE_KIND_SELECT = "select"
 NODE_KIND_TEXT = "text"
 NODE_KIND_TIME = "time"
 NODE_KIND_WEATHER = "weather"
+NODE_KIND_VALVE = "valve"
+NODE_KIND_VALVE = "valve"
 
 DEFAULT_TITLE = "OPC-UA"
 
@@ -229,6 +243,20 @@ DEFAULT_NUMBER_MAX = 100.0
 DEFAULT_NUMBER_STEP = 1.0
 
 ISSUE_MISSING_CERTIFICATE_FILES = "missing_certificate_files"
+
+SECURITY_POLICIES: tuple[str, ...] = (
+    SECURITY_POLICY_NONE,
+    SECURITY_POLICY_BASIC256SHA256_SIGN,
+    SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+)
+SSING_CERTIFICATE_FILES = "missing_certificate_files"
+
+SECURITY_POLICIES: tuple[str, ...] = (
+    SECURITY_POLICY_NONE,
+    SECURITY_POLICY_BASIC256SHA256_SIGN,
+    SECURITY_POLICY_BASIC256SHA256_SIGN_ENCRYPT,
+)
+SSING_CERTIFICATE_FILES = "missing_certificate_files"
 
 SECURITY_POLICIES: tuple[str, ...] = (
     SECURITY_POLICY_NONE,

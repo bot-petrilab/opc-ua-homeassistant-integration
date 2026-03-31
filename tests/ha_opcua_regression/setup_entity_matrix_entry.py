@@ -297,6 +297,20 @@ async def main() -> None:
                 True,
             ),
             (
+                "add_valve",
+                {
+                    "name": "Matrix Valve",
+                    "node_id": "ns=2;s=EntityMatrix.Control.Valve.Position",
+                    "set_position_node_id": "ns=2;s=EntityMatrix.Control.Valve.Position",
+                    "open_node_id": "ns=2;s=EntityMatrix.Control.Commands.ValveOpen",
+                    "close_node_id": "ns=2;s=EntityMatrix.Control.Commands.ValveClose",
+                    "stop_node_id": "ns=2;s=EntityMatrix.Control.Commands.ValveStop",
+                    "invert_position": False,
+                    "icon": "mdi:valve",
+                },
+                True,
+            ),
+            (
                 "add_scene",
                 {
                     "name": "Matrix Scene",

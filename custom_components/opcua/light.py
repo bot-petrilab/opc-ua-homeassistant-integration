@@ -123,6 +123,10 @@ class OpcUaLight(OpcUaBaseEntity, LightEntity):
     ) -> None:
         super().__init__(entry_id, endpoint, node_cfg, coordinator, NODE_KIND_LIGHT)
         self._cfg = node_cfg
+        # For discovered LightType objects with attached device_info, keep the configured
+        # light object name as the final HA friendly name instead of prefixing it with the
+        # parent device name (e.g. "Matrix Main" instead of "Panel 01 Matrix Main").
+        self._attr_has_entity_name = False
         self._invert = bool(node_cfg.get(CONF_NODE_INVERT, False))
 
         self._brightness_scale = float(

@@ -127,6 +127,27 @@ async def main() -> None:
         False,
         True,
     )
+    cmd_valve_open = await _add_var(
+        control,
+        f"ns={idx};s=EntityMatrix.Control.Commands.ValveOpen",
+        "ValveOpen",
+        False,
+        True,
+    )
+    cmd_valve_close = await _add_var(
+        control,
+        f"ns={idx};s=EntityMatrix.Control.Commands.ValveClose",
+        "ValveClose",
+        False,
+        True,
+    )
+    cmd_valve_stop = await _add_var(
+        control,
+        f"ns={idx};s=EntityMatrix.Control.Commands.ValveStop",
+        "ValveStop",
+        False,
+        True,
+    )
     cover_position = await _add_var(
         control,
         f"ns={idx};s=EntityMatrix.Control.Cover.Position",
