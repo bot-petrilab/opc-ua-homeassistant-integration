@@ -603,10 +603,3 @@
     }
   }
 }
-   }
-  }
-}
-e security policy, but the client certificate path or client private key path is missing. To fix this issue: 1) Open Settings → Devices & Services, 2) open the OPC-UA integration for this endpoint, 3) choose Reconfigure, 4) set both the client certificate path and client private key path, and 5) save the updated configuration. After saving, Home Assistant should reconnect and this repair issue will disappear."
-    }
-  }
-}
