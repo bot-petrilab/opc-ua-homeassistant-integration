@@ -23,10 +23,40 @@ async def _add_var(parent, node_id: str, name: str, initial, writable: bool = Fa
 def _best_ipv4() -> str:
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.settimeout(0.5)
             s.connect(("8.8.8.8", 80))
             return str(s.getsockname()[0])
     except Exception:
-        return "127.0.0.1"
+        try:
+            return socket.gethostbyname(socket.gethostname())
+        except Exception:
+            return "127.0.0.1"
+
+
+def register_zeroconf() -> tuple[Zeroconf | None, ServiceInfo | None]:
+    try:
+        host_ip = _best_ipv4()
+        service_type = ZEROCONF_TYPE
+        service_name = f"opcua-all-entities-{host_ip}.{service_type}"
+        service_info = ServiceInfo(
+            type_=service_type,
+            name=service_name,
+            addresses=[socket.inet_aton(host_ip)],
+            port=PORT,
+            properties={
+                b"path": b"/",
+                b"endpoint": f"opc.tcp://{host_ip}:{PORT}".encode(),
+                b"sim_version": SIM_VERSION.encode(),
+            },
+            server=f"opcua-all-entities-{host_ip.replace('.', '-')}.local.",
+        )
+        zeroconf = Zeroconf(ip_version=IPVersion.V4Only)
+        zeroconf.register_service(service_info)
+        print(f"mDNS announced: {service_name}", flush=True)
+        return zeroconf, service_info
+    except Exception as err:
+        print(f"mDNS announce skipped: {err}", flush=True)
+        return None, None
 
 
 async def main() -> None:
