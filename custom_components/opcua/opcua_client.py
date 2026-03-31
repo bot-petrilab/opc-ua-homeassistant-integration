@@ -5,7 +5,6 @@ import logging
 from collections import deque
 from collections.abc import Awaitable, Callable
 from typing import Any
-from urllib.parse import urlparse
 
 from asyncua import Client, ua
 

@@ -7,7 +7,6 @@ import pytest
 from custom_components.opcua.config_flow import (
     OpcUaConfigFlow,
     OpcUaOptionsFlow,
-    _browse_folder_label,
     _browse_option_label,
     _friendly_node_name,
 )
