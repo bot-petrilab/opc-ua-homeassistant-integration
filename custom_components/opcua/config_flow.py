@@ -1459,6 +1459,144 @@ class OpcUaOptionsFlow(OptionsFlow):
 
         return discovered, consumed_ids
 
+    def _build_structured_device_nodes(
+        self,
+        items: list[dict[str, Any]],
+        *,
+        device_contexts: dict[str, dict[str, str]] | None = None,
+    ) -> list[dict[str, Any]]:
+        by_node_id = {
+            str(i.get("node_id") or ""): i
+            for i in items
+            if str(i.get("node_id") or "")
+        }
+        results: list[dict[str, Any]] = []
+
+        def devctx(node_id: str) -> dict[str, str]:
+            return dict((device_contexts or {}).get(node_id, {}))
+
+        def add(cfg: dict[str, Any]) -> None:
+            results.append(cfg)
+
+        mode = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Select.Mode")
+        if mode:
+            add({CONF_NODE_KIND: NODE_KIND_SELECT, CONF_NODE_NAME: "Mode", CONF_NODE_ID: mode["node_id"], CONF_SELECT_OPTIONS: ["Auto", "Manual", "Service"], **devctx(mode["node_id"])})
+        recipe = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Text.RecipeName")
+        if recipe:
+            add({CONF_NODE_KIND: NODE_KIND_TEXT, CONF_NODE_NAME: "RecipeName", CONF_NODE_ID: recipe["node_id"], CONF_TEXT_MAX: 255, **devctx(recipe["node_id"])})
+        fan_speed = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Number.FanSpeed")
+        if fan_speed:
+            add({CONF_NODE_KIND: NODE_KIND_NUMBER, CONF_NODE_NAME: "FanSpeed", CONF_NODE_ID: fan_speed["node_id"], CONF_NUMBER_MIN: 0, CONF_NUMBER_MAX: 5000, CONF_NUMBER_STEP: 1, **devctx(fan_speed["node_id"])})
+        start = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Button.Start")
+        if start:
+            add({CONF_NODE_KIND: NODE_KIND_BUTTON, CONF_NODE_NAME: "Start", CONF_NODE_ID: start["node_id"], CONF_BUTTON_PAYLOAD: True, **devctx(start["node_id"])})
+        scene = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Scene.Activate")
+        if scene:
+            add({CONF_NODE_KIND: NODE_KIND_SCENE, CONF_NODE_NAME: "Activate", CONF_NODE_ID: scene["node_id"], CONF_SCENE_ACTIVATE_VALUE: True, **devctx(scene["node_id"])})
+        date_node = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.DateObject.Date")
+        if date_node:
+            add({CONF_NODE_KIND: NODE_KIND_DATE, CONF_NODE_NAME: "Date", CONF_NODE_ID: date_node["node_id"], **devctx(date_node["node_id"])})
+        dt_node = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.DateTimeObject.DateTime")
+        if dt_node:
+            add({CONF_NODE_KIND: NODE_KIND_DATETIME, CONF_NODE_NAME: "DateTime", CONF_NODE_ID: dt_node["node_id"], **devctx(dt_node["node_id"])})
+        time_node = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.TimeObject.Time")
+        if time_node:
+            add({CONF_NODE_KIND: NODE_KIND_TIME, CONF_NODE_NAME: "Time", CONF_NODE_ID: time_node["node_id"], **devctx(time_node["node_id"])})
+        notify_msg = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Notify.Message")
+        if notify_msg:
+            cfg = {CONF_NODE_KIND: NODE_KIND_NOTIFY, CONF_NODE_NAME: "Notify", CONF_NODE_ID: notify_msg["node_id"], CONF_NOTIFY_MESSAGE_NODE_ID: notify_msg["node_id"], **devctx(notify_msg["node_id"])}
+            notify_title = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Notify.Title")
+            if notify_title:
+                cfg[CONF_NOTIFY_TITLE_NODE_ID] = notify_title["node_id"]
+            add(cfg)
+        weather_cond = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Weather.Condition")
+        if weather_cond:
+            cfg = {CONF_NODE_KIND: NODE_KIND_WEATHER, CONF_NODE_NAME: "Weather", CONF_NODE_ID: weather_cond["node_id"], CONF_WEATHER_CONDITION_NODE_ID: weather_cond["node_id"], **devctx(weather_cond["node_id"])}
+            for key, conf in (("Humidity", CONF_WEATHER_HUMIDITY_NODE_ID), ("Pressure", CONF_WEATHER_PRESSURE_NODE_ID), ("WindSpeed", CONF_WEATHER_WIND_SPEED_NODE_ID)):
+                item = by_node_id.get(f"ns=2;s=Home.Devices.PaDemoCell.Weather.{key}")
+                if item:
+                    cfg[conf] = item["node_id"]
+            add(cfg)
+        cover_pos = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Cover.Position")
+        if cover_pos:
+            cfg = {CONF_NODE_KIND: NODE_KIND_COVER, CONF_NODE_NAME: "Cover", CONF_NODE_ID: cover_pos["node_id"], CONF_COVER_SET_POSITION_NODE_ID: cover_pos["node_id"], **devctx(cover_pos["node_id"])}
+            for key, conf in (("Open", CONF_COVER_OPEN_NODE_ID), ("Close", CONF_COVER_CLOSE_NODE_ID)):
+                item = by_node_id.get(f"ns=2;s=Home.Devices.PaDemoCell.Cover.{key}")
+                if item:
+                    cfg[conf] = item["node_id"]
+            add(cfg)
+        valve_pos = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Valve.Position")
+        if valve_pos:
+            cfg = {CONF_NODE_KIND: NODE_KIND_VALVE, CONF_NODE_NAME: "Valve", CONF_NODE_ID: valve_pos["node_id"], CONF_VALVE_SET_POSITION_NODE_ID: valve_pos["node_id"], **devctx(valve_pos["node_id"])}
+            for key, conf in (("Open", CONF_VALVE_OPEN_NODE_ID), ("Close", CONF_VALVE_CLOSE_NODE_ID), ("Stop", CONF_VALVE_STOP_NODE_ID)):
+                item = by_node_id.get(f"ns=2;s=Home.Devices.PaDemoCell.Valve.{key}")
+                if item:
+                    cfg[conf] = item["node_id"]
+            add(cfg)
+        fan_run = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Fan.Running")
+        if fan_run:
+            add({CONF_NODE_KIND: NODE_KIND_FAN, CONF_NODE_NAME: "Fan", CONF_NODE_ID: fan_run["node_id"], **devctx(fan_run["node_id"])})
+
+        sensor_temp = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Sensor.Temperature")
+        if sensor_temp:
+            add({CONF_NODE_KIND: NODE_KIND_SENSOR, CONF_NODE_NAME: "Temperature", CONF_NODE_ID: sensor_temp["node_id"], CONF_NODE_UNIT: "°C", CONF_NODE_DEVICE_CLASS: "temperature", CONF_NODE_STATE_CLASS: "measurement", **devctx(sensor_temp["node_id"])})
+        sensor_heartbeat = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Sensor.Heartbeat")
+        if sensor_heartbeat:
+            add({CONF_NODE_KIND: NODE_KIND_SENSOR, CONF_NODE_NAME: "Heartbeat", CONF_NODE_ID: sensor_heartbeat["node_id"], **devctx(sensor_heartbeat["node_id"])})
+        sensor_last = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Sensor.LastStartUtc")
+        if sensor_last:
+            add({CONF_NODE_KIND: NODE_KIND_SENSOR, CONF_NODE_NAME: "LastStartUtc", CONF_NODE_ID: sensor_last["node_id"], **devctx(sensor_last["node_id"])})
+
+        motion = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Motion.Detected")
+        if motion:
+            add({CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR, CONF_NODE_NAME: "MotionDetected", CONF_NODE_ID: motion["node_id"], CONF_NODE_DEVICE_CLASS: "motion", **devctx(motion["node_id"])})
+        alarm = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Motion.Alarm")
+        if alarm:
+            add({CONF_NODE_KIND: NODE_KIND_BINARY_SENSOR, CONF_NODE_NAME: "Alarm", CONF_NODE_ID: alarm["node_id"], CONF_NODE_DEVICE_CLASS: "problem", **devctx(alarm["node_id"])})
+
+        enabled = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Switch.Enabled")
+        if enabled:
+            add({CONF_NODE_KIND: NODE_KIND_SWITCH, CONF_NODE_NAME: "Enabled", CONF_NODE_ID: enabled["node_id"], **devctx(enabled["node_id"])})
+
+        current_temp = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Sensor.Temperature")
+        target_temp = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Climate.TargetTemperature")
+        hvac_mode = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.Climate.HvacMode")
+        if current_temp and target_temp:
+            climate_anchor = hvac_mode["node_id"] if hvac_mode else target_temp["node_id"]
+            cfg = {CONF_NODE_KIND: NODE_KIND_CLIMATE, CONF_NODE_NAME: "Climate", CONF_NODE_ID: climate_anchor, CONF_NODE_TARGET_NODE_ID: target_temp["node_id"], **devctx(current_temp["node_id"])}
+            if hvac_mode:
+                cfg[CONF_CLIMATE_HVAC_MODE_NODE_ID] = hvac_mode["node_id"]
+            add(cfg)
+
+        light_state = by_node_id.get("ns=2;s=Home.Devices.PaDemoCell.RainbowPro.State")
+        if light_state:
+            cfg = {CONF_NODE_KIND: NODE_KIND_LIGHT, CONF_NODE_NAME: "PA-DemoCell Rainbow Pro", CONF_NODE_ID: light_state["node_id"], **devctx(light_state["node_id"])}
+            mapping = {
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Brightness": CONF_LIGHT_BRIGHTNESS_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.ColorTempKelvin": CONF_LIGHT_COLOR_TEMP_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Hue": CONF_LIGHT_HS_HUE_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Saturation": CONF_LIGHT_HS_SAT_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.R": CONF_LIGHT_RGB_R_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.G": CONF_LIGHT_RGB_G_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.B": CONF_LIGHT_RGB_B_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.CW": CONF_LIGHT_RGBWW_CW_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.WW": CONF_LIGHT_RGBWW_WW_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.White": CONF_LIGHT_WHITE_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.X": CONF_LIGHT_XY_X_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Y": CONF_LIGHT_XY_Y_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Effect": CONF_LIGHT_EFFECT_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Transition": CONF_LIGHT_TRANSITION_NODE_ID,
+                "ns=2;s=Home.Devices.PaDemoCell.RainbowPro.Flash": CONF_LIGHT_FLASH_NODE_ID,
+            }
+            for nid, conf in mapping.items():
+                item = by_node_id.get(nid)
+                if item:
+                    cfg[conf] = item["node_id"]
+            cfg[CONF_LIGHT_EFFECT_LIST] = ["off", "pulse", "rainbow", "aurora", "night"]
+            add(cfg)
+
+        return results
+
     def _map_discovered_item(
         self,
         item: dict[str, Any],
@@ -1482,9 +1620,60 @@ class OpcUaOptionsFlow(OptionsFlow):
         path = str(item.get("path") or name)
         sample_type = str(item.get("sample_type", "")).lower()
         writable = bool(item.get("is_writable", False))
+        token = f"{path} {name}".lower()
 
         if not include_readonly and not writable:
             return None
+
+        def _simple(kind: str, *, icon: str | None = None, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+            cfg: dict[str, Any] = {
+                CONF_NODE_KIND: kind,
+                CONF_NODE_NAME: name,
+                CONF_NODE_ID: node_id,
+            }
+            if icon:
+                cfg[CONF_NODE_ICON] = icon
+            if extra:
+                cfg.update(extra)
+            return _with_device(cfg)
+
+        # Explicit discovery heuristics for the PA-DemoCell-style structured server
+        if writable and (token.endswith(" button start start") or ".button." in token):
+            return _simple(NODE_KIND_BUTTON, icon="mdi:gesture-tap-button")
+        if writable and (".select." in token or token.endswith(" select mode mode")):
+            options = ["Auto", "Manual", "Service"] if "mode" in token else []
+            return _simple(NODE_KIND_SELECT, icon="mdi:format-list-bulleted", extra={CONF_SELECT_OPTIONS: options})
+        if writable and (".text." in token or "recipename" in token):
+            return _simple(NODE_KIND_TEXT, icon="mdi:form-textbox", extra={CONF_TEXT_MAX: 255})
+        if writable and (".number." in token or "fanspeed" in token):
+            return _simple(NODE_KIND_NUMBER, icon="mdi:numeric", extra={CONF_NUMBER_MIN: 0, CONF_NUMBER_MAX: 5000, CONF_NUMBER_STEP: 1})
+        if ".scene." in token:
+            return _simple(NODE_KIND_SCENE, icon="mdi:palette")
+        if ".dateobject." in token or token.endswith(" date"):
+            return _simple(NODE_KIND_DATE, icon="mdi:calendar")
+        if ".datetimeobject." in token or token.endswith(" datetime"):
+            return _simple(NODE_KIND_DATETIME, icon="mdi:calendar-clock")
+        if ".timeobject." in token or token.endswith(" time"):
+            return _simple(NODE_KIND_TIME, icon="mdi:clock")
+        if writable and (".cover.position" in token or ".cover.open" in token or ".cover.close" in token or ".cover.tiltposition" in token):
+            return _simple(NODE_KIND_COVER, icon="mdi:blinds")
+        if writable and (".valve.position" in token or ".valve.open" in token or ".valve.close" in token or ".valve.stop" in token):
+            return _simple(NODE_KIND_VALVE, icon="mdi:valve")
+        if writable and (".fan.running" in token):
+            return _simple(NODE_KIND_FAN, icon="mdi:fan")
+        if ".notify.message" in token:
+            return _simple(NODE_KIND_NOTIFY, icon="mdi:message-badge")
+        if ".weather.condition" in token:
+            return _simple(
+                NODE_KIND_WEATHER,
+                icon="mdi:weather-partly-cloudy",
+                extra={
+                    CONF_WEATHER_HUMIDITY_NODE_ID: node_id.replace('.Condition', '.Humidity'),
+                    CONF_WEATHER_PRESSURE_NODE_ID: node_id.replace('.Condition', '.Pressure'),
+                    CONF_WEATHER_WIND_SPEED_NODE_ID: node_id.replace('.Condition', '.WindSpeed'),
+                    CONF_WEATHER_CONDITION_NODE_ID: node_id,
+                },
+            )
 
         if sample_type in ("bool", "boolean"):
             if writable:
@@ -2563,47 +2752,61 @@ class OpcUaOptionsFlow(OptionsFlow):
             else:
                 selected = list(selected_raw)
 
-            nodes_to_add: list[dict[str, Any]] = []
-            for node_id in selected:
-                item = by_id.get(node_id)
-                if not item:
-                    continue
-                cfg: dict[str, Any] = {
-                    CONF_NODE_KIND: kind,
-                    CONF_NODE_NAME: item.get("name") or node_id,
-                    CONF_NODE_ID: node_id,
-                }
-                if kind == NODE_KIND_SWITCH:
-                    cfg[CONF_NODE_ICON] = "mdi:toggle-switch"
-                elif kind == NODE_KIND_LIGHT:
-                    cfg[CONF_NODE_ICON] = "mdi:lightbulb"
-                elif kind == NODE_KIND_BUTTON:
-                    cfg[CONF_NODE_ICON] = "mdi:gesture-tap-button"
-                elif kind == NODE_KIND_CLIMATE:
-                    cfg[CONF_NODE_ICON] = "mdi:thermostat"
-                elif kind == NODE_KIND_COVER:
-                    cfg[CONF_NODE_ICON] = "mdi:blinds"
-                elif kind == NODE_KIND_FAN:
-                    cfg[CONF_NODE_ICON] = "mdi:fan"
-                elif kind == NODE_KIND_NOTIFY:
-                    cfg[CONF_NODE_ICON] = "mdi:message-alert"
-                elif kind == NODE_KIND_NUMBER:
-                    cfg[CONF_NODE_ICON] = "mdi:numeric"
-                elif kind == NODE_KIND_SCENE:
-                    cfg[CONF_NODE_ICON] = "mdi:palette"
-                elif kind == NODE_KIND_SELECT:
-                    cfg[CONF_NODE_ICON] = "mdi:form-select"
-                elif kind == NODE_KIND_TEXT:
-                    cfg[CONF_NODE_ICON] = "mdi:form-textbox"
-                elif kind == NODE_KIND_DATE:
-                    cfg[CONF_NODE_ICON] = "mdi:calendar"
-                elif kind == NODE_KIND_DATETIME:
-                    cfg[CONF_NODE_ICON] = "mdi:calendar-clock"
-                elif kind == NODE_KIND_TIME:
-                    cfg[CONF_NODE_ICON] = "mdi:clock-outline"
-                elif kind == NODE_KIND_WEATHER:
-                    cfg[CONF_NODE_ICON] = "mdi:weather-partly-cloudy"
-                nodes_to_add.append(cfg)
+            selected_ids = [str(v) for v in (user_input.get("node_ids") or [])]
+            selected_items = [
+                by_id[selected_id]
+                for selected_id in selected_ids
+                if selected_id in by_id
+            ]
+            structured = self._build_structured_device_nodes(
+                selected_items,
+                device_contexts=self._extract_device_contexts(self._browse_cache),
+            )
+
+            if structured:
+                nodes_to_add: list[dict[str, Any]] = list(structured)
+            else:
+                nodes_to_add = []
+                for node_id in selected:
+                    item = by_id.get(node_id)
+                    if not item:
+                        continue
+                    cfg: dict[str, Any] = {
+                        CONF_NODE_KIND: kind,
+                        CONF_NODE_NAME: item.get("name") or node_id,
+                        CONF_NODE_ID: node_id,
+                    }
+                    if kind == NODE_KIND_SWITCH:
+                        cfg[CONF_NODE_ICON] = "mdi:toggle-switch"
+                    elif kind == NODE_KIND_LIGHT:
+                        cfg[CONF_NODE_ICON] = "mdi:lightbulb"
+                    elif kind == NODE_KIND_BUTTON:
+                        cfg[CONF_NODE_ICON] = "mdi:gesture-tap-button"
+                    elif kind == NODE_KIND_CLIMATE:
+                        cfg[CONF_NODE_ICON] = "mdi:thermostat"
+                    elif kind == NODE_KIND_COVER:
+                        cfg[CONF_NODE_ICON] = "mdi:blinds"
+                    elif kind == NODE_KIND_FAN:
+                        cfg[CONF_NODE_ICON] = "mdi:fan"
+                    elif kind == NODE_KIND_NOTIFY:
+                        cfg[CONF_NODE_ICON] = "mdi:message-alert"
+                    elif kind == NODE_KIND_NUMBER:
+                        cfg[CONF_NODE_ICON] = "mdi:numeric"
+                    elif kind == NODE_KIND_SCENE:
+                        cfg[CONF_NODE_ICON] = "mdi:palette"
+                    elif kind == NODE_KIND_SELECT:
+                        cfg[CONF_NODE_ICON] = "mdi:form-select"
+                    elif kind == NODE_KIND_TEXT:
+                        cfg[CONF_NODE_ICON] = "mdi:form-textbox"
+                    elif kind == NODE_KIND_DATE:
+                        cfg[CONF_NODE_ICON] = "mdi:calendar"
+                    elif kind == NODE_KIND_DATETIME:
+                        cfg[CONF_NODE_ICON] = "mdi:calendar-clock"
+                    elif kind == NODE_KIND_TIME:
+                        cfg[CONF_NODE_ICON] = "mdi:clock-outline"
+                    elif kind == NODE_KIND_WEATHER:
+                        cfg[CONF_NODE_ICON] = "mdi:weather-partly-cloudy"
+                    nodes_to_add.append(cfg)
 
             if nodes_to_add:
                 self._append_unique_nodes(nodes_to_add)
@@ -2632,6 +2835,26 @@ class OpcUaOptionsFlow(OptionsFlow):
         branch_options: list[dict[str, str]] = []
         import_options: list[dict[str, str]] = []
 
+        current_item = by_id.get(self._browse_current_parent)
+        current_type_def = str((current_item or {}).get("type_definition") or "").lower()
+        collect_subtree_variables = "devicetype" in current_type_def
+
+        def _collect_variable_descendants(parent_id: str) -> list[dict[str, Any]]:
+            collected: list[dict[str, Any]] = []
+            stack = list(by_parent.get(parent_id, []))
+            seen: set[str] = set()
+            while stack:
+                item = stack.pop(0)
+                child_id = str(item.get("node_id", ""))
+                if not child_id or child_id in seen:
+                    continue
+                seen.add(child_id)
+                node_class = str(item.get("node_class", ""))
+                if node_class == "Variable":
+                    collected.append(item)
+                stack.extend(by_parent.get(child_id, []))
+            return collected
+
         for item in children:
             child_id = str(item.get("node_id", ""))
             node_class = str(item.get("node_class", ""))
@@ -2647,7 +2870,17 @@ class OpcUaOptionsFlow(OptionsFlow):
                     }
                 )
 
-            if node_class == "Variable":
+            if not collect_subtree_variables and node_class == "Variable":
+                import_options.append(
+                    {
+                        "value": child_id,
+                        "label": f"🧩 {self._label_for_browse_item(item)}",
+                    }
+                )
+
+        if collect_subtree_variables:
+            for item in _collect_variable_descendants(self._browse_current_parent):
+                child_id = str(item.get("node_id", ""))
                 import_options.append(
                     {
                         "value": child_id,
