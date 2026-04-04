@@ -187,6 +187,37 @@ async def test_user_step_aborts_when_endpoint_already_configured() -> None:
 
 
 @pytest.mark.asyncio
+async def test_import_step_creates_entry_with_nodes_and_notifications() -> None:
+    flow = OpcUaConfigFlow()
+    flow.hass = SimpleNamespace()
+
+    result = await flow.async_step_import(
+        {
+            CONF_ENDPOINT: "opc.tcp://yaml-plc:4840",
+            CONF_SECURITY_POLICY: "None",
+            CONF_NOTIFY_KEYWORDS: "Alarm, Warn",
+            CONF_NODES: [
+                {
+                    CONF_NODE_NAME: "Temp",
+                    CONF_NODE_ID: "ns=2;s=Temp",
+                    CONF_NODE_KIND: NODE_KIND_SENSOR,
+                },
+                {
+                    CONF_NODE_NAME: "Main Light",
+                    CONF_NODE_ID: "ns=2;s=Light.On",
+                    CONF_NODE_KIND: NODE_KIND_LIGHT,
+                },
+            ],
+        }
+    )
+
+    assert result["type"] == "create_entry"
+    assert result["data"][CONF_ENDPOINT] == "opc.tcp://yaml-plc:4840"
+    assert result["data"][CONF_NOTIFY_KEYWORDS] == ["alarm", "warn"]
+    assert len(result["data"][CONF_NODES]) == 2
+
+
+@pytest.mark.asyncio
 async def test_zeroconf_setup_uses_default_keywords_when_blank() -> None:
     flow = OpcUaConfigFlow()
     flow._discovered_endpoint = "opc.tcp://192.168.1.20:4840"

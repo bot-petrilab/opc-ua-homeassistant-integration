@@ -27,7 +27,7 @@ This integration uses **opcua-asyncio** (`asyncua`) and follows Home Assistant i
 
 ✅ UI-configurable via **Settings → Devices & Services → Add Integration**
 ✅ Multiple nodes per endpoint via **Options**
-✅ Polling + auto-reconnect on disconnect
+✅ OPC-UA subscriptions (local push) + auto-reconnect on disconnect
 ✅ HA discovery popup via Zeroconf (`_opcua-tcp._tcp.local.`): discovered servers can be confirmed and added directly
 ✅ OPC-UA server discovery in options flow (FindServers/GetEndpoints + endpoint selection)
 ✅ OPC-UA browser in options flow (root/depth/max + import as entities)
@@ -55,7 +55,17 @@ This integration uses **opcua-asyncio** (`asyncua`) and follows Home Assistant i
   - `Basic256Sha256_Sign`
   - `Basic256Sha256_SignAndEncrypt`
 - For Basic256Sha256, certificate/key paths must be set in the config flow
-- Polling is used instead of OPC-UA subscriptions
+- Update cadence can still vary with server-side subscription/monitored-item limits
+
+## Supported / unsupported device scope
+
+Supported:
+- OPC-UA servers with readable/writable `Variable` nodes.
+- Structured server models where node names/paths allow deterministic entity mapping.
+
+Not supported or only partially supported:
+- Event/history-only servers that do not expose current-value variables for entity state.
+- Vendor-specific workflows that require custom OPC-UA method call orchestration beyond standard variable read/write control.
 
 ## Usage
 
@@ -63,6 +73,39 @@ This integration uses **opcua-asyncio** (`asyncua`) and follows Home Assistant i
 2. Add the **OPC-UA** integration.
 3. Enter endpoint (for example `opc.tcp://192.168.0.50:4840`).
 4. Add nodes or use auto-discovery in integration options.
+
+## YAML configuration (configuration.yaml)
+
+You can also define OPC-UA endpoints directly in YAML; entries are imported into config entries on startup.
+
+```yaml
+opcua:
+  - endpoint: opc.tcp://192.168.0.50:4840
+    security_policy: None
+    notify_keywords: "alarm,fault"
+    nodes:
+      - name: Temp
+        node_id: ns=2;s=Temp
+        kind: sensor
+        unit: "°C"
+        device_class: temperature
+        state_class: measurement
+        device_id: plc_1
+        device_name: PLC 1
+      - name: Run
+        node_id: ns=2;s=Run
+        kind: binary_sensor
+        device_class: running
+        device_id: plc_1
+      - name: Main Light
+        node_id: ns=2;s=Light.On
+        kind: light
+        brightness_node_id: ns=2;s=Light.Brightness
+        device_id: panel_1
+        device_name: Panel 1
+```
+
+All supported entity kinds can be defined through `nodes`, and Home Assistant devices are created automatically when `device_id` metadata is present.
 
 ## Full example (all entity types + variants)
 

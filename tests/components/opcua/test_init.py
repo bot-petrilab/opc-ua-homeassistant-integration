@@ -73,6 +73,30 @@ async def test_async_setup_returns_true() -> None:
     assert await async_setup(SimpleNamespace(), {}) is True
 
 
+@pytest.mark.asyncio
+async def test_async_setup_imports_yaml_entries() -> None:
+    flow = SimpleNamespace(async_init=AsyncMock())
+    hass = SimpleNamespace(config_entries=SimpleNamespace(flow=flow))
+    yaml_config = {
+        "opcua": [
+            {
+                CONF_ENDPOINT: "opc.tcp://plc-a:4840",
+                CONF_SECURITY_POLICY: "None",
+                CONF_NOTIFY_KEYWORDS: "Alarm, Fault",
+                CONF_NODES: [
+                    {"name": "Pump Running", "node_id": "ns=2;s=Pump.Run", "kind": "binary_sensor"}
+                ],
+            }
+        ]
+    }
+
+    assert await async_setup(hass, yaml_config) is True
+    flow.async_init.assert_awaited_once()
+    called = flow.async_init.await_args.kwargs["data"]
+    assert called[CONF_NOTIFY_KEYWORDS] == ["alarm", "fault"]
+    assert called[CONF_NODES][0]["kind"] == "binary_sensor"
+
+
 def test_is_auth_error_detects_expected_markers() -> None:
     assert _is_auth_error(Exception("BadIdentityToken")) is True
     assert _is_auth_error(Exception("authentication failed")) is True

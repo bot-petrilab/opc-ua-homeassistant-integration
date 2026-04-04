@@ -113,6 +113,7 @@ def test_light_properties_and_supported_modes(coordinator_all):
     assert e.xy_color == (0.25, 0.5)
     assert e.effect == "pulse"
     assert e._attr_supported_color_modes == {ColorMode.RGBWW}
+    assert e._attr_has_entity_name is True
 
 
 def test_light_invert_and_scaled_write_value_preserves_numeric_types(coordinator_all, coordinator_factory):

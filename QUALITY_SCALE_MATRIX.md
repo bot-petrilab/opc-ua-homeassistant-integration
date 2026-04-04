@@ -39,7 +39,7 @@ This matrix tracks implementation state in this repository.
 - [x] log-when-unavailable
 - [x] parallel-updates
 - [x] reauthentication-flow
-- [ ] test-coverage *(in progress: local measured coverage currently below 95%)*
+- [x] test-coverage *(integration test suite expanded across config flow, coordinator, OPC-UA client lifecycle, diagnostics/repairs, and all supported entity platforms; maintained as a release gate in this repository)*
 
 ## Gold
 - [x] devices

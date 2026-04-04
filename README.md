@@ -73,6 +73,46 @@ Options flow includes:
 - browse and auto-discovery tools
 - notification settings
 
+## YAML configuration (import support)
+
+In addition to UI setup, the integration now supports YAML import via `configuration.yaml`.
+Each YAML block is imported as a normal config entry, so **all entity kinds** and **device metadata**
+work the same way as in UI configuration.
+
+```yaml
+opcua:
+  - endpoint: opc.tcp://192.168.1.50:4840
+    security_policy: None
+    notify_enabled: true
+    notify_keywords: "alarm,fault,warn"
+    nodes:
+      - name: Process Temperature
+        node_id: ns=2;s=Process.Temperature
+        kind: sensor
+        unit: "°C"
+        device_class: temperature
+        state_class: measurement
+        device_id: plc_line_1
+        device_name: PLC Line 1
+        device_manufacturer: Example Automation
+        device_model: PLC-X1000
+      - name: Machine Running
+        node_id: ns=2;s=Machine.Running
+        kind: binary_sensor
+        device_class: running
+        device_id: plc_line_1
+      - name: Main Light
+        node_id: ns=2;s=Light.Main.On
+        kind: light
+        brightness_node_id: ns=2;s=Light.Main.Brightness
+        device_id: panel_1
+        device_name: Operator Panel 1
+```
+
+Notes:
+- `kind` supports all implemented platforms (`sensor`, `binary_sensor`, `switch`, `light`, `button`, `climate`, `cover`, `date`, `datetime`, `fan`, `notify`, `number`, `scene`, `select`, `text`, `time`, `weather`, `valve`).
+- Device entries are created when node configs include `device_id` (optionally with `device_name`, `device_manufacturer`, `device_model`, `device_serial`).
+
 ## Discovery, node browser, and auto-discovery
 
 These three features serve different purposes:
@@ -168,6 +208,14 @@ Supported entity platforms:
 - time
 - weather
 
+Supported device scope:
+- OPC-UA servers exposing readable/writable `Variable` nodes (industrial PLCs, gateways, simulation servers, machine controllers).
+- Structured models with stable browse names/paths (best results for auto-discovery and device grouping).
+
+Known unsupported / partially supported scenarios:
+- Historical/event-stream-only servers without usable current-value `Variable` nodes.
+- Server-specific proprietary data models that require custom method calls instead of variable read/write mappings.
+
 ## Use cases
 
 ### 1. Machine status dashboard
@@ -237,7 +285,7 @@ action:
 
 ## Known limitations
 
-- Polling is used instead of OPC-UA subscriptions.
+- Connection quality and update latency depend on OPC-UA server subscription behavior and monitored-item configuration.
 - For secure policies, valid certificate/key material must be available to Home Assistant runtime paths.
 - Feature availability depends on node model quality and naming/typing.
 - Automatically inferred mappings depend on the structure and quality of the OPC-UA server model.
