@@ -560,6 +560,54 @@ class OpcUaConfigFlow(ConfigFlow, domain=DOMAIN):
             description_placeholders={"endpoint": str(pending[CONF_ENDPOINT])},
         )
 
+    async def async_step_import(self, import_config: dict[str, Any]) -> ConfigFlowResult:
+        """Import OPC-UA configuration from YAML."""
+        endpoint = str(import_config.get(CONF_ENDPOINT, "")).strip()
+        if not endpoint or not endpoint.lower().startswith("opc.tcp://"):
+            return self.async_abort(reason="invalid_endpoint")
+
+        await self.async_set_unique_id(endpoint)
+
+        keywords_raw = import_config.get(CONF_NOTIFY_KEYWORDS, list(DEFAULT_NOTIFY_KEYWORDS))
+        if isinstance(keywords_raw, str):
+            keywords = self._normalize_keywords(keywords_raw)
+        else:
+            keywords = [
+                str(k).strip().lower() for k in keywords_raw if str(k).strip()
+            ] or list(DEFAULT_NOTIFY_KEYWORDS)
+
+        data = {
+            CONF_ENDPOINT: endpoint,
+            CONF_SECURITY_POLICY: str(
+                import_config.get(CONF_SECURITY_POLICY, DEFAULT_SECURITY_POLICY)
+            ),
+            CONF_NODES: list(import_config.get(CONF_NODES, [])),
+            CONF_NOTIFY_ENABLED: bool(
+                import_config.get(CONF_NOTIFY_ENABLED, DEFAULT_NOTIFY_ENABLED)
+            ),
+            CONF_NOTIFY_SERVICE: str(
+                import_config.get(CONF_NOTIFY_SERVICE, DEFAULT_NOTIFY_SERVICE)
+            ),
+            CONF_NOTIFY_TITLE_PREFIX: str(
+                import_config.get(CONF_NOTIFY_TITLE_PREFIX, DEFAULT_NOTIFY_TITLE_PREFIX)
+            ),
+            CONF_NOTIFY_KEYWORDS: keywords,
+        }
+        for key in (
+            CONF_USERNAME,
+            CONF_PASSWORD,
+            CONF_CLIENT_CERT_PATH,
+            CONF_CLIENT_KEY_PATH,
+            CONF_SERVER_CERT_PATH,
+            CONF_CLIENT_KEY_PASSWORD,
+        ):
+            if import_config.get(key):
+                data[key] = import_config[key]
+
+        self._abort_if_unique_id_configured(updates=data)
+        title = str(import_config.get("title") or endpoint)
+        return self.async_create_entry(title=title, data=data)
+
     async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         """Handle re-authentication flow when credentials/security changed."""
         self._reauth_entry = self._get_reauth_entry()
@@ -3082,4 +3130,3 @@ class OpcUaOptionsFlow(OptionsFlow):
             }
         )
         return self.async_show_form(step_id="remove_node", data_schema=schema)
-

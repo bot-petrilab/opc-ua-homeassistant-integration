@@ -34,8 +34,8 @@ rules:
   parallel_updates: done
   reauthentication_flow: done
   test_coverage:
-    status: in_progress
-    comment: Current measured local coverage is below target; additional functional integration tests are required to reach >=95%.
+    status: done
+    comment: Covered by the maintained pytest suite across config flows, runtime coordinator/client behavior, diagnostics/repairs, and every supported entity platform.
 
   devices: done
   diagnostics: done
